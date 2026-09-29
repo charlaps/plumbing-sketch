@@ -1,0 +1,20 @@
+{
+  "name": "Plumbing Sketch",
+  "short_name": "Plumb Sketch",
+  "description": "Draw plumbing job diagrams and share them on WhatsApp. Works offline.",
+  "id": "./",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#0b3d6e",
+  "lang": "en-ZA",
+  "categories": ["productivity","utilities"],
+  "icons": [
+    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"},
+    {"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}
+  ]
+}
