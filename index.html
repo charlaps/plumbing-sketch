@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-ui="simple">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
@@ -185,6 +185,32 @@ html[data-theme=dark] #tipPill{background:#4a3a10;color:#ffe199;border-color:#8a
 #alignpad.show{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 #alignpad button{height:56px;border-radius:14px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:11px;gap:2px;color:var(--text)}
 #alignpad button:active{background:var(--primary-soft)}
+
+/* v3.18 Quick draw */
+#quick{grid-area:tools;display:none;gap:6px;background:var(--surface);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+html[data-ui=simple] #quick{display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}
+html[data-ui=simple] #tools,html[data-ui=simple] #shareBtn,html[data-ui=simple] #opts .viewpill,html[data-ui=simple] #opts .joint{display:none}
+html[data-ui=simple] #fab{display:none}
+html[data-ui=simple] #selbar{right:8px}
+html[data-ui=simple] #menuBtn{padding:0 14px}
+html[data-ui=adv] #menuBtn span{display:none}
+#menuBtn span{font-size:14px;font-weight:800}
+.qbtn{height:66px;min-width:0;border-radius:16px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:13px;font-weight:800;color:var(--text);border:1px solid var(--line);padding:0}
+.qbtn svg.ic{width:28px;height:28px}
+.qbtn.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.qbtn.send{background:var(--ok);color:#03331a;border-color:transparent}
+.qbtn:active{filter:brightness(.92)}
+.qbtn:disabled,.qbtn.off{opacity:.4}
+.msec{grid-column:1/-1;display:flex;align-items:center;gap:12px;width:100%;min-height:60px;margin-top:8px;padding:6px 14px;border-radius:16px;background:var(--primary-soft);color:var(--text);font-weight:800;font-size:16px;text-align:left}
+.msec small{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:2px}
+.msec>span{flex:1}
+.msec .chev{width:10px;height:10px;border-right:3px solid var(--muted);border-bottom:3px solid var(--muted);transform:rotate(-45deg);transition:transform .15s;flex:none;margin-right:4px}
+.msec.open .chev{transform:rotate(45deg)}
+.msgrp{margin-top:8px}.msgrp.shut{display:none}
+.uitog{display:flex;gap:6px;align-items:center;margin:0 0 6px;padding:6px;border-radius:16px;background:var(--surface2)}
+.uitog>span{font-weight:800;font-size:14px;color:var(--muted);padding:0 8px}
+.uitog button{flex:1;height:48px;border-radius:12px;font-weight:800;font-size:15px;color:var(--text);background:transparent}
+.uitog button.on{background:var(--primary);color:#fff}
 @keyframes pop{from{opacity:0;transform:scale(.94) translateY(6px)}to{opacity:1;transform:none}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes slide{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
@@ -195,6 +221,8 @@ html[data-theme=dark] #tipPill{background:#4a3a10;color:#ffe199;border-color:#8a
   #title,.topbtn{height:40px}
   #tools{flex-direction:column;border-top:0;border-left:1px solid var(--line);padding:4px 6px;padding-right:calc(6px + env(safe-area-inset-right));overflow-y:auto}
   .tbtn{height:auto;min-height:44px;flex:1 0 auto;font-size:11px}
+  html[data-ui=simple] #quick{grid-template-columns:minmax(0,1fr);grid-auto-rows:1fr;border-top:0;border-left:1px solid var(--line);padding:6px;padding-right:calc(6px + env(safe-area-inset-right))}
+  .qbtn{height:auto;min-height:40px}
   #opts{height:72px}
   #opts.tall{height:146px}
   .tile canvas{width:42px;height:42px}
@@ -235,6 +263,7 @@ html[data-theme=dark] #tipPill{background:#4a3a10;color:#ffe199;border-color:#8a
   </main>
   <section id="opts"></section>
   <nav id="tools"></nav>
+  <nav id="quick" aria-label="Quick draw"></nav>
 </div>
 
 <div class="ov" id="dlg"><div class="card">
@@ -253,7 +282,7 @@ html[data-theme=dark] #tipPill{background:#4a3a10;color:#ffe199;border-color:#8a
 'use strict';
 var $=function(s){return document.querySelector(s)};
 var INK='#14202e', FILL='#f4f8fc', WATER='#cfe4f8', BRASS='#d9b44a', CHROME='#d5dbe2';
-var K=0.2, PI=Math.PI, H2=Math.SQRT1_2, VERSION='3.17';
+var K=0.2, PI=Math.PI, H2=Math.SQRT1_2, VERSION='3.18';
 var KEY='plumbing-sketch-v3', BGKEY='plumbing-sketch-v3-bg', OLDKEY='plumbing-sketch-v2', PREFKEY='plumbing-sketch-prefs';
 var FONT='system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
 var COLS=[['Black','#111111'],['Red','#e0202f'],['Blue','#1565e6'],['Green','#1a9a3c'],['Orange','#e07b00'],['Purple','#7a3fc4']];
@@ -1793,7 +1822,7 @@ function load(){
       if(j.view&&j.view.z){V.z=j.view.z;V.tx=j.view.tx;V.ty=j.view.ty;S.viewSet=1}
       var bg=localStorage.getItem(BGKEY);if(bg){bgSaved=bg;setBg(bg,S.bgRect)}}
     else S.showDate=true}catch(e){S.showDate=true}
-  try{var pf=JSON.parse(localStorage.getItem(PREFKEY)||'null');if(pf){prefs.ask=pf.ask!==false;if(pf.ls>0)LS=pf.ls;if(pf.theme)prefs.theme=pf.theme;if(pf.favs)prefs.favs=pf.favs;if(pf.recent)prefs.recent=pf.recent;if(pf.pt&&MATS[pf.pt.mat])pipeType=pf.pt;if(pf.haptic===false)prefs.haptic=false;if(pf.magnet===false)prefs.magnet=false;if(pf.snap45)prefs.snap45=true;if(pf.view)prefs.view=pf.view;if(pf.pview)prefs.pview=pf.pview;if(pf.pv&&typeof pf.pv==='object')prefs.pv=pf.pv;if(pf.wallmm>0){prefs.wallmm=pf.wallmm;wallMM=pf.wallmm}if(pf.wallHint)prefs.wallHint=1;if(pf.rooms===false)prefs.rooms=false;if(pf.scalebar===false)prefs.scalebar=false;if(pf.sizeTag===false)prefs.sizeTag=false;if(pf.hints===false)prefs.hints=false;if(pf.hintOff&&typeof pf.hintOff==='object'){prefs.hintOff={};Object.keys(pf.hintOff).slice(0,40).forEach(function(k){if(/^[a-z0-9_]{1,24}$/.test(k)&&pf.hintOff[k])prefs.hintOff[k]=1})}}}catch(e){}
+  try{var pf=JSON.parse(localStorage.getItem(PREFKEY)||'null');if(pf){prefs.ask=pf.ask!==false;if(pf.ls>0)LS=pf.ls;if(pf.theme)prefs.theme=pf.theme;if(pf.favs)prefs.favs=pf.favs;if(pf.recent)prefs.recent=pf.recent;if(pf.pt&&MATS[pf.pt.mat])pipeType=pf.pt;if(pf.haptic===false)prefs.haptic=false;if(pf.magnet===false)prefs.magnet=false;if(pf.snap45)prefs.snap45=true;if(pf.view)prefs.view=pf.view;if(pf.pview)prefs.pview=pf.pview;if(pf.pv&&typeof pf.pv==='object')prefs.pv=pf.pv;if(pf.wallmm>0){prefs.wallmm=pf.wallmm;wallMM=pf.wallmm}if(pf.wallHint)prefs.wallHint=1;if(pf.rooms===false)prefs.rooms=false;if(pf.scalebar===false)prefs.scalebar=false;if(pf.sizeTag===false)prefs.sizeTag=false;if(pf.hints===false)prefs.hints=false;if(pf.ui==='adv'||pf.ui==='simple')prefs.ui=pf.ui;if(pf.hintOff&&typeof pf.hintOff==='object'){prefs.hintOff={};Object.keys(pf.hintOff).slice(0,40).forEach(function(k){if(/^[a-z0-9_]{1,24}$/.test(k)&&pf.hintOff[k])prefs.hintOff[k]=1})}}}catch(e){}
   syncMode();
 }
 var prefs={ask:true};
@@ -1822,11 +1851,21 @@ function closeSheet(){$('#sheet').classList.remove('show')}
 function sheet(title,items,o){
   o=o||{};var box=$('#sheetBox'),s=$('#sheet');box.innerHTML='';var h=document.createElement('h3');h.textContent=title;box.appendChild(h);
   var g=document.createElement('div');g.className='sgrid';if(o.cols===1)g.style.gridTemplateColumns='1fr';box.appendChild(g);
+  var grid=g,secs=[];
   items.forEach(function(it){
-    if(it.head){var hd=document.createElement('h3');hd.textContent=it.head;hd.style.gridColumn='1/-1';hd.style.margin='8px 0 0';hd.style.fontSize='14px';hd.style.color='#5a7089';g.appendChild(hd);return}
+    if(it.sect){var sb=document.createElement('button');sb.type='button';sb.className='msec'+(it.open?' open':'');sb.dataset.sect=it.sect;
+      sb.innerHTML=(it.ic?ico(it.ic):'')+'<span>'+esc(it.sect)+(it.sub?'<small>'+esc(it.sub)+'</small>':'')+'</span><i class="chev"></i>';
+      var gg=document.createElement('div');gg.className='sgrid msgrp'+(it.open?'':' shut');box.appendChild(sb);box.appendChild(gg);grid=gg;
+      var rec={b:sb,g:gg,n:it.sect};secs.push(rec);
+      sb.onclick=function(){var op=gg.classList.contains('shut');
+        if(op&&o.accordion)secs.forEach(function(r){r.g.classList.add('shut');r.b.classList.remove('open')});
+        gg.classList.toggle('shut',!op);sb.classList.toggle('open',op);
+        if(o.onFold)o.onFold(it.sect,op);if(op){try{sb.scrollIntoView({block:'nearest'})}catch(e){}}};
+      return}
+    if(it.head){var hd=document.createElement('h3');hd.textContent=it.head;hd.style.gridColumn='1/-1';hd.style.margin='8px 0 0';hd.style.fontSize='14px';hd.style.color='#5a7089';grid.appendChild(hd);return}
     var b=document.createElement('button');b.type='button';b.className='sbtn'+(it.danger?' danger':'')+(it.primary?' primary':'')+(it.on?' on':'');
     b.innerHTML=(it.ic?ico(it.ic):'')+(it.dot?'<span class="cdot" style="background:'+it.dot+'"></span>':'')+'<span>'+esc(it.label)+(it.sub?'<small>'+esc(it.sub)+'</small>':'')+'</span>';
-    b.onclick=function(){if(!it.keep)closeSheet();if(it.fn)it.fn()};g.appendChild(b)});
+    b.onclick=function(){if(!it.keep)closeSheet();if(it.fn)it.fn()};grid.appendChild(b)});
   if(o.note){var p=document.createElement('p');p.textContent=o.note;box.appendChild(p)}
   s.classList.add('show');var t1=Date.now();s.onclick=function(e){if(e.target===s&&Date.now()-t1>450)closeSheet()};
 }
@@ -3999,53 +4038,106 @@ var deferredInstall=null;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredInstall=e});
 window.addEventListener('appinstalled',function(){deferredInstall=null;toast('Installed – open it from your home screen')});
 function menuSheet(){
+  var adv=uiMode()==='adv';
+  var dark=document.documentElement.getAttribute('data-theme')==='dark';
   var items=[
-    {head:'Job'},
+    {sect:'Jobs & quotes',ic:'list',sub:'Job card, quote, materials, saved jobs, templates'},
     {ic:'list',label:'Job card',sub:cardSummary(),primary:true,fn:jobCardSheet},
     {ic:'list',label:'Materials list',sub:'Fittings & pipe lengths',fn:bomSheet},
     {ic:'pdf',label:'Quote',sub:quoteSummary(),fn:quoteSheet},
     {ic:'folder',label:'My jobs',sub:jobIndex().length+' saved',fn:jobsSheet},
     {ic:'tmpl',label:'Templates',sub:'Bathroom, kitchen, geyser, septic…',fn:templatesSheet},
-    {ic:'info',label:'Compliance tips',sub:tipsOn()?(tipCache.length?tipCache.length+' to look at':'On – nothing flagged'):'Off',fn:tipSheet},
-    {ic:'layers',label:'Layers'+(hiddenCount()?' ('+hiddenCount()+' hidden)':''),fn:layersSheet},
     {ic:'share',label:'Share job link',sub:'Compact link, no server',fn:linkSheet},
     {ic:'export',label:'Send job file',sub:'For your workers',fn:function(){exportJob()}},
     {ic:'import',label:'Import job file',fn:importJobPick},
-    {head:'Share'},
+
+    {sect:'Send & save',ic:'share',sub:'Picture or PDF, date and pipe key'},
     {ic:'share',label:'Share as image (PNG)',sub:'Best for WhatsApp',primary:true,fn:function(){doShare('png')}},
     {ic:'pdf',label:'Share as PDF',sub:cardHas(S.card)?'Job card + photos + sketch + materials':'Sketch (add a job card to include it)',fn:function(){doShare('pdf')}},
     {ic:'save',label:'Save image',fn:function(){doSave('png')}},
     {ic:'pdf',label:'Save PDF',fn:function(){doSave('pdf')}},
-    {head:'Drawing'},
-    {ic:'photo',label:'Photo background',fn:photoSheet},
     {ic:'date',label:'Date on image: '+(S.showDate?'ON':'off'),on:S.showDate,fn:function(){S.showDate=!S.showDate;save();toast(S.showDate?'Date added to image':'Date removed',1400)}},
-    {ic:'moon',label:'Dark mode: '+(document.documentElement.getAttribute('data-theme')==='dark'?'ON':'off'),fn:function(){prefs.theme=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';savePrefs();applyTheme()}},
+    {ic:'legend',label:'Pipe key on image: '+(S.legend?'ON':'off'),sub:'Lists pipe sizes used',on:S.legend,fn:function(){S.legend=!S.legend;save();toast('Pipe key '+(S.legend?'will be added':'removed'))}},
+
+    {sect:'Drawing tools',ic:'pen',sub:'Pen, eraser, text, select, copy, layers'},
+    {ic:'pen',label:'Pen (freehand)',on:tool==='pen',fn:function(){optsHidden=false;setTool('pen')}},
+    {ic:'eraser',label:'Eraser',on:tool==='eraser',fn:function(){optsHidden=false;setTool('eraser')}},
+    {ic:'text',label:'Text note',on:tool==='text',fn:function(){optsHidden=false;setTool('text')}},
+    {ic:'move',label:'Move & select',sub:'Tap an item, then drag',on:tool==='move',fn:function(){optsHidden=false;setTool('move')}},
+    {ic:'select',label:'Select several items',sub:'Tap items or drag a box',fn:function(){setTool('move');setSelMode(true)}},
     {ic:'dup',label:'Copy selected to clipboard',sub:'Select items first',fn:function(){clipCopy(false)}},
     {ic:'paste',label:'Paste copied items',sub:clip?clip.length+' in clipboard':'Copy something first',fn:clipPaste},
-    {ic:'select',label:'Select several items',sub:'Tap items or drag a box',fn:function(){setTool('move');setSelMode(true)}},
-    {ic:'legend',label:'Pipe key on image: '+(S.legend?'ON':'off'),sub:'Lists pipe sizes used',on:S.legend,fn:function(){S.legend=!S.legend;save();toast('Pipe key '+(S.legend?'will be added':'removed'))}},
-    {ic:'select',label:'Magnet snap: '+(magnetOn()?'ON':'off'),sub:'Walls, doors, windows & fixtures stick together',on:magnetOn(),fn:function(){prefs.magnet=!magnetOn();savePrefs();toast('Magnet snap '+(prefs.magnet?'on':'off'),1400)}},
-    {ic:'rot90',label:'Walls snap to 45°: '+(prefs.snap45?'ON':'off'),sub:'Otherwise walls snap to 0° / 90°',on:!!prefs.snap45,fn:function(){prefs.snap45=!prefs.snap45;savePrefs()}},
+    {ic:'redo',label:'Redo',fn:redo},
+    {ic:'layers',label:'Layers'+(hiddenCount()?' ('+hiddenCount()+' hidden)':''),fn:layersSheet},
+    {ic:'fit',label:'Fit to screen',fn:function(){fitView()}},
+
+    {sect:'Drawing mode & view',ic:'view',sub:'Plan / elevation / isometric, photo, grid, colours'},
+    {ic:'view',label:'Drawing mode: '+(isoOn()?'Isometric':elevOn()?'Elevation':'Plan'),sub:'Plan · Elevation (heights) · Isometric (3-D pipe runs)',on:S.mode!=='plan',fn:modeSheet},
     {ic:'moon',label:'Drawing view: '+({standard:'Standard',contrast:'High contrast',blueprint:'Blueprint'}[VIEW]),sub:'Tap to switch: Standard → High contrast → Blueprint',fn:function(){prefs.view=VIEW==='standard'?'contrast':VIEW==='contrast'?'blueprint':'standard';applyView();savePrefs();render();toast('View: '+({standard:'Standard',contrast:'High contrast',blueprint:'Blueprint'}[VIEW]),1500)}},
+    {ic:'photo',label:'Photo background',fn:photoSheet},
+    {ic:'grid',label:'Grid: '+(S.grid?'ON':'off'),sub:'Helps line things up',on:S.grid,fn:function(){S.grid=!S.grid;save();render()}},
     {ic:'legend',label:'Room colours & area: '+(prefs.rooms!==false?'ON':'off'),sub:'Closed wall loops get a colour and m²',on:prefs.rooms!==false,fn:function(){prefs.rooms=prefs.rooms===false;savePrefs();render()}},
     {ic:'fit',label:'Scale bar: '+(prefs.scalebar!==false?'ON':'off'),on:prefs.scalebar!==false,fn:function(){prefs.scalebar=prefs.scalebar===false;savePrefs();render()}},
-    {ic:'type',label:'Pipe size on labels: '+(prefs.sizeTag!==false?'ON':'off'),sub:'Shows e.g. “22 mm · 1.5 m” on every pipe',on:prefs.sizeTag!==false,fn:function(){prefs.sizeTag=prefs.sizeTag===false;savePrefs();render()}},
-    {ic:'view',label:'Drawing mode: '+(isoOn()?'Isometric':elevOn()?'Elevation':'Plan'),sub:'Plan · Elevation (heights) · Isometric (3-D pipe runs)',on:S.mode!=='plan',fn:modeSheet},
-    {ic:'grid',label:'Grid: '+(S.grid?'ON':'off'),sub:'Helps line things up',on:S.grid,fn:function(){S.grid=!S.grid;save();render()}},
-    {ic:'type',label:'Ask for pipe label: '+(prefs.ask?'ON':'off'),on:prefs.ask,fn:function(){prefs.ask=!prefs.ask;savePrefs()}},
     {ic:'fit',hide:S.mode!=='plan',label:'Pipe length scale: '+LSN.filter(function(z){return z[1]===LS})[0][0],sub:'How long typed lengths are drawn',fn:function(){var i=0;LSN.forEach(function(z,n){if(z[1]===LS)i=n});LS=LSN[(i+1)%LSN.length][1];savePrefs();rescaleAll();toast('Length scale: '+LSN.filter(function(z){return z[1]===LS})[0][0])}},
-    {ic:'fit',label:'Fit to screen',fn:function(){fitView()}},
+
+    {sect:'Checks & help',ic:'info',sub:'Compliance tips, worked example'},
+    {ic:'info',label:'Compliance tips',sub:tipsOn()?(tipCache.length?tipCache.length+' to look at':'On – nothing flagged'):'Off',fn:tipSheet},
     {ic:'example',label:'Load example',fn:loadExample},
-    {ic:'clear',label:'Clear drawing',danger:true,fn:function(){if(!S.items.length){toast('Nothing to clear');return}S.items=[];setSel(null);commit();toast('Cleared – tap Undo to bring it back')}},
-    {ic:'plus',label:'New blank job (current one stays saved)',fn:function(){newJob()}}
+
+    {sect:'Settings',ic:'nudge',sub:'Simple / Advanced, dark mode, snapping, labels'},
+    {ic:'moon',label:'Dark mode: '+(dark?'ON':'off'),fn:function(){prefs.theme=dark?'light':'dark';savePrefs();applyTheme()}},
+    {ic:'select',label:'Magnet snap: '+(magnetOn()?'ON':'off'),sub:'Walls, doors, windows & fixtures stick together',on:magnetOn(),fn:function(){prefs.magnet=!magnetOn();savePrefs();toast('Magnet snap '+(prefs.magnet?'on':'off'),1400)}},
+    {ic:'rot90',label:'Walls snap to 45°: '+(prefs.snap45?'ON':'off'),sub:'Otherwise walls snap to 0° / 90°',on:!!prefs.snap45,fn:function(){prefs.snap45=!prefs.snap45;savePrefs()}},
+    {ic:'type',label:'Pipe size on labels: '+(prefs.sizeTag!==false?'ON':'off'),sub:'Shows e.g. “22 mm · 1.5 m” on every pipe',on:prefs.sizeTag!==false,fn:function(){prefs.sizeTag=prefs.sizeTag===false;savePrefs();render()}},
+    {ic:'type',label:'Ask for pipe label: '+(prefs.ask?'ON':'off'),on:prefs.ask,fn:function(){prefs.ask=!prefs.ask;savePrefs()}},
+    {ic:'nudge',label:'Screen layout: '+(adv?'Advanced':'Simple'),sub:adv?'Tap to go back to the big Quick draw buttons':'Tap for the full tool bar and extra buttons',fn:function(){setUI(adv?'simple':'adv')}},
+
+    {sect:'Start over',ic:'clear',sub:'New job, clear drawing'},
+    {ic:'plus',label:'New blank job (current one stays saved)',fn:function(){newJob()}},
+    {ic:'clear',label:'Clear drawing',danger:true,fn:function(){if(!S.items.length){toast('Nothing to clear');return}S.items=[];setSel(null);commit();toast('Cleared – tap Undo to bring it back')}}
   ];
   var standalone=window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches;
-  if(!standalone){items.push({head:'App'});items.push({ic:'install',label:'Install on phone',sub:deferredInstall?'Adds to home screen':'Chrome menu ⋮ → Add to Home screen',fn:function(){if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast('In Chrome tap ⋮ then “Add to Home screen”',4200)}})}
+  if(!standalone){var at=items.map(function(m){return m.sect}).indexOf('Start over');
+    items.splice(at,0,{sect:'Install',ic:'install',sub:'Add to your phone\'s home screen'},{ic:'install',label:'Install on phone',sub:deferredInstall?'Adds to home screen':'Chrome menu ⋮ → Add to Home screen',fn:function(){if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast('In Chrome tap ⋮ then “Add to Home screen”',4200)}})}
   items=items.filter(function(m){return !m.hide});
-  sheet('Menu',items,{note:'Plumbing Sketch v'+VERSION+' · works offline · drawings are saved on this phone.'});
+  items.forEach(function(m){if(m.sect&&adv)m.open=true});
+  sheet('Menu',items,{accordion:true,note:'Plumbing Sketch v'+VERSION+' · works offline · drawings are saved on this phone.'});
+  var box=$('#sheetBox'),tg=document.createElement('div');tg.className='uitog';
+  tg.innerHTML='<span>Screen</span><button type="button" data-ui="simple" class="'+(adv?'':'on')+'">Simple</button><button type="button" data-ui="adv" class="'+(adv?'on':'')+'">Advanced</button>';
+  tg.onclick=function(e){var bt=e.target.closest('button');if(!bt)return;closeSheet();setUI(bt.dataset.ui)};
+  box.insertBefore(tg,box.children[1]);
 }
 function applyTheme(){var t=prefs.theme;if(t!=='dark'&&t!=='light')t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
   document.documentElement.setAttribute('data-theme',t);var m=$('#themeMeta');if(m)m.setAttribute('content',t==='dark'?'#0a1320':'#0b3d6e')}
+/* ---------- v3.18 Quick draw bar + Simple/Advanced screen ---------- */
+function uiMode(){return prefs.ui==='adv'?'adv':'simple'}
+function applyUI(){document.documentElement.setAttribute('data-ui',uiMode());setTimeout(fit,0)}
+function setUI(m){prefs.ui=(m==='adv')?'adv':'simple';savePrefs();applyUI();buildTools();buildOpts();toast(m==='adv'?'Advanced screen – full tool bar':'Simple screen – Quick draw',1600)}
+var QUICK=[['pipe','Pipe','pipe'],['fit','Fitting','parts'],['fix','Fixture','wall'],['wall','Wall','wall'],['undo','Undo','undo'],['send','Send','share']];
+function qIcon(id){return id==='fix'?'<svg class="ic" viewBox="0 0 24 24"><path d="M4 11h16v2a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6z"/><path d="M8 11V6a2 2 0 0 1 2-2h4M4 21h16"/></svg>':ico(QUICK.filter(function(q){return q[0]===id})[0][2])}
+function buildQuick(){
+  var q=$('#quick');q.innerHTML='';
+  QUICK.forEach(function(d){var b=document.createElement('button');b.type='button';b.className='qbtn'+(d[0]==='send'?' send':'');b.dataset.q=d[0];
+    b.innerHTML=qIcon(d[0])+'<span>'+d[1]+'</span>';b.onclick=function(){quickTap(d[0])};q.appendChild(b)});
+  updQuick();
+}
+function quickTap(id){
+  if(id==='undo'){undo();return}
+  if(id==='send'){doShare('png');return}
+  var same=(id==='pipe'&&tool==='pipe')||(id==='wall'&&tool==='wall')||(id==='fit'&&tool==='parts'&&(partCat==='fit'||partCat==='val')&&!partSearch)||(id==='fix'&&tool==='parts'&&partCat==='fix'&&!partSearch);
+  if(same){optsHidden=!optsHidden;buildOpts();return}
+  optsHidden=false;
+  if(id==='wall'&&isoOn()){toast('Walls are drawn in Plan view – Menu › Drawing mode',3000);return}
+  if(id==='fit'){partSearch='';if(partCat!=='fit'&&partCat!=='val')partCat='fit';setTool('parts')}
+  else if(id==='fix'){partSearch='';partCat='fix';setTool('parts')}
+  else setTool(id);
+}
+function updQuick(){
+  var q=$('#quick');if(!q)return;
+  var on={pipe:tool==='pipe',wall:tool==='wall',fit:tool==='parts'&&(partCat==='fit'||partCat==='val')&&!partSearch,fix:tool==='parts'&&partCat==='fix'&&!partSearch};
+  [].forEach.call(q.querySelectorAll('.qbtn'),function(b){var k=b.dataset.q;b.classList.toggle('on',!!on[k]);b.classList.toggle('off',k==='wall'&&isoOn());if(k==='undo')b.disabled=hi<=0});
+}
+(function(){var bo=buildOpts;buildOpts=function(){bo();updQuick()};var uu=updUndo;updUndo=function(){uu();updQuick()}})();
 function initButtons(){
   $('#undoBtn').innerHTML=ico('undo')+'<span>Undo</span>';
   $('#redoBtn').innerHTML=ico('redo')+'<span>Redo</span>';
@@ -4053,12 +4145,12 @@ function initButtons(){
   $('#layBtn').innerHTML=ico('layers')+'<span>Layers</span>';$('#layBtn').onclick=layersSheet;
   $('#selBtn').innerHTML=ico('select')+'<span>Select</span>';$('#selBtn').onclick=function(){setSelMode(!selMode)};
   $('#shareBtn').innerHTML=ico('share')+'<span>Share</span>';
-  $('#menuBtn').innerHTML=ico('menu');$('#menuBtn').setAttribute('aria-label','Menu');
+  $('#menuBtn').innerHTML=ico('menu')+'<span>Menu</span>';$('#menuBtn').setAttribute('aria-label','Menu');
   $('#undoBtn').onclick=undo;$('#redoBtn').onclick=redo;$('#fitBtn').onclick=function(){fitView()};
   $('#shareBtn').onclick=function(){doShare('png')};$('#menuBtn').onclick=menuSheet;
   var tb=$('#title');tb.value=S.title;tb.addEventListener('input',function(){S.title=tb.value;save()});
   tb.addEventListener('keydown',function(e){if(e.key==='Enter')tb.blur()});
-  applyTheme();
+  applyTheme();applyUI();buildQuick();
 }
 document.addEventListener('keydown',function(e){
   if(e.target&&e.target.tagName==='INPUT')return;
@@ -4076,7 +4168,7 @@ window.addEventListener('orientationchange',function(){setTimeout(fit,250)});
 if(window.ResizeObserver)new ResizeObserver(function(){fit()}).observe(stage);
 
 /* ---------- init ---------- */
-load();applyView();initButtons();buildTools();buildOpts();tipsSoon();linkBoot();
+load();if(uiMode()==='simple')tool='pipe';applyView();initButtons();buildTools();buildOpts();tipsSoon();linkBoot();
 hist=[snap()];hi=0;updUndo();updLayBtn();
 fit();
 window.addEventListener('load',fit);
