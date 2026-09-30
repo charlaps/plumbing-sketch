@@ -1,5 +1,5 @@
 /* Plumbing Sketch service worker – offline cache (cache-first, refreshed in background) */
-var CACHE='plumbing-sketch-v3.6';
+var CACHE='plumbing-sketch-v3.7';
 var FILES=['./','index.html','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png'];
 self.addEventListener('install',function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){return Promise.all(FILES.map(function(f){return c.add(f).catch(function(){})}))}).then(function(){return self.skipWaiting()}));
