@@ -211,6 +211,18 @@ html[data-ui=adv] #menuBtn span{display:none}
 .uitog>span{font-weight:800;font-size:14px;color:var(--muted);padding:0 8px}
 .uitog button{flex:1;height:48px;border-radius:12px;font-weight:800;font-size:15px;color:var(--text);background:transparent}
 .uitog button.on{background:var(--primary);color:#fff}
+
+/* v3.19 copy / paste / duplicate bar */
+#cpbar{position:absolute;right:8px;top:48px;z-index:6;display:none;gap:6px;background:var(--surface);border-radius:20px;box-shadow:var(--shadow);border:1px solid var(--line);padding:5px}
+#cpbar.show{display:flex;animation:pop .16s ease-out}
+#nudge.show~#cpbar,#alignpad.show~#cpbar{display:none}
+#cpbar button{width:70px;height:56px;border-radius:15px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:800;color:var(--text);padding:0;position:relative}
+#cpbar button svg.ic{width:24px;height:24px}
+#cpbar button:active{background:var(--primary-soft)}
+#cpbar button.pst{background:var(--primary-soft);color:var(--primary)}
+#cpbar button.pst.off{opacity:.45}
+#cpbar button .cnt{position:absolute;top:3px;right:6px;min-width:18px;height:18px;border-radius:9px;background:var(--primary);color:#fff;font-size:11px;line-height:18px;text-align:center;padding:0 4px}
+#cpbar button.x{width:44px;background:transparent;color:var(--muted);font-size:20px}
 @keyframes pop{from{opacity:0;transform:scale(.94) translateY(6px)}to{opacity:1;transform:none}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes slide{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
@@ -260,6 +272,7 @@ html[data-ui=adv] #menuBtn span{display:none}
     <div id="endmenu"></div>
     <div id="nudge"></div>
     <div id="alignpad"></div>
+    <div id="cpbar" aria-label="Copy and paste"></div>
   </main>
   <section id="opts"></section>
   <nav id="tools"></nav>
@@ -282,7 +295,7 @@ html[data-ui=adv] #menuBtn span{display:none}
 'use strict';
 var $=function(s){return document.querySelector(s)};
 var INK='#14202e', FILL='#f4f8fc', WATER='#cfe4f8', BRASS='#d9b44a', CHROME='#d5dbe2';
-var K=0.2, PI=Math.PI, H2=Math.SQRT1_2, VERSION='3.18';
+var K=0.2, PI=Math.PI, H2=Math.SQRT1_2, VERSION='3.19';
 var KEY='plumbing-sketch-v3', BGKEY='plumbing-sketch-v3-bg', OLDKEY='plumbing-sketch-v2', PREFKEY='plumbing-sketch-prefs';
 var FONT='system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
 var COLS=[['Black','#111111'],['Red','#e0202f'],['Blue','#1565e6'],['Green','#1a9a3c'],['Orange','#e07b00'],['Purple','#7a3fc4']];
@@ -1909,7 +1922,7 @@ function nextCol(c){var i=0;COLS.forEach(function(x,n){if(x[1]===c)i=n});return 
 function updBar(){
   var bar=$('#selbar');bar.innerHTML='';hidePads();
   var set=selSet();
-  if(!set.length||set.some(function(x){return S.items.indexOf(x)<0})&&set.length===1){bar.classList.remove('show');if(selMode&&!set.length){}return}
+  if(!set.length||set.some(function(x){return S.items.indexOf(x)<0})&&set.length===1){bar.classList.remove('show');if(selMode&&!set.length){}updCp();return}
   var btns=[],it=set.length===1?set[0]:null;
   function B(ic,l,fn,cls){btns.push({ic:ic,l:l,fn:fn,cls:cls})}
   if(!it){
@@ -1949,18 +1962,41 @@ function updBar(){
     else if(b.ic==='dot'){var c=(it&&it.col)||'#e0202f';e.innerHTML='<span class="cdot" style="background:'+c+'"></span><span>'+b.l+'</span>'}
     else e.innerHTML=ico(b.ic)+'<span>'+b.l+'</span>';
     e.onclick=b.fn;bar.appendChild(e)});
-  bar.classList.add('show');
+  bar.classList.add('show');updCp();
 }
 /* ----- group / clipboard / lock / nudge / align ----- */
 var clip=null, nudgeStep=1;
 function lockSet(set,on){set.forEach(function(x){if(on)x.lock=true;else delete x.lock});commit();updBar();toast(on?'Locked – it won’t move':'Unlocked')}
 function dupSet(){var set=selSet().slice(),o=30/V.z,cl=set.map(function(x){var c=clone(x);delete c.lock;shiftItem(c,o,o);return c});cl.forEach(function(c){S.items.push(c)});setMulti(cl);commit();toast(cl.length+' copied')}
-function clipCopy(cut){var set=selSet();if(!set.length)return;clip=set.map(clone);if(cut){S.items=S.items.filter(function(x){return set.indexOf(x)<0});setSel(null);commit()}toast((cut?'Cut ':'Copied ')+clip.length+' item(s) – use Paste in the menu')}
+var CLIPKEY='plumbing-sketch-clip',clipN=0,cpDismiss=true;
+try{var cj=JSON.parse(localStorage.getItem(CLIPKEY)||'null');if(Array.isArray(cj)&&cj.length&&cj.length<400&&cj.every(function(x){return x&&typeof x==='object'&&typeof x.t==='string'}))clip=cj}catch(e){}
+function clipSave(){try{if(clip&&clip.length)localStorage.setItem(CLIPKEY,JSON.stringify(clip));else localStorage.removeItem(CLIPKEY)}catch(e){}}
+function clipCopy(cut){var set=selSet();if(!set.length)return;clip=set.map(clone);clipN=0;cpDismiss=false;clipSave();if(cut){S.items=S.items.filter(function(x){return set.indexOf(x)<0});setSel(null);commit()}toast((cut?'Cut ':'Copied ')+clip.length+' item(s) – tap Paste',2000);updCp()}
 function clipPaste(){
   if(!clip||!clip.length){toast('Nothing copied yet');return}
   var bs=clip.map(function(x){return bounds(x)}).filter(Boolean),x0=Math.min.apply(null,bs.map(function(b){return b.x})),x1=Math.max.apply(null,bs.map(function(b){return b.x+b.w})),y0=Math.min.apply(null,bs.map(function(b){return b.y})),y1=Math.max.apply(null,bs.map(function(b){return b.y+b.h}));
-  var c=viewCenter(),dx=c.x-(x0+x1)/2,dy=c.y-(y0+y1)/2,nw=clip.map(function(x){var q=clone(x);shiftItem(q,dx,dy);return q});
-  nw.forEach(function(q){S.items.push(q)});setSelMode(nw.length>1);setMulti(nw);commit();toast('Pasted '+nw.length)}
+  var c=viewCenter(),mx=(x0+x1)/2,my=(y0+y1)/2,dx,dy;
+  /* original still on screen -> drop the copy just beside it (30 px more each paste); otherwise (other job / scrolled away) centre it */
+  var sp=w2sPt(mx,my),near=sp.x>0&&sp.x<cw&&sp.y>0&&sp.y<ch;
+  if(near){clipN++;var o=30*clipN/V.z;dx=o;dy=o}else{dx=c.x-mx;dy=c.y-my;clipN=0}
+  var nw=clip.map(function(x){var q=clone(x);delete q.lock;shiftItem(q,dx,dy);return q});
+  nw.forEach(function(q){S.items.push(q)});setSelMode(nw.length>1);setMulti(nw);commit();toast('Pasted '+nw.length,1400)}
+function w2sPt(x,y){return {x:x*V.z+V.tx,y:y*V.z+V.ty}}
+function cpBtn(ic,l,fn,cls,cnt){var e=document.createElement('button');e.type='button';e.className=cls||'';e.dataset.cp=l.toLowerCase();e.innerHTML=ico(ic)+'<span>'+l+'</span>'+(cnt?'<i class="cnt">'+cnt+'</i>':'');e.onclick=fn;return e}
+function updCp(){
+  var bar=$('#cpbar');if(!bar)return;var set=selSet().filter(function(x){return S.items.indexOf(x)>=0}),has=clip&&clip.length;
+  bar.innerHTML='';
+  if(set.length){
+    bar.appendChild(cpBtn('dup','Copy',function(){clipCopy(false)}));
+    bar.appendChild(cpBtn('paste','Paste',clipPaste,'pst'+(has?'':' off'),has&&clip.length>1?clip.length:0));
+    bar.appendChild(cpBtn('all','Duplicate',function(){if(multi.length>1)dupSet();else dupSel()}));
+    bar.classList.add('show')}
+  else if(has&&!cpDismiss){
+    bar.appendChild(cpBtn('paste','Paste',clipPaste,'pst',clip.length>1?clip.length:0));
+    var x=document.createElement('button');x.type='button';x.className='x';x.dataset.cp='hide';x.setAttribute('aria-label','Hide paste button');x.textContent='×';x.onclick=function(){cpDismiss=true;updCp()};bar.appendChild(x);
+    bar.classList.add('show')}
+  else bar.classList.remove('show');
+}
 function clipSheet(){sheet('Clipboard',[{ic:'dup',label:'Copy',fn:function(){clipCopy(false)}},{ic:'trash',label:'Cut',danger:true,fn:function(){clipCopy(true)}},{ic:'paste',label:'Paste here',sub:clip?clip.length+' item(s)':'empty',fn:clipPaste}])}
 function moveSet(set,dx,dy){var wc=wallCtx(set.filter(function(x){return !x.lock}));set.forEach(function(x){if(x.lock)return;var lk=x.t==='stamp'?findLinks(x):null;shiftItem(x,dx,dy);if(lk&&lk.length&&set.length===1)applyLinks(x,lk)});if(wc)ctxApply(wc)}
 function toggleNudge(){var n=$('#nudge');if(n.classList.contains('show')){n.classList.remove('show');return}
