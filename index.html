@@ -93,7 +93,7 @@ html[data-theme=dark] .tabs button.pill{background:#4a3d0a;color:#ffe9a1}
 .tbtn svg.ic{transition:transform .15s}
 .ov{position:fixed;inset:0;background:rgba(6,16,30,.5);display:none;z-index:50;animation:fade .18s}
 .ov.show{display:flex}
-#dlg{align-items:flex-start;justify-content:center;padding:8vh 14px 0;overflow-y:auto}
+#dlg{z-index:60;align-items:flex-start;justify-content:center;padding:8vh 14px 0;overflow-y:auto}
 .card{background:var(--surface);border-radius:22px;width:100%;max-width:440px;padding:18px;box-shadow:var(--shadow);animation:pop .2s ease-out}
 .card h3,.sbox h3{margin:0 0 12px;font-size:18px}
 #dlgInput{width:100%;height:56px;border:2px solid var(--line);border-radius:14px;padding:0 14px;font-size:18px;font-family:inherit;background:var(--surface2);
@@ -122,6 +122,49 @@ html[data-theme=dark] .tabs button.pill{background:#4a3d0a;color:#ffe9a1}
 .sbtn.on{background:var(--primary-soft);box-shadow:inset 0 0 0 2px var(--primary)}
 .sbtn:active{background:var(--primary-soft)}
 .sbox p{font-size:13px;color:var(--muted);margin:14px 4px 0;line-height:1.4}
+#cardOv .sbox{max-height:92dvh}
+.cf{display:block;margin:0 0 10px}.cf span{display:block;font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0 2px 4px}
+.cf input,.cf textarea{width:100%;border:2px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px;font-family:inherit;background:var(--surface2);color:var(--text);-webkit-user-select:text;user-select:text;outline:none;touch-action:manipulation;resize:none}
+.cf input{height:48px}.cf input:focus,.cf textarea:focus{border-color:var(--primary)}
+.cfrow{display:flex;flex-wrap:wrap;gap:0 10px}.cfrow .cf{flex:1 1 100%}.cfrow .cf.half{flex:1 1 calc(50% - 5px);min-width:140px}
+.cfh{font-size:13px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin:14px 2px 6px}
+.cklist .ck{display:flex;align-items:center;gap:8px;margin:0 0 6px}
+.cklist .cbx{flex:none;width:44px;height:44px;border-radius:12px;border:2px solid var(--muted);background:var(--surface);display:flex;align-items:center;justify-content:center;color:#fff}
+.cklist .ck.done .cbx{background:var(--ok);border-color:var(--ok)}
+.cklist .cbx svg.ic{width:26px;height:26px;stroke-width:3.2}
+.cklist input{flex:1;min-width:0;height:44px;border:2px solid transparent;border-radius:10px;padding:0 8px;font-size:16px;font-family:inherit;background:transparent;color:var(--text);-webkit-user-select:text;user-select:text;outline:none;touch-action:manipulation}
+.cklist input:focus{border-color:var(--primary);background:var(--surface2)}
+.cklist .ck.done input{text-decoration:line-through;color:var(--muted)}
+.cklist .cdel{flex:none;width:40px;height:44px;color:var(--muted);font-size:16px}
+.cfbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.cfbtns.one{grid-template-columns:1fr}
+.phgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.phb{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--surface2);border:1px solid var(--line)}
+.phb i{position:absolute;inset:0;background-size:cover;background-position:center}
+.phb em{position:absolute;left:0;right:0;bottom:0;background:rgba(10,30,60,.75);color:#fff;font-size:11px;font-style:normal;font-weight:700;padding:3px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phfull{display:block;width:100%;max-height:46vh;object-fit:contain;background:#000;border-radius:14px;margin:0 0 10px}
+#quoteOv .sbox,#pbOv .sbox{max-height:94dvh}
+.qhint{font-size:13px;color:var(--muted);margin:4px 2px 10px;line-height:1.4}.qhint code{background:var(--surface2);padding:1px 5px;border-radius:5px;font-size:12px}
+.qrow{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:0 0 7px}.qrow.miss{border-color:#e7a100}
+.qnm{font-size:14px;font-weight:700;line-height:1.25;margin:0 0 6px;word-break:break-word}.qnm small{display:block;font-size:11px;color:#b86e00;font-weight:800;margin-top:1px}
+.qctl{display:flex;align-items:center;gap:5px;flex-wrap:nowrap}.qu{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap}
+.qin{height:42px;border:2px solid var(--line);border-radius:10px;padding:0 8px;font-size:16px;font-family:inherit;background:var(--surface);color:var(--text);-webkit-user-select:text;user-select:text;outline:none;touch-action:manipulation;min-width:0}
+.qin:focus{border-color:var(--primary)}.qname{width:100%;margin:0 0 6px;display:block;box-sizing:border-box}.qsearch{width:100%;box-sizing:border-box;margin:0 0 8px}
+.qt{margin-left:auto;font-size:14px;white-space:nowrap}.qx{flex:none;width:36px;height:42px;color:var(--muted);font-size:15px}
+.qsm{min-height:44px;margin:0 0 8px;width:100%}
+.qmv{display:flex;gap:10px}.qf{flex:1;display:block}.qf span{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 2px 4px}.qf .qin{width:100%;box-sizing:border-box}
+.qtot{background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:10px 0}
+.qtot div{display:flex;justify-content:space-between;padding:3px 0;font-size:14px}.qtot .sub{border-top:1px solid var(--line);margin-top:4px;padding-top:6px;font-weight:700}
+.qtot .grand{border-top:2px solid var(--brand2);margin-top:6px;padding-top:8px;font-size:20px;font-weight:900;color:var(--brand2)}.qtot .warn{color:#b86e00;font-weight:800;font-size:12px}
+.qpaste{width:100%;box-sizing:border-box;border:2px solid var(--line);border-radius:12px;padding:10px;font-size:14px;font-family:ui-monospace,monospace;background:var(--surface2);color:var(--text);-webkit-user-select:text;user-select:text;touch-action:manipulation;margin:0 0 8px}
+.pblist{max-height:38dvh;overflow-y:auto;touch-action:pan-y;margin:0 0 8px}
+#tipPill{position:absolute;right:10px;top:10px;height:34px;padding:0 12px 0 9px;border-radius:17px;background:#fff3cf;color:#6b4a00;border:1px solid #e7b94a;font-size:13px;font-weight:800;display:none;align-items:center;gap:5px;box-shadow:var(--shadow);z-index:5}
+#tipPill svg.ic{width:18px;height:18px}
+html[data-theme=dark] #tipPill{background:#4a3a10;color:#ffe199;border-color:#8a6a1d}
+#tipOv .sbox{max-height:92dvh}
+.hrow{background:var(--surface2);border:1px solid var(--line);border-left:5px solid #e7b94a;border-radius:12px;padding:10px 12px;margin:0 0 10px}
+.htitle{display:flex;align-items:center;gap:6px;font-size:16px;font-weight:800;margin:0 0 4px}.htitle svg.ic{width:20px;height:20px;color:#b37a00;flex:none}
+.hbody{font-size:14px;line-height:1.4;margin:0 0 6px}.hstd{font-size:12px;color:var(--muted);margin:0 0 8px;line-height:1.35}
+.hbtn{display:grid;grid-template-columns:1fr 1fr;gap:6px}.hbtn .sbtn{min-height:48px;padding:6px 8px}.hbtn .sbtn:first-child:nth-last-child(3){grid-column:1/-1}
 #toast{position:fixed;left:50%;top:78px;transform:translateX(-50%);background:rgba(18,38,58,.96);color:#fff;padding:12px 18px;border-radius:16px;
   font-size:15px;font-weight:600;z-index:80;max-width:88%;text-align:center;display:none;pointer-events:none;box-shadow:var(--shadow)}
 #toast.show{display:block;animation:pop .18s ease-out}
@@ -210,7 +253,7 @@ html[data-theme=dark] .tabs button.pill{background:#4a3d0a;color:#ffe9a1}
 'use strict';
 var $=function(s){return document.querySelector(s)};
 var INK='#14202e', FILL='#f4f8fc', WATER='#cfe4f8', BRASS='#d9b44a', CHROME='#d5dbe2';
-var K=0.2, PI=Math.PI, H2=Math.SQRT1_2, VERSION='3.10';
+var K=0.2, PI=Math.PI, H2=Math.SQRT1_2, VERSION='3.17';
 var KEY='plumbing-sketch-v3', BGKEY='plumbing-sketch-v3-bg', OLDKEY='plumbing-sketch-v2', PREFKEY='plumbing-sketch-prefs';
 var FONT='system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
 var COLS=[['Black','#111111'],['Red','#e0202f'],['Blue','#1565e6'],['Green','#1a9a3c'],['Orange','#e07b00'],['Purple','#7a3fc4']];
@@ -239,7 +282,7 @@ function rebuildPipeTypes(){var a=BASETYPES.slice();if(pipeType&&pipeType.mat!==
 function ptName(m,mm){return m==='wall'?'Wall '+mm+' mm':m==='dim'?'Dimension line':mm+' mm '+MATS[m].n}
 function pipeName(it){return it.mat==='wall'?'Wall '+it.mm+' mm':it.mat==='dim'?'Dimension':it.mm+' mm '+(MATS[it.mat]?MATS[it.mat].n:it.mat)}
 var LS=0.35, LSN=[['Small',0.2],['Normal',0.35],['Large',0.6]];
-function pipePx(mm){return Math.max(36,Math.min(1400,mm*LS))}
+function pipePx(mm){return S.mode==='plan'?Math.max(36,Math.min(1400,mm*LS)):Math.max(4,Math.min(20000,mm*LS))}
 function pipeMM(it){var L=Math.hypot(it.b.x-it.a.x,it.b.y-it.a.y);return it.len||L/LS}
 function parseLen(str){var m=/^\s*(\d+(?:[.,]\d+)?)\s*(mm|cm|m)?(?![a-z])\s*(.*)$/i.exec(String(str||''));if(!m)return null;var n=parseFloat(m[1].replace(',','.')),u=(m[2]||'mm').toLowerCase();if(u==='cm')n*=10;else if(u==='m')n*=1000;if(!(n>=10&&n<=100000))return null;return {mm:n,rest:m[3].trim(),plain:!m[3].trim()}}
 function fmtLen(mm){mm=Math.round(mm/10)*10;if(mm>=1000){var v=Math.round(mm/10)/100;return v+' m'}return mm+' mm'}
@@ -297,7 +340,7 @@ var ICONS={
 function ico(n){return '<svg class="ic" viewBox="0 0 24 24">'+(ICONS[n]||'')+'</svg>'}
 
 /* ---------- state ---------- */
-var S={mode:'plan',floorY:null,title:'',showDate:false,items:[],bg:null,legend:false,grid:false,hide:{},bomImg:false,jobId:null};
+var S={card:null,quote:null,hj:{},mode:'plan',floorY:null,title:'',showDate:false,items:[],bg:null,legend:false,grid:false,hide:{},bomImg:false,jobId:null};
 var bgImg=null, bgSaved=null;
 var tool='pen', col=COLS[0][1], penI=1, eraI=1, textI=1;
 var pipeType={mat:'pvc',mm:50}, partType={mat:'pvc',mm:50}, partCat='fit', partSearch='';
@@ -316,6 +359,10 @@ var ptrs={}, gest=null, ignoreUp={};
 function sizeList(m){return MATS[m]?MATS[m].sizes:[50]}
 function nearestSize(m,v){var L=sizeList(m),b=L[0],bd=1e9;L.forEach(function(z){var d=Math.abs(Math.log(z/v));if(d<bd){bd=d;b=z}});return b}
 function sizeStep(m,mm,dir){var L=sizeList(m),i=L.indexOf(nearestSize(m,mm||50))+dir;return L[Math.max(0,Math.min(L.length-1,i))]}
+function normMode(m){return m==='elev'||m==='iso'?m:'plan'}
+function isoOn(){return S.mode==='iso'}
+var LSplan=null;
+function syncMode(){if(S.mode==='iso'||S.mode==='elev'){if(LSplan==null){LSplan=LS}LS=K}else if(LSplan!=null){LS=LSplan;LSplan=null}}
 function pwid(it){return (it.mm||50)*K}
 
 /* ---------- view / geometry ---------- */
@@ -344,7 +391,7 @@ var boxCache=new WeakMap();
 function cbox(it){
   if(it.t==='text')return textBox(it);
   var key;
-  if(it.t==='stamp')key=[it.k,it.x,it.y,it.r,it.s,it.mm,it.mat,it.f,it.label,it.v].join('|');
+  if(it.t==='stamp')key=[it.k,it.x,it.y,it.r,it.s,it.mm,it.mat,it.f,it.label,it.v,it.io].join('|');
   else if(it.t==='pipe')key=[it.a.x,it.a.y,it.b.x,it.b.y,it.mm,it.mat].join('|');
   else key=it.pts.length+'|'+it.pts[0]+'|'+it.pts[1]+'|'+it.pts[it.pts.length-2]+'|'+it.w;
   var c=boxCache.get(it);if(c&&c.k===key)return c.b;
@@ -436,7 +483,7 @@ function fgeo(D,ports,extra,m){
   var x0=Math.min.apply(null,xs)-mg,x1=Math.max.apply(null,xs)+mg,y0=Math.min.apply(null,ys)-mg,y1=Math.max.apply(null,ys)+mg,cx=(x0+x1)/2,cy=(y0+y1)/2;
   return {cx:cx,cy:cy,hw:(x1-x0)/2,hh:(y1-y0)/2,ports:ports.map(function(p){return {x:p.x-cx,y:p.y-cy,a:p.a,e:p.e,k:p.k,mm:p.mm}})};
 }
-function fitDef(k,n,cat,nat,o){o=o||{};return {k:k,n:n,cat:cat,fit:true,rot:o.rot||PI/4,
+function fitDef(k,n,cat,nat,o){o=o||{};return {k:k,n:n,cat:cat,fit:true,rot:o.rot||PI/4,nat:nat,
   geo:function(D,m){m=MATS[m]?m:'pvc';var q=nat(D,m);return fgeo(D,q.ports,q.extra,m)},
   draw:function(c,lw,D,m){m=m||'pvc';if(!MATS[m])m='pvc';var q=nat(D,m),g=fgeo(D,q.ports,q.extra,m);c.translate(-g.cx,-g.cy);base(c,lw);
     var body=q.fill||matFill(m);
@@ -1009,9 +1056,11 @@ app('tvunit','TV unit','furn',600,220,function(c,lw){base(c,lw);
    ===================================================================== */
 var VW={},VLW=1,DIRA={d:PI/2,u:-PI/2,l:PI,r:0},POR='#ffffff',STEEL='#cfd6de',TILEB='#dcebf9',WOOD='#f0e6d2';
 function defV(k,v,w,h,rim,z0,fn,ports){(VW[k]||(VW[k]={}))[v]={w:w,h:h,rim:rim,z0:z0,fn:fn,ports:ports||[]}}
-function vSpec(it){return it&&it.v&&VW[it.k]&&VW[it.k][it.v]||null}
+var VGC={};
+function vSpecK(k,v,D,m,io){var e=VW[k]&&VW[k][v];if(!e)return null;if(!e.gen)return e;io=io|0;var key=k+'|'+v+'|'+D+'|'+m+'|'+io,c=VGC[key];if(!c){c=e.gen(D||50,MATS[m]?m:'pvc',io);VGC[key]=c}return c}
+function vSpec(it){return it&&it.v?vSpecK(it.k,it.v,it.mm,it.mat,it.io):null}
 function vGeoOf(it){var s=vSpec(it);if(!s)return null;
-  return {cx:0,cy:0,hw:s.w/2,hh:s.h/2,spec:s,ports:s.ports.map(function(p){return {x:p[0],y:s.h/2-p[1],a:DIRA[p[2]],mm:p[3],mat:p[4],e:p[5]||'plain'}})}}
+  return {cx:0,cy:0,hw:s.w/2,hh:s.h/2,spec:s,ports:s.gports||s.ports.map(function(p){return {x:p[0],y:s.h/2-p[1],a:typeof p[2]==='number'?p[2]:DIRA[p[2]],mm:p[3],mat:p[4],e:p[5]||'plain'}})}}
 function vDraw(c,s,lw){VLW=lw;c.save();c.translate(0,s.h/2);c.scale(1,-1);base(c,lw);s.fn(c,lw);c.restore()}
 function vViews(k){var o=VW[k];return o?Object.keys(o):[]}
 function vR(c,x,z,w,h,r,f){rr(c,x,z,w,h,Math.min(r||0,Math.abs(w)/2,Math.abs(h)/2));fs(c,f||FILL)}
@@ -1224,10 +1273,221 @@ defV('irrig','side',240,300,0,0,function(c){vR(c,-70,0,140,80,4,'#7a5230');vR(c,
 defV('aircon','front',900,300,0,2100,function(c){vR(c,-450,0,900,300,40,POR);vR(c,-420,20,840,50,10,'#dfe5eb');for(var i=0;i<5;i++)LN(c,[-380,90+i*14,380,90+i*14],VLW*0.6);vE(c,380,250,10,10,'#1a9a3c')},[]);
 defV('aircon','side',220,300,0,2100,function(c){wallS(c,-110,0,300,true);c.beginPath();c.moveTo(-110,300);c.lineTo(110,300);c.quadraticCurveTo(110,60,20,40);c.lineTo(-110,30);c.closePath();fs(c,POR)},[]);
 
+/* =====================================================================
+   v3.11  ELEVATION VIEWS for fittings, valves, drains, outdoor & electrical parts
+   Fittings/valves are generated from their plan definitions (profile in the vertical plane,
+   'Side' = seen from the other side, or end-on for inline parts).
+   ===================================================================== */
+var CONC='#cfc9bb',PAVE='#e3e0d9',SOIL='#efe7d6',GRATE='#7c8896';
+function genFit(d,view){
+  return function(D,m){
+    var q=d.nat(D,m),g=fgeo(D,q.ports,q.extra,m),h=2*g.hh,w=2*g.hw,inline=false;
+    var horiz=q.ports.length>=2&&q.ports.every(function(p){return Math.abs(Math.sin(p.a))<0.05&&Math.abs(p.y-q.ports[0].y)<1});
+    var end=(view==='side'&&horiz);
+    var ports=g.ports.map(function(p){return {x:p.x,y:p.y,a:p.a,e:p.e,k:p.k,mm:p.mm}});
+    if(end){var pm=Math.max.apply(null,q.ports.map(function(p){return p.k||1}));
+      w=h=Math.max(D*1.5,d.cat==='val'?D*2.9:D*1.7);if(d.k==='flange')w=h=D*3.4;ports=[]}
+    else if(view==='side'){ports=ports.map(function(p){return {x:-p.x,y:p.y,a:PI-p.a,e:p.e,k:p.k,mm:p.mm}})}
+    var fn=function(c,lw){
+      c.save();c.translate(0,h/2);c.scale(1,-1);
+      if(end)endOn(c,lw,d,D,m,w);
+      else{if(view==='side')c.scale(-1,1);d.draw(c,lw,D,m)}
+      c.restore()};
+    return {w:w,h:h,rim:h/2,lname:'Centre',z0:Math.max(0,Math.round((300-h/2)/10)*10),fn:fn,ports:[],gports:ports}}}
+function endOn(c,lw,d,D,m,w){
+  base(c,lw);var r=D/2;
+  if(d.cat==='val'){
+    var bc=d.k==='gasvalve'?'#e6c227':(m==='pvc'&&d.k==='ballvalve')?'#4a90e2':d.k==='ballvalve'||d.k==='stopcock'?BRASS:BRASS;
+    rr(c,-0.72*D,-0.72*D,1.44*D,1.44*D,0.3*D);fs(c,bc);
+    c.beginPath();c.arc(0,0,0.5*D,0,7);fs(c,'#f6f8fa');c.beginPath();c.arc(0,0,r,0,7);fs(c,matFill(m));
+    c.beginPath();c.arc(0,0,r*0.62,0,7);fs(c,'#20303f');
+    c.beginPath();c.rect(-0.16*D,-1.0*D,0.32*D,0.3*D);fs(c,CHROME);
+    c.beginPath();c.moveTo(-0.55*D,-1.2*D);c.lineTo(0.55*D,-1.2*D);c.lineWidth=Math.max(lw*2,0.3*D);c.strokeStyle='#d0202f';c.lineCap='round';c.stroke();
+  }else if(d.k==='flange'){
+    c.beginPath();c.arc(0,0,1.7*D,0,7);fs(c,'#b6bec8');c.beginPath();c.arc(0,0,0.66*D,0,7);fs(c,matFill(m));c.beginPath();c.arc(0,0,r*0.62,0,7);fs(c,'#20303f');
+    for(var i=0;i<6;i++){var a=i*PI/3;c.beginPath();c.arc(Math.cos(a)*1.3*D,Math.sin(a)*1.3*D,0.13*D,0,7);c.fillStyle=INKC;c.fill()}
+  }else{
+    c.beginPath();c.arc(0,0,0.78*D,0,7);fs(c,'#f6f8fa');c.beginPath();c.arc(0,0,0.62*D,0,7);fs(c,matFill(m));c.beginPath();c.arc(0,0,r*0.66,0,7);fs(c,'#20303f');
+    if(d.k==='union'||d.k==='nipple'||d.k==='bush'||d.k==='plug'){c.beginPath();c.moveTo(-0.62*D,0.3*D);c.lineTo(0.62*D,0.3*D);c.lineWidth=lw*.6;c.stroke()}
+  }
+}
+function regFits(){
+  STAMPS.forEach(function(d){
+    if(!d.fit||!d.nat||VW[d.k])return;
+    VW[d.k]={front:{gen:genFit(d,'front')},side:{gen:genFit(d,'side')}}})}
+
+/* ---------- DRAINS, CHAMBERS, TANKS (buried parts have a negative base: they sit below the FLOOR/ground line) ---------- */
+function grat(c,x,z,w,n){vR(c,x,z,w,22,4,GRATE);for(var i=1;i<n;i++)LN(c,[x+w*i/n,z,x+w*i/n,z+22],VLW*0.7)}
+function pipeR(c,x0,x1,z,d,f){vR(c,x0,z-d/2,x1-x0,d,0,f||'#eef1f4')}
+function soilBox(c,w,z0,z1){vR(c,-w/2,z0,w,z1-z0,0,'rgba(140,120,80,.10)')}
+defV('gully','front',700,650,0,-560,function(c){
+  vR(c,-140,20,280,470,10,'#f4f8fc');vR(c,-100,60,200,160,30,WATER);vR(c,-110,290,220,170,26,'#e6eaee');vR(c,-40,220,30,260,0,'#e6eaee');
+  grat(c,-150,490,300,8);vR(c,-170,470,340,26,4,PAVE);pipeR(c,140,340,150,110);vR(c,330,105,26,90,4,'#dfe5eb');LN(c,[-100,140,100,140],VLW,true)},[[350,150,'r',110,'pvc','socket']]);
+defV('gully','side',420,650,0,-560,function(c){
+  vR(c,-140,20,280,470,10,'#f4f8fc');vR(c,-100,60,200,160,30,WATER);vR(c,-110,290,220,170,26,'#e6eaee');
+  grat(c,-150,490,300,8);vR(c,-170,470,340,26,4,PAVE);vE(c,0,150,70,70,'#fff');vE(c,0,150,42,42,'#20303f')},[]);
+defV('gully_s','front',760,600,0,-520,function(c){
+  vR(c,-180,40,360,440,10,'#e6eaee');vR(c,-150,80,300,120,4,'rgba(140,200,255,.4)');vR(c,-200,470,400,26,4,GRATE);for(var i=1;i<10;i++)LN(c,[-200+i*40,470,-200+i*40,496],VLW*0.7);
+  vR(c,-230,440,460,30,4,PAVE);pipeR(c,180,380,200,110);vR(c,370,155,26,90,4,'#dfe5eb')},[[390,200,'r',110,'pvc','plain']]);
+defV('gully_s','side',500,600,0,-520,function(c){
+  vR(c,-180,40,360,440,10,'#e6eaee');vR(c,-150,80,300,120,4,'rgba(140,200,255,.4)');vR(c,-200,470,400,26,4,GRATE);vR(c,-230,440,460,30,4,PAVE);vE(c,0,200,70,70,'#fff');vE(c,0,200,42,42,'#20303f')},[]);
+defV('fdrain','front',420,400,0,-330,function(c){
+  vR(c,-100,30,200,270,8,'#dfe5eb');vR(c,-70,60,140,60,20,WATER);vR(c,-110,300,220,20,4,GRATE);for(var i=1;i<7;i++)LN(c,[-110+i*31,300,-110+i*31,320],VLW*0.7);
+  vR(c,-140,280,280,22,3,PAVE);vR(c,-38,-30,76,70,0,'#f4f8fc')},[[0,-30,'d',50,'pvc','plain']]);
+defV('fdrain','side',420,400,0,-330,function(c){
+  vR(c,-100,30,200,270,8,'#dfe5eb');vR(c,-70,60,140,60,20,WATER);vR(c,-110,300,220,20,4,GRATE);vR(c,-140,280,280,22,3,PAVE);vR(c,-38,-30,76,70,0,'#f4f8fc')},[[0,-30,'d',50,'pvc','plain']]);
+defV('ftrap','front',420,420,0,-350,function(c){
+  vR(c,-105,60,210,250,12,'#dfe5eb');vR(c,-72,90,144,80,26,WATER);vR(c,-115,310,230,18,4,GRATE);LN(c,[-70,310,-70,328,0,328,0,310,70,310,70,328]);vR(c,-150,290,300,22,3,PAVE);
+  vR(c,-38,-20,76,90,0,'#f4f8fc')},[[0,-20,'d',50,'pvc','plain']]);
+defV('ftrap','side',420,420,0,-350,function(c){
+  vR(c,-105,60,210,250,12,'#dfe5eb');vR(c,-72,90,144,80,26,WATER);vR(c,-115,310,230,18,4,GRATE);vR(c,-150,290,300,22,3,PAVE);vR(c,-38,-20,76,90,0,'#f4f8fc')},[[0,-20,'d',50,'pvc','plain']]);
+function greaseV(d){return function(c){var w=1040;vR(c,-w/2,0,w,440,10,'#e9ecef');
+  vR(c,-w/2+10,20,w-20,300,4,'rgba(140,200,255,.35)');for(var i=0;i<2;i++){var x=-170+i*340;vR(c,x-6,40,12,400,0,'#b6bec8')}
+  for(i=0;i<3;i++){vR(c,-380+i*330,440,180,40,6,CONC);vR(c,-350+i*330,480,120,14,4,'#8a94a0')}
+  pipeR(c,-w/2-40,-w/2+10,300,110);pipeR(c,w/2-10,w/2+40,210,110);VT(c,'GREASE',0,150,64,INKC)}}
+defV('grease','front',1120,520,0,-420,greaseV(),[[-560,300,'l',110,'pvc','socket'],[560,210,'r',110,'pvc','socket']]);
+defV('grease','side',580,520,0,-420,function(c){vR(c,-290,0,580,440,10,'#e9ecef');vR(c,-280,20,560,300,4,'rgba(140,200,255,.35)');vR(c,-90,440,180,40,6,CONC);vR(c,-60,480,120,14,4,'#8a94a0');vE(c,0,260,55,55,'#fff');vE(c,0,260,33,33,'#20303f')},[]);
+function chamber(w,h,ports){return function(c){
+  vR(c,-w/2,0,w,h-90,6,'#e3e0d9');vR(c,-w/2+50,50,w-100,h-190,4,'#f6f8fa');
+  vR(c,-w/2+50,50,w-100,90,4,'#c9ccd0');LN(c,[-w/2+50,140,w/2-50,140]);
+  vR(c,-w/2+60,h-90,w-120,10,0,'#e3e0d9');vR(c,-w/2-20,h-100,w+40,60,4,CONC);vR(c,-w/2+40,h-40,w-80,40,4,GRATE);
+  for(var z=200;z<h-160;z+=140){vR(c,-w/2+70,z,28,16,2,'#8a94a0')}
+  if(ports)ports(c)}}
+function pipesIn(c,w,zs){zs.forEach(function(z){pipeR(c,-w/2-70,-w/2+10,z,110);vR(c,-w/2-70,z-45,16,90,0,'#dfe5eb')})}
+defV('manhole','front',760,980,0,-880,chamber(600,980,function(c){pipesIn(c,600,[110]);pipeR(c,290,360,110,110);pipeR(c,-40,40,260,110);vR(c,-45,260,90,100,0,'#eef1f4')}),[[-370,110,'l',110,'pvc','plain'],[360,110,'r',110,'pvc','plain'],[0,360,'u',110,'pvc','plain']]);
+defV('manhole','side',760,980,0,-880,chamber(600,980,function(c){vE(c,0,110,60,60,'#fff');vE(c,0,110,36,36,'#20303f')}),[]);
+defV('ic2','front',760,980,0,-880,chamber(600,980,function(c){pipesIn(c,600,[110]);pipeR(c,290,360,110,110)}),[[-370,110,'l',110,'pvc','plain'],[360,110,'r',110,'pvc','plain']]);
+defV('ic2','side',760,980,0,-880,chamber(600,980,function(c){vE(c,0,110,60,60,'#fff');vE(c,0,110,36,36,'#20303f')}),[]);
+defV('catchpit','front',720,640,0,-590,function(c){vR(c,-280,0,560,560,4,PAVE);vR(c,-230,50,460,460,4,'#f6f8fa');vR(c,-230,50,460,120,4,'rgba(140,200,255,.4)');LN(c,[-230,170,230,170],0,true);
+  vR(c,-260,530,520,24,4,GRATE);for(var i=1;i<9;i++)LN(c,[-260+i*65,530,-260+i*65,554],VLW*0.7);pipeR(c,230,330,310,110);pipeR(c,-330,-230,400,110)},[[340,310,'r',110,'pvc','plain'],[-340,400,'l',110,'pvc','plain']]);
+defV('catchpit','side',640,640,0,-590,function(c){vR(c,-280,0,560,560,4,PAVE);vR(c,-230,50,460,460,4,'#f6f8fa');vR(c,-230,50,460,120,4,'rgba(140,200,255,.4)');vR(c,-260,530,520,24,4,GRATE)},[]);
+defV('sewer','front',760,1500,0,-1400,function(c){vR(c,-230,0,460,1200,4,'#e3e0d9');vR(c,-190,40,380,1130,4,'#f6f8fa');vR(c,-100,1150,200,120,0,'#e3e0d9');vR(c,-160,1270,320,50,3,CONC);vR(c,-230,1400,460,30,4,GRATE);
+  for(var z=220;z<1100;z+=160)vR(c,-160,z,30,16,2,'#8a94a0');vR(c,-190,40,380,80,4,'#c9ccd0');pipeR(c,-330,-190,110,110);vR(c,-380,60,20,100,0,'#dfe5eb');VT(c,'SEWER',60,700,50,'#5a6b7d')},[[-380,110,'l',110,'pvc','plain']]);
+defV('sewer','side',460,1500,0,-1400,function(c){vR(c,-230,0,460,1200,4,'#e3e0d9');vR(c,-190,40,380,1130,4,'#f6f8fa');vR(c,-160,1270,320,50,3,CONC);vR(c,-230,1400,460,30,4,GRATE)},[]);
+defV('downpipe','front',420,2400,0,0,function(c){vR(c,-45,120,90,2280,10,'#e3e6ea');for(var z=400;z<2300;z+=700)vR(c,-58,z,116,22,3,'#8a94a0');
+  vR(c,-60,2300,120,60,6,'#c8ccd2');vR(c,-45,2280,90,30,0,'#e3e6ea');PG(c,[-45,120,45,120,200,0,60,0,-60,0,-200,0],'#e3e6ea')},[[0,0,'d',75,'pvc','plain']]);
+defV('downpipe','side',420,2400,0,0,function(c){wallS(c,-45,0,2400,true);vR(c,-45,120,90,2280,10,'#e3e6ea');for(var z=400;z<2300;z+=700)vR(c,-45,z,110,22,3,'#8a94a0');vR(c,-45,2300,140,60,6,'#c8ccd2');PG(c,[-45,120,45,120,200,0,-45,0],'#e3e6ea')},[[0,0,'d',75,'pvc','plain']]);
+function tankBuried(w,h,chambers,name,ports){return function(c){
+  vR(c,-w/2,0,w,h-200,14,'#e9ecef');if(chambers>1){vR(c,-w*0.08,0,20,h-200,0,'#b6bec8')}
+  vR(c,-w/2+20,20,w-40,h-320,10,'rgba(140,200,255,.30)');
+  vR(c,-w*0.36,h-200,190,120,4,CONC);vR(c,-w*0.36-30,h-100,250,50,4,PAVE);if(chambers>1){vR(c,w*0.2,h-200,190,120,4,CONC);vR(c,w*0.2-30,h-100,250,50,4,PAVE)}
+  VT(c,name,0,h*0.35,Math.max(60,w*0.05),'#5a6b7d');if(ports)ports(c)}}
+defV('septic','front',2500,1600,0,-1300,tankBuried(2200,1500,2,'SEPTIC TANK',function(c){pipeR(c,-1250,-1090,1150,110);pipeR(c,1090,1250,1050,110);vR(c,-1270,1100,20,100,0,'#dfe5eb')}),[[-1250,1150,'l',110,'pvc','socket'],[1250,1050,'r',110,'pvc','socket']]);
+defV('septic','side',1500,1600,0,-1300,tankBuried(1400,1500,1,'',function(c){vE(c,0,1100,60,60,'#fff');vE(c,0,1100,36,36,'#20303f')}),[]);
+defV('conserv','front',2200,1600,0,-1300,tankBuried(2000,1500,1,'CONSERVANCY',function(c){pipeR(c,-1140,-990,1150,110)}),[[-1150,1150,'l',110,'pvc','plain']]);
+defV('conserv','side',1500,1600,0,-1300,tankBuried(1400,1500,1,'',function(c){vE(c,0,1100,60,60,'#fff');vE(c,0,1100,36,36,'#20303f')}),[]);
+function soakV(w){return function(c){
+  vR(c,-w/2,0,w,1350,6,SOIL);c.save();c.lineWidth=VLW*0.6;for(var i=0;i<26;i++){var x=-w/2+((i*137)%w),z=60+((i*211)%1200);c.beginPath();c.arc(x,z,16+(i%3)*8,0,7);c.stroke()}c.restore();
+  vR(c,-w/2+140,60,w-280,1290,4,'#f6f8fa');LN(c,[-w/2+140,60,-w/2+140,1340,w/2-140,1340,w/2-140,60],VLW*1.6,true);
+  vR(c,-w/2-30,1340,w+60,70,4,CONC);vR(c,-90,1410,180,30,4,GRATE);pipeR(c,-w/2-120,-w/2+140,1150,110)}}
+defV('soakaway','front',2100,1500,0,-1350,soakV(1800),[[-1020,1150,'l',110,'pvc','plain']]);
+defV('soakaway','side',2100,1500,0,-1350,soakV(1800),[[-1020,1150,'l',110,'pvc','plain']]);
+function boreV(c){vR(c,-70,0,140,1800,0,'#e3e0d9');vR(c,-42,0,84,1800,0,'#20303f');vR(c,-100,1750,200,50,4,STEEL);vR(c,-160,1700,320,50,4,CONC);vR(c,-24,1800,48,200,4,'#3a6ea5');
+  LN(c,[-70,900,-40,940,-100,980,-70,1020],VLW*1.2)}
+defV('borehole','front',420,2000,0,-1800,boreV,[[0,2000,'u',32,'poly','comp']]);
+defV('borehole','side',420,2000,0,-1800,boreV,[[0,2000,'u',32,'poly','comp']]);
+defV('manifold','front',720,330,0,1200,function(c){vR(c,-330,220,660,70,30,'#e59a68');for(var i=0;i<4;i++){var x=-210+i*140;vR(c,x-24,120,48,100,0,'#f0a877');vR(c,x-30,100,60,34,6,BRASS);vR(c,x-26,30,52,30,6,i%2?'#4a90e2':'#d0202f');vR(c,x-12,60,24,40,0,CHROME)}
+  vR(c,-370,235,50,40,4,BRASS)},[[-370,255,'l',22,'cu','thread'],[-210,100,'d',15,'cu','thread'],[-70,100,'d',15,'cu','thread'],[70,100,'d',15,'cu','thread'],[210,100,'d',15,'cu','thread']]);
+defV('manifold','side',300,330,0,1200,function(c){wallS(c,-150,0,330,true);vR(c,-110,210,260,80,30,'#e59a68');vR(c,-24,100,48,110,0,'#f0a877');vR(c,-30,80,60,30,6,BRASS);vR(c,-26,20,52,30,6,'#4a90e2')},[[0,100,'d',15,'cu','thread']]);
+defV('gaspoint','front',240,240,0,500,function(c){vR(c,-110,10,220,220,20,'#e3e0d9');vR(c,-24,110,48,110,4,'#e6c227');vR(c,-70,190,140,34,17,'#f2d34a');vE(c,0,60,26,26,BRASS)},[[0,10,'d',15,'gas','thread']]);
+defV('gaspoint','side',240,240,0,500,function(c){wallS(c,-110,0,240,true);vR(c,-110,80,150,50,6,'#e6c227');vR(c,10,60,60,90,10,'#f2d34a');vR(c,20,20,40,60,4,BRASS)},[[40,20,'d',15,'gas','thread']]);
+defV('hosereel','front',560,560,0,900,function(c){vR(c,-250,0,500,40,10,'#e59a68');vE(c,0,300,250,250,'#e59a68');vE(c,0,300,180,180,'#2f7d4a');vE(c,0,300,110,110,'#3aa35e');vE(c,0,300,40,40,CHROME);vR(c,-20,40,40,70,4,CHROME)},[[0,0,'d',20,'poly','comp']]);
+defV('hosereel','side',300,560,0,900,function(c){wallS(c,-150,0,560,true);vR(c,-110,150,220,300,20,'#e59a68');vR(c,-90,180,180,240,10,'#2f7d4a');vR(c,-24,40,48,110,4,CHROME)},[[0,0,'d',20,'poly','comp']]);
+/* ---------- ELECTRICAL (wall-mounted) ---------- */
+function wallPlate(w,h,d,f){return function(c){vR(c,-w/2,0,w,h,10,f||'#f2f2ee')}}
+function wallPlateS(h,d,f,extra){return function(c){wallS(c,-90,0,h+60,true);vR(c,-90,30,d,h,4,f||'#f2f2ee');if(extra)extra(c)}}
+defV('socket','front',100,100,0,300,function(c){wallPlate(86,86)(c);vE(c,-18,50,10,10,'#20303f');vE(c,18,50,10,10,'#20303f');vR(c,-5,20,10,14,0,'#20303f');vR(c,-40,86,0,0,0)},[]);
+defV('socket','side',200,100,0,300,wallPlateS(86,30),[]);
+defV('socket2','front',180,100,0,300,function(c){vR(c,-88,0,176,86,10,'#f2f2ee');[-44,44].forEach(function(x){vE(c,x-18,50,10,10,'#20303f');vE(c,x+18,50,10,10,'#20303f');vR(c,x-5,20,10,14,0,'#20303f')})},[]);
+defV('socket2','side',200,100,0,300,wallPlateS(86,30),[]);
+defV('switch','front',100,100,0,1200,function(c){wallPlate(86,86)(c);vR(c,-22,18,44,50,6,'#e6e6e0')},[]);
+defV('switch','side',200,100,0,1200,wallPlateS(86,30,null,function(c){vR(c,-60,50,20,30,4,'#e6e6e0')}),[]);
+defV('light','front',300,200,0,2400,function(c){vR(c,-140,120,280,40,10,'#e9e6dd');PG(c,[-110,120,110,120,80,0,-80,0],'#fff8d6')},[]);
+defV('light','side',300,200,0,2400,function(c){vR(c,-140,120,280,40,10,'#e9e6dd');PG(c,[-110,120,110,120,80,0,-80,0],'#fff8d6')},[]);
+defV('db','front',500,700,0,1400,function(c){vR(c,-230,0,460,640,8,'#dfe5eb');vR(c,-200,30,400,580,4,'#f2f2ee');for(var r=0;r<3;r++)for(var i=0;i<8;i++)vR(c,-180+i*45,60+r*170,32,120,3,i%3?'#20303f':'#d0202f');vR(c,-40,640,80,40,4,'#8a94a0')},[]);
+defV('db','side',300,700,0,1400,function(c){wallS(c,-150,0,700,true);vR(c,-150,0,150,640,4,'#dfe5eb')},[]);
+defV('isolator','front',240,240,0,1400,function(c){vR(c,-100,0,200,200,12,'#e6eaee');vE(c,0,100,50,50,'#d0202f');vR(c,-30,90,60,20,3,'#20303f')},[]);
+defV('isolator','side',240,240,0,1400,wallPlateS(200,80,'#e6eaee'),[]);
+regFits();
+
+/* =====================================================================
+   v3.12  ISOMETRIC VIEW  (30° axes)
+   Fittings/valves: 8 orientations = vertical plane A (x→down-right), its mirror, vertical plane B
+   (x→up-right), its mirror, and 4 flat (ground-plane) rotations. Their tube path is drawn with a
+   proper uniform-width stroke; details are projected flat with a drop edge for depth.
+   Fixtures/plant: shaded 3-D blocks/cylinders with the plan symbol on top; 4 orientations.
+   ===================================================================== */
+var C30=Math.cos(PI/6),S30=0.5,ISOCYL={geyser:1,geyser_slim:1,tank_r:1,tank_e:1,jojo:1,pressvessel:1,gasbottle:1,borepump:1,hydrant:1};
+function isoPlane(io){return io>>3}
+function isoRotN(io){return (io>>1)&3}
+function isoMir(io){return (io&1)===1}
+function isoBase(io){var p=isoPlane(io);return p===0?[C30,S30,0,1]:p===1?[C30,-S30,0,1]:[C30,S30,-C30,S30]}
+function isoMap(io,x,y){var M=isoBase(io),rot=isoRotN(io)*PI/2,c=Math.cos(rot),s=Math.sin(rot),rx=x*c-y*s,ry=x*s+y*c;if(isoMir(io))rx=-rx;return [M[0]*rx+M[2]*ry,M[1]*rx+M[3]*ry]}
+function isoApply(c,io){var M=isoBase(io);c.transform(M[0],M[1],M[2],M[3],0,0);if(isoMir(io))c.scale(-1,1);if(isoRotN(io))c.rotate(isoRotN(io)*PI/2)}
+function isoFitDraw(c,lw,d,D,m,io,hh){
+  var q=d.nat(D,m),g=fgeo(D,q.ports,q.extra,m),body=q.fill||matFill(m);
+  c.translate(0,hh);c.scale(1,-1);
+  function T(fn){c.save();isoApply(c,io);c.translate(-g.cx,-g.cy);fn();c.restore()}
+  base(c,lw);
+  if(q.body){T(function(){base(c,lw);q.body(c,lw,D,m,body)})}
+  else{c.save();c.lineCap='butt';c.lineJoin='round';
+    T(function(){q.path(c)});c.strokeStyle=INKC;c.lineWidth=D+2*lw;c.stroke();
+    T(function(){q.path(c)});c.strokeStyle=body;c.lineWidth=D;c.stroke();
+    if(m==='cu'||m==='gas'||m==='ss'){c.save();c.translate(-D*0.12,-D*0.16);T(function(){q.path(c)});c.strokeStyle='rgba(255,255,255,.42)';c.lineWidth=D*0.2;c.stroke();c.restore()}
+    c.restore()}
+  if(q.more)T(function(){base(c,lw);q.more(c,lw,D,m)});
+  q.ports.forEach(function(p){T(function(){hub(c,lw,p,D,m)})});
+  if(q.top)T(function(){base(c,lw);q.top(c,lw,D,m)});
+}
+function genIsoFit(d){
+  return function(D,m,io){
+    io=(io|0)%24;var q=d.nat(D,m),g=fgeo(D,q.ports,q.extra,m),hw=0,hh=0,mg=D*0.45;
+    [[g.hw,g.hh],[g.hw,-g.hh],[-g.hw,g.hh],[-g.hw,-g.hh]].forEach(function(cc){var p=isoMap(io,cc[0],cc[1]);hw=Math.max(hw,Math.abs(p[0]));hh=Math.max(hh,Math.abs(p[1]))});
+    hw+=mg*0.3;hh+=mg;
+    var gp=g.ports.map(function(p){var w=isoMap(io,p.x,p.y),dv=isoMap(io,Math.cos(p.a),Math.sin(p.a));return {x:w[0],y:w[1],a:Math.atan2(dv[1],dv[0]),e:p.e,k:p.k,mm:p.mm}});
+    return {w:2*hw,h:2*hh,rim:0,z0:0,fn:function(c,lw){isoFitDraw(c,lw,d,D,m,io,hh)},ports:[],gports:gp,iso:true,io:io,lname:'Centre'}}}
+function genIsoFix(d){
+  return function(D,m,io){
+    io=(io|0)&3;var g0=d.geo(),fr=VW[d.k]&&VW[d.k].front,H=Math.max(60,fr?fr.h:400),a0=g0.hw,b0=g0.hh,a=(io&1)?b0:a0,b=(io&1)?a0:b0;
+    var P=function(x,y){return [C30*(x-y),S30*(x+y)]},cyl=!!ISOCYL[d.k],rmin=Math.min(a,b),rx0=rmin*0.98*1.2247,ry0=rmin*0.98*0.7071,hw=cyl?rx0:C30*(a+b),hT=(cyl?(H+2*ry0):(S30*(a+b)*2+H))/2+10,ports=[],cy=H/2;
+    var cs=Math.cos(io*PI/2),sn=Math.sin(io*PI/2);
+    function rp(x,y){return [x*cs-y*sn,x*sn+y*cs]}
+    if(fr&&fr.ports)fr.ports.forEach(function(p){var xx=p[0]*(2*a0/Math.max(1,fr.w)),r=rp(xx,b0),pm=P(r[0],r[1]);
+      var dir=p[2]==='d'?PI/2:p[2]==='u'?-PI/2:(function(){var v=rp(p[2]==='l'?-1:1,0),w=P(v[0],v[1]);return Math.atan2(w[1],w[0])})();
+      var px=pm[0],py=pm[1]+cy-p[1];if(cyl){px=(p[0]<0?-1:p[0]>0?1:0)*rmin*1.22;py=cy-p[1]}
+      ports.push({x:px,y:py,a:dir,mm:p[3],mat:p[4],e:p[5]||'plain'})});
+    var nm=String(d.n||d.k).split(/[ (\/]/)[0].toUpperCase().slice(0,10);
+    var fn=function(c,lw){
+      c.translate(0,hT);c.scale(1,-1);c.translate(0,cy);c.lineJoin='round';
+      var TOP=function(sc){c.save();c.translate(0,-H);c.transform(C30,S30,-C30,S30,0,0);c.rotate(io*PI/2);c.scale(sc,sc);d.draw(c,lw/sc,50,'pvc');c.restore()};
+      if(cyl){var r=rmin*0.98,rx=r*1.2247,ry=r*0.7071;
+        c.beginPath();c.moveTo(-rx,-H);c.lineTo(-rx,0);c.ellipse(0,0,rx,ry,0,PI,0,true);c.lineTo(rx,-H);c.ellipse(0,-H,rx,ry,0,0,PI,false);c.closePath();fs(c,'#d3dfec');
+        c.beginPath();c.ellipse(0,-H,rx,ry,0,0,7);fs(c,FILL);TOP(0.62);
+        ltext(c,nm,0,-H*0.42+ry*0.6,Math.max(rx*0.3,40),INKC)}
+      else{
+        var A=P(-a,b),B=P(a,b),Cc=P(a,-b),Dd=P(-a,-b);
+        c.beginPath();c.moveTo(A[0],A[1]);c.lineTo(B[0],B[1]);c.lineTo(B[0],B[1]-H);c.lineTo(A[0],A[1]-H);c.closePath();fs(c,'#d5e0ec');
+        c.beginPath();c.moveTo(B[0],B[1]);c.lineTo(Cc[0],Cc[1]);c.lineTo(Cc[0],Cc[1]-H);c.lineTo(B[0],B[1]-H);c.closePath();fs(c,'#bccddd');
+        c.beginPath();c.moveTo(A[0],A[1]-H);c.lineTo(B[0],B[1]-H);c.lineTo(Cc[0],Cc[1]-H);c.lineTo(Dd[0],Dd[1]-H);c.closePath();fs(c,FILL);
+        TOP(1);
+        var mid=P(0,b);c.save();c.transform(C30,S30,0,1,mid[0],mid[1]);ltext(c,nm,0,-H*0.5,Math.max(Math.min(H*0.22,a*0.3),34),INKC);c.restore()}};
+    return {w:2*hw+20,h:2*hT,rim:0,z0:0,fn:fn,ports:[],gports:ports,iso:true,io:io,lname:'Base'}}}
+function regIso(){
+  STAMPS.forEach(function(d){
+    if(d.fit&&d.nat){(VW[d.k]||(VW[d.k]={})).iso={gen:genIsoFit(d)};return}
+    if(!d.fit&&VW[d.k]&&VW[d.k].front&&d.cat!=='mark')VW[d.k].iso={gen:genIsoFix(d)}})}
+regIso();
+function isoStates(it){var d=stampDef(it.k);return d&&d.fit?24:4}
+function isoAlign(it,pi,P,u){
+  var n=isoStates(it),best=null,p0=(it.io|0)>>3;
+  for(var k=0;k<n;k++){var o=n===24?(((p0+(k>>3))%3)<<3)|(k&7):k;it.io=o;delete it.f;it.r=0;var g=geoOf(it),pt=g.ports[pi];if(!pt)continue;
+    var dd=Math.abs(Math.atan2(Math.sin(pt.a-u),Math.cos(pt.a-u)));if(!best||dd<best.dd-1e-6)best={o:o,dd:dd}}
+  it.io=best?best.o:(it.io|0);it.r=0;it.x=0;it.y=0;var q=portsW(it)[pi];if(q){it.x=P.x-q.x;it.y=P.y-q.y}}
+
 /* ---------- ports, snapping, linking ---------- */
 function portsW(it){var d=stampDef(it.k);if(!d)return [];var g=geoOf(it),s=it.fit===false?1:(d.fit?1:(it.s||1)),r=it.r||0;
   return g.ports.map(function(p){var w=worldOff(it,p.x*K*s,p.y*K*s);return {x:w.x,y:w.y,a:p.a+r,mm:p.mm,mat:p.mat,e:p.e}})}
-function alignPort(it,pi,P,u){var g=geoOf(it);it.r=u-g.ports[pi].a;it.x=0;it.y=0;var q=portsW(it)[pi];it.x=P.x-q.x;it.y=P.y-q.y}
+function alignPort(it,pi,P,u){if(it.v==='iso')return isoAlign(it,pi,P,u);var g=geoOf(it);it.r=u-g.ports[pi].a;it.x=0;it.y=0;var q=portsW(it)[pi];it.x=P.x-q.x;it.y=P.y-q.y}
 function isRealPipe(p){return p.t==='pipe'&&p.mat!=='wall'&&p.mat!=='dim'}
 function pipeEnds(p){var dx=p.b.x-p.a.x,dy=p.b.y-p.a.y,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L;
   return [{x:p.a.x,y:p.a.y,vx:-ux,vy:-uy,which:'a'},{x:p.b.x,y:p.b.y,vx:ux,vy:uy,which:'b'}]}
@@ -1471,11 +1731,11 @@ function paint(){
   c.setTransform(dpr*V.z,0,0,dpr*V.z,dpr*V.tx,dpr*V.ty);DZ=V.z;
   var x0=-V.tx/V.z,y0=-V.ty/V.z,x1=x0+cw/V.z,y1=y0+ch/V.z;
   var pd=150/V.z;VR={x0:x0-pd,y0:y0-pd,x1:x1+pd,y1:y1+pd};
-  drawBg(c);if(S.grid)drawGrid(c,x0,y0,x1,y1);
+  drawBg(c);if(S.grid){if(S.mode==='iso')drawIsoGrid(c,x0,y0,x1,y1);else drawGrid(c,x0,y0,x1,y1)}
   drawItems(c);VR=null;
   c.setTransform(1,0,0,1,0,0);postView(c,cv.width,cv.height);
   if(prefs.scalebar!==false){c.setTransform(dpr,0,0,dpr,0,0);scaleBar(c,14,ch-12,V.z,1);c.setTransform(1,0,0,1,0,0)}
-  if(elevOn()){c.setTransform(dpr,0,0,dpr,0,0);c.font='800 12px '+FONT;var bw=c.measureText('ELEVATION VIEW').width+18;c.fillStyle='rgba(10,60,120,.88)';rr(c,10,8,bw,24,12);c.fill();c.fillStyle='#fff';c.textAlign='left';c.textBaseline='middle';c.fillText('ELEVATION VIEW',19,20.5);c.setTransform(1,0,0,1,0,0)}
+  if(elevOn()||isoOn()){var bt=isoOn()?'ISOMETRIC VIEW':'ELEVATION VIEW';c.setTransform(dpr,0,0,dpr,0,0);c.font='800 12px '+FONT;var bw=c.measureText(bt).width+18;c.fillStyle='rgba(10,60,120,.88)';rr(c,10,8,bw,24,12);c.fill();c.fillStyle='#fff';c.textAlign='left';c.textBaseline='middle';c.fillText(bt,19,20.5);c.setTransform(1,0,0,1,0,0)}
   c.setTransform(dpr*V.z,0,0,dpr*V.z,dpr*V.tx,dpr*V.ty);drawGuide(c);drawSelection(c);drawMarquee(c);
   updateHud();
 }
@@ -1509,7 +1769,7 @@ function updateHud(){}
 
 /* ---------- history + autosave ---------- */
 function snap(){return {items:JSON.stringify(S.items),bg:S.bg,bgRect:S.bgRect?clone(S.bgRect):null}}
-function docData(){return {mode:S.mode,floorY:S.floorY,v:3,title:S.title,showDate:S.showDate,legend:S.legend,grid:S.grid,bomImg:!!S.bomImg,hide:S.hide||{},jobId:S.jobId||null,items:S.items,bgRect:S.bgRect,view:{z:V.z,tx:V.tx,ty:V.ty}}}
+function docData(){return {card:S.card,quote:S.quote,hj:S.hj||{},mode:S.mode,floorY:S.floorY,v:3,title:S.title,showDate:S.showDate,legend:S.legend,grid:S.grid,bomImg:!!S.bomImg,hide:S.hide||{},jobId:S.jobId||null,items:S.items,bgRect:S.bgRect,view:{z:V.z,tx:V.tx,ty:V.ty}}}
 function setBg(d,rect){S.bg=d||null;if(rect!==undefined)S.bgRect=rect;bgImg=null;if(d){var im=new Image();im.onload=function(){if(S.bg===d){bgImg=im;render()}};im.src=d}}
 function commit(){var sn=snap();if(hist[hi]&&hist[hi].items===sn.items&&hist[hi].bg===sn.bg&&JSON.stringify(hist[hi].bgRect)===JSON.stringify(sn.bgRect)){save();render();return}
   hist.length=hi+1;hist.push(sn);if(hist.length>100)hist.shift();hi=hist.length-1;updUndo();save();render()}
@@ -1518,7 +1778,7 @@ function undo(){if(hi>0){hi--;restore(hist[hi]);updUndo();save();render()}else t
 function redo(){if(hi<hist.length-1){hi++;restore(hist[hi]);updUndo();save();render()}}
 function updUndo(){$('#undoBtn').disabled=hi<=0;$('#redoBtn').disabled=hi>=hist.length-1}
 var saveT=0,warned=false;
-function save(){clearTimeout(saveT);saveT=setTimeout(saveNow,250)}
+function save(){clearTimeout(saveT);saveT=setTimeout(saveNow,250);if(typeof tipsSoon==='function')tipsSoon()}
 function saveNow(){
   ensureJob();var o=docData();
   try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}
@@ -1529,14 +1789,15 @@ function saveNow(){
 function load(){
   try{var pf0=JSON.parse(localStorage.getItem(PREFKEY)||'null');if(pf0&&pf0.temp)pipeTemp=pf0.temp}catch(e){}
   try{var j=JSON.parse(localStorage.getItem(KEY)||'null');
-    if(j&&Array.isArray(j.items)){S.mode=j.mode==='elev'?'elev':'plan';S.floorY=(typeof j.floorY==='number'&&isFinite(j.floorY))?j.floorY:null;S.title=j.title||'';S.showDate=j.showDate!==false;S.legend=!!j.legend;S.grid=!!j.grid;S.items=j.items;S.bgRect=j.bgRect||null;S.bomImg=!!j.bomImg;S.hide=j.hide||{};S.jobId=j.jobId||null;
+    if(j&&Array.isArray(j.items)){S.card=cleanCard(j.card);S.quote=cleanQuote(j.quote);S.hj=cleanHJ(j.hj);S.mode=normMode(j.mode);S.floorY=(typeof j.floorY==='number'&&isFinite(j.floorY))?j.floorY:null;S.title=j.title||'';S.showDate=j.showDate!==false;S.legend=!!j.legend;S.grid=!!j.grid;S.items=j.items;S.bgRect=j.bgRect||null;S.bomImg=!!j.bomImg;S.hide=j.hide||{};S.jobId=j.jobId||null;
       if(j.view&&j.view.z){V.z=j.view.z;V.tx=j.view.tx;V.ty=j.view.ty;S.viewSet=1}
       var bg=localStorage.getItem(BGKEY);if(bg){bgSaved=bg;setBg(bg,S.bgRect)}}
     else S.showDate=true}catch(e){S.showDate=true}
-  try{var pf=JSON.parse(localStorage.getItem(PREFKEY)||'null');if(pf){prefs.ask=pf.ask!==false;if(pf.ls>0)LS=pf.ls;if(pf.theme)prefs.theme=pf.theme;if(pf.favs)prefs.favs=pf.favs;if(pf.recent)prefs.recent=pf.recent;if(pf.pt&&MATS[pf.pt.mat])pipeType=pf.pt;if(pf.haptic===false)prefs.haptic=false;if(pf.magnet===false)prefs.magnet=false;if(pf.snap45)prefs.snap45=true;if(pf.view)prefs.view=pf.view;if(pf.pview)prefs.pview=pf.pview;if(pf.pv&&typeof pf.pv==='object')prefs.pv=pf.pv;if(pf.wallmm>0){prefs.wallmm=pf.wallmm;wallMM=pf.wallmm}if(pf.wallHint)prefs.wallHint=1;if(pf.rooms===false)prefs.rooms=false;if(pf.scalebar===false)prefs.scalebar=false;if(pf.sizeTag===false)prefs.sizeTag=false}}catch(e){}
+  try{var pf=JSON.parse(localStorage.getItem(PREFKEY)||'null');if(pf){prefs.ask=pf.ask!==false;if(pf.ls>0)LS=pf.ls;if(pf.theme)prefs.theme=pf.theme;if(pf.favs)prefs.favs=pf.favs;if(pf.recent)prefs.recent=pf.recent;if(pf.pt&&MATS[pf.pt.mat])pipeType=pf.pt;if(pf.haptic===false)prefs.haptic=false;if(pf.magnet===false)prefs.magnet=false;if(pf.snap45)prefs.snap45=true;if(pf.view)prefs.view=pf.view;if(pf.pview)prefs.pview=pf.pview;if(pf.pv&&typeof pf.pv==='object')prefs.pv=pf.pv;if(pf.wallmm>0){prefs.wallmm=pf.wallmm;wallMM=pf.wallmm}if(pf.wallHint)prefs.wallHint=1;if(pf.rooms===false)prefs.rooms=false;if(pf.scalebar===false)prefs.scalebar=false;if(pf.sizeTag===false)prefs.sizeTag=false;if(pf.hints===false)prefs.hints=false;if(pf.hintOff&&typeof pf.hintOff==='object'){prefs.hintOff={};Object.keys(pf.hintOff).slice(0,40).forEach(function(k){if(/^[a-z0-9_]{1,24}$/.test(k)&&pf.hintOff[k])prefs.hintOff[k]=1})}}}catch(e){}
+  syncMode();
 }
 var prefs={ask:true};
-function savePrefs(){prefs.pt=(pipeType.mat==='wall'||pipeType.mat==='dim')?prefs.pt:pipeType;prefs.temp=pipeTemp;prefs.ls=LS;try{localStorage.setItem(PREFKEY,JSON.stringify(prefs))}catch(e){}}
+function savePrefs(){prefs.pt=(pipeType.mat==='wall'||pipeType.mat==='dim')?prefs.pt:pipeType;prefs.temp=pipeTemp;prefs.ls=(LSplan!=null?LSplan:LS);try{localStorage.setItem(PREFKEY,JSON.stringify(prefs))}catch(e){}}
 
 /* ---------- UI helpers ---------- */
 var toastT=0;
@@ -1625,7 +1886,7 @@ function updBar(){
     else{B('minus','Smaller',function(){it.s=Math.max(0.2,(it.s||1)/1.2);commit()});B('plus','Bigger',function(){it.s=Math.min(6,(it.s||1)*1.2);commit()})}
     B('rotl','Rotate',function(){rotateStamp(it,-rs)});B('rotr','Rotate',function(){rotateStamp(it,rs)});
     B('flip','Flip',function(){it.f=!it.f;commit()});
-    if(VW[it.k]){B('view',viewName(it.v)+' view',function(){setViewOf(it,nextView(it));commit();updBar()});if(it.v)B('height','Height',function(){setElevHeight(it)})}
+    if(VW[it.k]){B('view',viewName(it.v)+' view',function(){setViewOf(it,nextView(it));commit();updBar()});if(it.v&&it.v!=='iso')B('height','Height',function(){setElevHeight(it)})}
     if(d.fit)B('type','Joint',function(){sheet('Joint style',JOINTS.map(function(j){return {label:j[1],on:(j[0]||null)===(it.joint||null),fn:function(){if(j[0])it.joint=j[0];else delete it.joint;commit()}}}),{cols:1})});
     if(d.red||d.label)B('dot','Colour',function(){it.col=nextCol(it.col||'#e0202f');commit()});
     B('edit','Label',editLabel);
@@ -1698,7 +1959,7 @@ function alignSet(mode){
     if(mode==='l')dx=L-b.x;else if(mode==='r')dx=R-(b.x+b.w);else if(mode==='cx')dx=(L+R)/2-(b.x+b.w/2);
     else if(mode==='t')dy=T-b.y;else if(mode==='b')dy=Bt-(b.y+b.h);else if(mode==='cy')dy=(T+Bt)/2-(b.y+b.h/2);shiftItem(x,dx,dy)});
   commit()}
-function rotateStamp(it,a){var links=findLinks(it);it.r=(it.r||0)+a;if(Math.abs(it.r)>2*PI)it.r=it.r%(2*PI);commit()}
+function rotateStamp(it,a){var links=findLinks(it);if(it.v==='iso'){isoTurn(it,a<0?-1:1);applyLinks(it,links);commit();return}it.r=(it.r||0)+a;if(Math.abs(it.r)>2*PI)it.r=it.r%(2*PI);commit()}
 function resizeFit(it,dir){var links=findLinks(it);it.mm=sizeStep(it.mat||'pvc',it.mm,dir);applyLinks(it,links);commit();toast((it.mm)+' mm')}
 function delSel(){var set=selSet();if(!set.length)return;if(set.some(function(x){return x.lock})){toast('Unlock first – locked items can’t be deleted');return}
   S.items=S.items.filter(function(x){return set.indexOf(x)<0});sel=null;multi=[];updBar();commit()}
@@ -1754,7 +2015,7 @@ var wallMM=110,prevPT=null,roomPending=false;
 var WALLTH=[75,110,150,230];
 function buildTools(){
   var t=$('#tools');t.innerHTML='';
-  TOOLS.forEach(function(d){var b=document.createElement('button');b.type='button';b.className='tbtn'+(tool===d[0]?' on':'');b.dataset.tool=d[0];
+  TOOLS.forEach(function(d){if(d[0]==='wall'&&isoOn())return;var b=document.createElement('button');b.type='button';b.className='tbtn'+(tool===d[0]?' on':'');b.dataset.tool=d[0];
     b.innerHTML=ico(d[0])+'<span>'+d[1]+'</span>';b.onclick=function(){if(tool===d[0]&&d[0]!=='move'){optsHidden=!optsHidden;buildOpts()}else{optsHidden=false;setTool(d[0])}};t.appendChild(b)});
 }
 function setTool(t){var was=tool;tool=t;
@@ -1786,7 +2047,7 @@ function tileCanvas(d,m,mm){
   tileCache[key]=c;return c;
 }
 function tileView(d,v){
-  var key=d.k+'|'+v,c0=tileCache[key];if(c0)return c0;var sp=VW[d.k][v],c=document.createElement('canvas');c.width=104;c.height=104;var x=c.getContext('2d'),sc=46/Math.max(sp.w/2,sp.h/2);
+  var key=d.k+'|'+v+(d.fit?'|'+partType.mm+partType.mat:''),c0=tileCache[key];if(c0)return c0;var sp=vSpecK(d.k,v,d.fit?partType.mm:50,d.fit?partType.mat:'pvc'),c=document.createElement('canvas');c.width=104;c.height=104;var x=c.getContext('2d'),sc=46/Math.max(sp.w/2,sp.h/2);
   x.translate(52,52);x.scale(sc,sc);INKC=d.red?'#e0202f':INK;PXL=1/sc;FLIP=1;DZ=1;vDraw(x,sp,Math.max(1.6/sc,0));INKC=INK;PXL=1;tileCache[key]=c;return c}
 function buildOpts(){
   var o=$('#opts');o.classList.remove('tall');o.style.display=optsHidden?'none':'';
@@ -1804,8 +2065,8 @@ function buildOpts(){
     var sb=document.createElement('button');sb.type='button';sb.className='srch'+(partSearch?' on':'');sb.innerHTML=ico('search')+(partSearch?'“'+esc(partSearch)+'”':'Search');sb.dataset.search='1';
     sb.onclick=async function(){var v=await askText({title:'Search parts (e.g. tee, basin, door, geyser)',value:partSearch,placeholder:'type a name',cancel:'Cancel',chips:['bend','valve','basin','wc','door','tank','pump']});if(v!==null){partSearch=v.trim().toLowerCase();buildOpts()}};
     r1.appendChild(sb);
-    var vb=document.createElement('button');vb.type='button';vb.className='pill viewpill';vb.dataset.pview='1';vb.innerHTML=ico('view')+'Place as: '+({auto:elevOn()?'Auto (Front)':'Auto (Top)',top:'Top',front:'Front',side:'Side'}[prefs.pview||'auto']);
-    vb.onclick=function(){var o=['auto','top','front','side'],i=o.indexOf(prefs.pview||'auto');prefs.pview=o[(i+1)%4];savePrefs();buildOpts()};r1.appendChild(vb);
+    var vb=document.createElement('button');vb.type='button';vb.className='pill viewpill';vb.dataset.pview='1';vb.innerHTML=ico('view')+'Place as: '+({auto:isoOn()?'Auto (Iso)':elevOn()?'Auto (Front)':'Auto (Top)',top:'Top',front:'Front',side:'Side',iso:'Iso'}[prefs.pview||'auto']);
+    vb.onclick=function(){var o=['auto','top','front','side','iso'],i=o.indexOf(prefs.pview||'auto');prefs.pview=o[(i+1)%5];savePrefs();buildOpts()};r1.appendChild(vb);
     tab('Recent','recent','clock');tab('Favourites','fav','star');
     CATS.forEach(function(cg){tab(cg[1],cg[0])});
     var needsType=partCat==='fit'||partCat==='val'||partCat==='recent'||partCat==='fav'||!!partSearch;
@@ -1820,7 +2081,7 @@ function buildOpts(){
     list.forEach(function(d){
       var b=document.createElement('button');b.type='button';b.className='tile'+(isFav(d.k)?' fav':'');b.dataset.stamp=d.k;
       var mm=d.fit?partType.mm:(d.cat==='drain'?110:50),m=d.fit?partType.mat:'pvc';
-      var tv=d.fit?null:placeView(d.k),tcv=tv?tileView(d,tv):tileCanvas(d,m,mm);
+      var tv=placeView(d.k),tcv=tv?tileView(d,tv):tileCanvas(d,m,mm);
       b.appendChild(tcv.cloneNode(false));var cc=b.firstChild;cc.getContext('2d').drawImage(tcv,0,0);
       var s=document.createElement('span');s.textContent=d.n;b.appendChild(s);
       var lpt=0,lpd=false;
@@ -1869,7 +2130,7 @@ async function placeStamp(k){
   var d=stampDef(k),c=viewCenter(),n=(stampCount++%5)*14/V.z;
   pushRecent(k);var it={t:'stamp',k:k,x:c.x+n-20/V.z,y:c.y+n-20/V.z,s:1,r:0,mm:d.fit?partType.mm:50,mat:d.fit?partType.mat:'pvc',col:d.red?'#e0202f':INK};
   if(d.fit&&partJoint)it.joint=partJoint;
-  var pv0=d.fit?null:placeView(k);if(pv0){it.v=pv0;if(elevOn()){ensureFloor();var sp0=vSpec(it);it.y=rnd3(S.floorY-sp0.z0*K-sp0.h/2*K)}}
+  var pv0=placeView(k);if(pv0){it.v=pv0;if(elevOn()){ensureFloor();var sp0=vSpec(it);it.y=rnd3(S.floorY-sp0.z0*K-sp0.h/2*K)}}
   var attached=false;
   if(d.fit&&sel&&S.items.indexOf(sel)>=0){
     var g=geoOf(it);
@@ -1918,7 +2179,7 @@ var snapCtx=null,snapExcl=null;
 function snapPipe(a,p,except,isDim){snapScale=(isDim||(except&&except.mat==='wall'))?K:LS;var isW=except&&except.mat==='wall';
   if(isW&&magnetOn())return wallSnap(a,p,[except].concat(snapExcl||[]),snapCtx);
   var e=snapEnd(p,except,isDim?'dim':isW?'wall':null);
-  if(!e&&!isDim&&!isW&&magnetOn()){var wf=wallFace(p);if(wf){guide={x:wf.x,y:wf.y,ring:1,rc:'#1259e8',tag:'Wall'};return {x:wf.x,y:wf.y}}}guide=null;if(e){guide={x:e.x,y:e.y,ring:1};return {x:e.x,y:e.y}}return snapAngle(a,p,true)}
+  if(!e&&!isDim&&!isW&&magnetOn()&&S.mode!=='iso'){var wf=wallFace(p);if(wf){guide={x:wf.x,y:wf.y,ring:1,rc:'#1259e8',tag:'Wall'};return {x:wf.x,y:wf.y}}}guide=null;if(e){guide={x:e.x,y:e.y,ring:1};return {x:e.x,y:e.y}}return S.mode==='iso'?snapAngleIso(a,p,true):snapAngle(a,p,true)}
 function pickItem(p,tol){
   if(sel&&S.items.indexOf(sel)>=0&&multi.length===0&&hit(sel,p,tol))return sel;
   var i,it;
@@ -2053,7 +2314,7 @@ cv.addEventListener('pointermove',function(e){
       if(!drag.moved&&Math.hypot(dx,dy)*V.z<6)continue;if(!drag.moved){drag.moved=true;clearTimeout(lpT)}guide=null;translateItem(drag.it,drag.orig,dx,dy);
       var snapped=false,linked=false;
       if(drag.it.t==='stamp'){
-        if(stampDef(drag.it.k).fit){drag.it.r=drag.orig.r;drag.it.mm=drag.orig.mm;drag.it.mat=drag.orig.mat;drag.it.col=drag.orig.col}
+        if(stampDef(drag.it.k).fit){if(drag.it.v==='iso'){if(drag.orig.io!=null)drag.it.io=drag.orig.io;else delete drag.it.io}drag.it.r=drag.orig.r;drag.it.mm=drag.orig.mm;drag.it.mat=drag.orig.mat;drag.it.col=drag.orig.col}
         var dd=stampDef(drag.it.k);
         if(dd.host){drag.it.r=drag.orig.r;if(drag.orig.wt)drag.it.wt=drag.orig.wt;else delete drag.it.wt;
           if(magnetOn()){var sw=snapToWall(drag.it,magR());if(sw){snapped=true;guide={x:sw.x,y:sw.y,ring:1,rc:'#1259e8',tag:'In wall'}}}}
@@ -2158,7 +2419,7 @@ function openEndMenu(c){
 }
 function attachFromEnd(k,c){
   var d=stampDef(k),mat=c.mat||'pvc',it={t:'stamp',k:k,x:0,y:0,s:1,r:0,col:INK,mm:nearestSize(mat,c.mm||50),mat:mat};
-  if(c.temp)it.temp=c.temp;
+  if(c.temp)it.temp=c.temp;if(isoOn()&&VW[k]&&VW[k].iso){it.v='iso';it.io=0}
   alignPort(it,0,{x:c.x,y:c.y},c.a+PI);S.items.push(it);hideEndMenu();setSel(it);commit();toast(d.n+' fitted – '+typeLabel(it));
 }
 function continuePipe(c){
@@ -2437,7 +2698,8 @@ function elevOn(){return S.mode==='elev'}
 function vBaseY(it){var sp=vSpec(it);return sp?it.y+sp.h/2*K*(it.s||1):null}
 function vZh(it){return S.floorY==null?null:(S.floorY-vBaseY(it))/K}
 function vLevel(it){var sp=vSpec(it),zh=vZh(it);if(zh==null)return null;return sp.rim>0?zh+sp.rim*(it.s||1):zh}
-function vLevelName(it){var sp=vSpec(it);return sp&&sp.rim>0?'Rim':'Base'}
+function vIso(it){return it.v==='iso'}
+function vLevelName(it){var sp=vSpec(it);return sp&&(sp.lname||(sp.rim>0?'Rim':'Base'))}
 function vSetLevel(it,mm){var sp=vSpec(it),s=it.s||1,zh=sp.rim>0?mm-sp.rim*s:mm;it.y=rnd3(S.floorY-zh*K-sp.h/2*K*s)}
 function ensureFloor(){
   if(S.floorY!=null)return;
@@ -2446,19 +2708,23 @@ function ensureFloor(){
   S.floorY=rnd3(base)}
 function placeView(k){
   var vs=VW[k];if(!vs)return null;var pv=prefs.pview||'auto';
+  if(isoOn()&&vs.iso&&pv==='auto')return 'iso';
   if(pv==='top')return null;
+  if(pv==='iso')return vs.iso?'iso':null;
   if(pv==='front'||pv==='side')return vs[pv]?pv:(vs.front?'front':null);
-  var m=prefs.pv&&prefs.pv[k];if(m)return m==='top'?null:(vs[m]?m:null);
+  var m=prefs.pv&&prefs.pv[k];if(m&&(m!=='iso'||isoOn()))return m==='top'?null:(vs[m]?m:null);
   return elevOn()?(vs.front?'front':null):null}
-function viewName(v){return v==='front'?'Front':v==='side'?'Side':'Top'}
-function nextView(it){var order=['top','front','side'],cur=it.v||'top',i=order.indexOf(cur),vs=VW[it.k]||{};
-  for(var n=1;n<=3;n++){var v=order[(i+n)%3];if(v==='top'||vs[v])return v}return 'top'}
+function viewName(v){return v==='front'?'Front':v==='side'?'Side':v==='iso'?'Iso':'Top'}
+function nextView(it){var order=['top','front','side','iso'],cur=it.v||'top',i=order.indexOf(cur),vs=VW[it.k]||{};
+  for(var n=1;n<=4;n++){var v=order[(i+n)%4];if(v==='top'||vs[v])return v}return 'top'}
 function setViewOf(it,v){
-  var old=it.v,zh0=old&&S.floorY!=null?vZh(it):null;
+  var old=it.v,zh0=old&&S.floorY!=null?vZh(it):null,lv0=old&&S.floorY!=null?vLevel(it):null;
   if(!v||v==='top')delete it.v;else{if(!VW[it.k]||!VW[it.k][v])return false;it.v=v}
+  if(it.v==='iso'){if(old!=='iso')it.io=0}else delete it.io;
+  if(it.v==='iso'||old==='iso'){if(it.v!=='iso')it.r=0;(prefs.pv||(prefs.pv={}))[it.k]=it.v||'top';savePrefs();return true}
   (prefs.pv||(prefs.pv={}))[it.k]=it.v||'top';savePrefs();
   if(it.v&&elevOn()){ensureFloor();var sp=vSpec(it),s=it.s||1;
-    if(zh0!=null)it.y=rnd3(S.floorY-zh0*K-sp.h/2*K*s);else it.y=rnd3(S.floorY-sp.z0*K-sp.h/2*K*s)}
+    if(lv0!=null&&sp.lname==='Centre')vSetLevel(it,lv0);else if(zh0!=null)it.y=rnd3(S.floorY-zh0*K-sp.h/2*K*s);else it.y=rnd3(S.floorY-sp.z0*K-sp.h/2*K*s)}
   return true}
 function elevSnap(it){
   var lv=vLevel(it);if(lv==null)return;
@@ -2479,10 +2745,117 @@ function drawFloor(c){
   for(var s=Math.floor(x0/sp)*sp;s<x1+bh&&s<x0+8000*sp;s+=sp){c.moveTo(s,y);c.lineTo(s-bh,y+bh)}c.stroke();c.restore();
   c.strokeStyle='#4a4436';c.lineWidth=LWS()*1.15/k;c.lineCap='butt';c.beginPath();c.moveTo(x0,y);c.lineTo(x1,y);c.stroke();c.restore();
   var lx=VR?(-V.tx/V.z+46/k):x0+50/k;qLabel({txt:'FLOOR ±0',c:[[lx,y+bh*0.55]],rot:0,size:Math.max(10,11.5/k),col:'#5a5140',pr:0});
-  var n=0;S.items.forEach(function(i){if(i.t!=='stamp'||!i.v||hidden(i)||n>60)return;var sp2=vSpec(i);if(!sp2||Math.abs(Math.sin(i.r||0))>0.01&&Math.abs(Math.cos(i.r||0))<0.99)return;
-    if(!inView(i))return;n++;var lv=vLevel(i);if(lv==null)return;var s2=i.s||1,hw=sp2.w/2*K*s2,x=i.x+hw+14/k,top=y-lv*K,al=lv*K;if(al<6/k)return;
+  var n=0;S.items.forEach(function(i){if(i.t!=='stamp'||!i.v||i.v==='iso'||hidden(i)||n>60)return;var sp2=vSpec(i);if(!sp2||Math.abs(Math.sin(i.r||0))>0.01&&Math.abs(Math.cos(i.r||0))<0.99)return;
+    if(!inView(i))return;n++;var lv=vLevel(i);if(lv==null)return;var s2=i.s||1,hw=sp2.w/2*K*s2,x=i.x+hw+14/k,top=y-lv*K,al=lv*K;if(Math.abs(al)<6/k)return;
     c.save();c.strokeStyle='rgba(20,90,170,.85)';c.fillStyle='rgba(20,90,170,.85)';c.lineWidth=1.3/k;c.beginPath();c.moveTo(x,y);c.lineTo(x,top);c.moveTo(x-5/k,y);c.lineTo(x+5/k,y);c.moveTo(x-5/k,top);c.lineTo(x+5/k,top);c.stroke();c.restore();
-    var txt=(sp2.rim>0?'Rim ':'Base ')+Math.round(lv);qLabel({txt:txt,c:[[x+9/k,(y+top)/2],[x+9/k,top+22/k]],rot:-PI/2,size:Math.max(9.5,11/k),col:'#0f4c8a',pr:2})})}
+    var txt=lv<0?'Depth '+Math.round(-lv)+' below floor':vLevelName(i)+' '+Math.round(lv);qLabel({txt:txt,c:[[x+9/k,(y+top)/2],[x+9/k,top+22/k]],rot:-PI/2,size:Math.max(9.5,11/k),col:'#0f4c8a',pr:2})})}
+
+/* =====================================================================
+   v3.12  ISOMETRIC MODE: axis snapping, iso grid, part turning, iso templates
+   ===================================================================== */
+var ISOAX=[-PI/2,PI/2,-PI/6,PI/6,-5*PI/6,5*PI/6];
+function LP(){return S.mode==='iso'?K:LS}
+function isoSnapDir(ang){var best=null,bd=14*PI/180;ISOAX.forEach(function(a){var d=Math.abs(Math.atan2(Math.sin(ang-a),Math.cos(ang-a)));if(d<bd){bd=d;best=a}});return best}
+function drawIsoGrid(c,x0,y0,x1,y1){
+  var steps=[50,100,250,500,1000,2500],st=steps[steps.length-1],i;
+  for(i=0;i<steps.length;i++){if(steps[i]*K*DZ>=14){st=steps[i];break}}
+  var s=st*K,mj=5,dxv=s*C30,tn=S30/C30;c.save();
+  var mx0=Math.floor(x0/dxv),mx1=Math.ceil(x1/dxv),W=x1-x0,H=y1-y0;
+  var ny0=Math.floor((y0-tn*Math.max(Math.abs(x0),Math.abs(x1)))/s)-2,ny1=Math.ceil((y1+tn*Math.max(Math.abs(x0),Math.abs(x1)))/s)+2;
+  if((mx1-mx0)>400||(ny1-ny0)>800){c.restore();return}
+  for(var pass=0;pass<2;pass++){
+    c.beginPath();c.strokeStyle=pass?'rgba(60,110,170,.32)':'rgba(60,110,170,.13)';c.lineWidth=(pass?1.3:1)/DZ;
+    for(var m=mx0;m<=mx1;m++){if((((m%mj)+mj)%mj===0)!==!!pass)continue;c.moveTo(m*dxv,y0);c.lineTo(m*dxv,y1)}
+    for(var n=ny0;n<=ny1;n++){if((((n%mj)+mj)%mj===0)!==!!pass)continue;var oy=n*s;c.moveTo(x0,oy+tn*x0);c.lineTo(x1,oy+tn*x1);c.moveTo(x0,oy-tn*x0);c.lineTo(x1,oy-tn*x1)}
+    c.stroke()}
+  c.fillStyle='rgba(30,70,125,.85)';c.font='700 '+(11.5/DZ)+'px '+FONT;c.textAlign='left';c.fillText('iso grid '+(st>=1000?st/1000+' m':st+' mm')+' · 30° axes',x0+6/DZ,y0+17/DZ);c.restore()}
+/* ---- turning parts ---- */
+function isoStatesList(it){var n=isoStates(it),o=[];for(var k=0;k<n;k++)o.push(k);return o}
+function isoPivot(it){var ps=portsW(it);for(var i=0;i<ps.length;i++){if(portInUse(ps[i],it))return i}return 0}
+function isoSetIo(it,io,pi){var P=portsW(it)[pi];it.io=io;it.r=0;delete it.f;var q=portsW(it)[pi];if(P&&q){it.x+=P.x-q.x;it.y+=P.y-q.y}}
+function isoTurn(it,dir){
+  var d=stampDef(it.k);if(!d)return;
+  if(!d.fit){var n=4;it.io=(((it.io|0)+dir)%n+n)%n;return}
+  var pi=isoPivot(it),g0=geoOf(it),a0=g0.ports[pi]?g0.ports[pi].a:0,cands=[],cur=it.io|0,keep=it.io|0;
+  for(var o=0;o<24;o++){it.io=o;var g=geoOf(it),p=g.ports[pi];if(p&&Math.abs(Math.atan2(Math.sin(p.a-a0),Math.cos(p.a-a0)))<1e-3)cands.push(o)}
+  it.io=keep;if(cands.length<2)return;
+  var i=cands.indexOf(cur);if(i<0)i=0;isoSetIo(it,cands[((i+dir)%cands.length+cands.length)%cands.length],pi)}
+/* ---- exact placement for templates: match listed port directions ---- */
+function isoPlace(k,P,dirs,mm,mat,temp,pi0){
+  var d=stampDef(k),it={t:'stamp',k:k,v:'iso',io:0,x:0,y:0,s:1,r:0,mm:mm,mat:mat,col:INK};if(temp)it.temp=temp;
+  var n=isoStates(it),best=null;pi0=pi0||0;
+  for(var o=0;o<n;o++){it.io=o;var g=geoOf(it),err=0;dirs.forEach(function(a,i){if(a==null||!g.ports[i])return;err+=Math.abs(Math.atan2(Math.sin(g.ports[i].a-a),Math.cos(g.ports[i].a-a)))});if(!best||err<best.e-1e-6)best={o:o,e:err}}
+  it.io=best.o;var q=portsW(it)[pi0];it.x=P.x-q.x;it.y=P.y-q.y;return it}
+var ISOD={a:-PI/6,A:5*PI/6,b:PI/6,B:-5*PI/6,u:-PI/2,d:PI/2};
+function isoVec(l){var a=ISOD[l];return [Math.cos(a),Math.sin(a)]}
+function isoBack(a){return a+PI}
+/* chain: steps like ['u',300,'a',600,{k:'ballvalve'},'d',200]; elbows are inserted at direction changes */
+function isoChain(out,P0,steps,mat,mm,temp,elbow){
+  var cur={x:P0.x,y:P0.y},dir=null,pend=null;
+  steps.forEach(function(s){
+    if(typeof s==='string'){
+      if(dir!=null&&s!==dir&&elbow!==false){var e=isoPlace('bend90',cur,[isoBack(ISOD[dir]),ISOD[s]],mm,mat,temp,0);out.push(e);var ps=portsW(e);cur={x:ps[1].x,y:ps[1].y}}
+      dir=s}
+    else if(typeof s==='number'){var v=isoVec(dir),b={x:cur.x+v[0]*s*K,y:cur.y+v[1]*s*K};var pp={t:'pipe',a:{x:cur.x,y:cur.y},b:b,col:INK,mat:mat,mm:mm,label:'',len:s};if(temp)pp.temp=temp;out.push(pp);cur=b}
+    else{var f=isoPlace(s.k,cur,[isoBack(ISOD[dir]),ISOD[dir]],s.mm||mm,mat,temp,0);out.push(f);var ps2=portsW(f);var e2=ps2[ps2.length>1?1:0];cur={x:e2.x,y:e2.y}}});
+  return cur}
+function isoFix(k,x,y,io,o){var it={t:'stamp',k:k,v:'iso',io:io||0,x:x*K,y:y*K,s:1,r:0,mm:50,mat:'pvc',col:INK};if(o)for(var q in o)it[q]=o[q];return it}
+function isoTxt(t,x,y,col,size){return {t:'text',x:x*K,y:y*K,text:t,size:size||13,col:col||'#14202e'}}
+function tplIsoBasin(){
+  var o=[],b=isoFix('basin',0,0,0);o.push(b);var P=portsW(b)[0];
+  var tr=isoPlace('ptrap',P,[-PI/2,null],40,'pvc',null,0);o.push(tr);var e=portsW(tr)[1];
+  var end=isoChain(o,{x:e.x,y:e.y},['b',450,'d',300],'pvc',40,null);
+  o.push(isoTxt('Basin – 40 mm waste, P-trap',-500,-820),isoTxt('40 mm waste to stack (fall 1:40)',700,end.y/K+150,'#14202e'));
+  return o}
+function tplIsoWC(){
+  var o=[],w=isoFix('toilet',0,0,0);o.push(w);var P=portsW(w)[0];
+  var e0={x:P.x,y:P.y};var end=isoChain(o,e0,['d',150,'b',600,'d',250],'pvc',110,null);
+  o.push(isoTxt('WC – 110 mm soil pipe',-300,-700),isoTxt('110 mm soil to drain / stack',500,end.y/K+150));
+  return o}
+function tplIsoGeyser(){
+  var o=[],g=isoFix('geyser',0,0,0,{mm:22,mat:'cu'});o.push(g);var P=portsW(g);
+  var hot=P.filter(function(p){return p.a<0})[0]||P[0],cold=P.filter(function(p){return p.a>0})[0]||P[1];
+  isoChain(o,{x:hot.x,y:hot.y},['u',150,{k:'ptr'},250,'b',900,'u',300],'cu',22,'hot');
+  isoChain(o,{x:cold.x,y:cold.y},['d',120,{k:'ballvalve'},80,{k:'nrv'},80,{k:'prv'},100,'a',900,'d',200],'cu',22,'cold');
+  o.push(isoTxt('Hot out – T&P relief valve on outlet',-700,-820,'#e0202f'),isoTxt('Cold in – isolating valve, NRV, PRV',-700,900,'#1565e6'),isoTxt('GEYSER INSTALL (ISOMETRIC)',0,-1150,'#14202e',18));
+  return o}
+function tplIsoRiser(){
+  var o=[],cur={x:0,y:0};
+  var pts=[];
+  isoChain(o,{x:0,y:0},['u',900,{k:'tee'},700,{k:'ballvalve'},700,{k:'tee'},700,{k:'ballvalve'},700],'cu',28,'cold');
+  var tees=o.filter(function(i){return i.t==='stamp'&&i.k==='tee'});
+  tees.forEach(function(t,i){var p=portsW(t)[2];if(!p)return;isoChain(o,{x:p.x,y:p.y},['b',500,{k:'stopcock'},100],'cu',15,'cold',false)});
+  o.push(isoTxt('RISER – 28 mm cold main, branches to each floor',400,-2400,'#14202e',16));
+  return o}
+
+function snapAngleIso(a,p,guideOn){
+  var dx=p.x-a.x,dy=p.y-a.y,L=Math.hypot(dx,dy);if(L<1)return p;
+  var ang=Math.atan2(dy,dx),best=null,bd=1e9;ISOAX.forEach(function(x){var d=Math.abs(Math.atan2(Math.sin(ang-x),Math.cos(ang-x)));if(d<bd){bd=d;best=x}});
+  var ux=Math.cos(best),uy=Math.sin(best),Lp=Math.max(0,dx*ux+dy*uy);
+  var steps=[10,25,50,100,250,500,1000],st=1000,i,SC=snapScale;for(i=0;i<steps.length;i++){if(steps[i]*SC*V.z>=7){st=steps[i];break}}
+  var Lm=Lp/SC,Lr=Math.max(st,Math.round(Lm/st)*st)*SC;
+  if(guideOn)guide={line:[a.x-ux*30/V.z,a.y-uy*30/V.z,a.x+ux*(Lr+30/V.z),a.y+uy*(Lr+30/V.z)]};
+  return {x:a.x+ux*Lr,y:a.y+uy*Lr}}
+
+function setMode(m){
+  m=normMode(m);if(S.mode===m)return;S.mode=m;syncMode();if(m==='elev')ensureFloor();
+  if(m==='iso'&&prefs.pview&&prefs.pview!=='auto'&&prefs.pview!=='iso'){}
+  if(tool==='wall'&&m==='iso')setTool('pipe');
+  buildTools();buildOpts();save();render();
+  toast(m==='iso'?'Isometric mode – pipes snap to the 30° axes and vertical. Type lengths as usual.':m==='elev'?'Elevation mode – parts are placed front-on, heights from the floor line':'Plan mode',3200)}
+function modeSheet(){
+  sheet('Drawing mode',[
+    {ic:'view',label:'Plan',sub:'Top-down layout (default)',on:S.mode==='plan',fn:function(){setMode('plan')}},
+    {ic:'height',label:'Elevation',sub:'Front / side views, floor line and heights',on:S.mode==='elev',fn:function(){setMode('elev')}},
+    {ic:'view',label:'Isometric',sub:'3-D pipe runs on 30° axes – risers, geyser installs, basin / WC runs',on:S.mode==='iso',fn:function(){setMode('iso')}}
+  ],{cols:1,note:'You can mix parts drawn in different views – each keeps its own view. Use the View button on a selected part to flip it.'})}
+
+var ISOTPL=[
+ ['iso_basin','Isometric: basin waste run','Basin, P-trap, 40 mm waste to stack',tplIsoBasin,'iso'],
+ ['iso_wc','Isometric: WC run','WC with 110 mm soil pipe run',tplIsoWC,'iso'],
+ ['iso_geyser','Isometric: geyser install','Geyser, T&P valve, isolator, NRV, PRV, hot & cold runs',tplIsoGeyser,'iso'],
+ ['iso_riser','Isometric: riser with branches','28 mm riser, tees, isolating valves, branch stopcocks',tplIsoRiser,'iso']
+];
 
 /* =====================================================================
    v3.6 SMART FEATURES — materials list, saved jobs, job files,
@@ -2533,8 +2906,8 @@ function bomData(){
   S.items.forEach(function(it){
     if(it.t==='pipe'&&isRealPipe(it)){var k=it.mat+'|'+it.mm,e=pipes[k]||(pipes[k]={mat:it.mat,mm:it.mm,len:0,n:0});e.len+=pipeMM(it);e.n++}
     else if(it.t==='stamp'){var d=stampDef(it.k);if(!d||d.cat==='mark'||d.cat==='arch'||d.cat==='furn')return;
-      if(d.fit){var kk=it.k+'|'+it.mat+'|'+it.mm+'|'+(it.joint||''),f=fits[kk]||(fits[kk]={name:d.n,mat:it.mat,mm:it.mm,joint:it.joint,n:0,cat:d.cat});f.n++}
-      else{var o=oth[it.k]||(oth[it.k]={name:d.n,cat:d.cat,n:0});o.n++}}
+      if(d.fit){var kk=it.k+'|'+it.mat+'|'+it.mm+'|'+(it.joint||''),f=fits[kk]||(fits[kk]={k:it.k,name:d.n,mat:it.mat,mm:it.mm,joint:it.joint,n:0,cat:d.cat});f.n++}
+      else{var o=oth[it.k]||(oth[it.k]={k:it.k,name:d.n,cat:d.cat,n:0});o.n++}}
   });
   var P=Object.keys(pipes).map(function(k){return pipes[k]}).sort(function(a,b){return (MATORDER.indexOf(a.mat)-MATORDER.indexOf(b.mat))||b.mm-a.mm});
   var F=Object.keys(fits).map(function(k){return fits[k]}).sort(function(a,b){return (a.cat===b.cat?0:a.cat==='fit'?-1:1)||(a.name<b.name?-1:a.name>b.name?1:0)||a.mm-b.mm});
@@ -2569,7 +2942,8 @@ function bomSheet(){
   sheet('Materials list',[
     {ic:'share',label:'Share list (text)',sub:'WhatsApp / message',primary:true,fn:function(){shareText(bomText(),'Materials list'+(S.title?' – '+S.title:''),fname('txt'))}},
     {ic:'legend',label:'Show list on exported image / PDF: '+(S.bomImg?'ON':'off'),on:!!S.bomImg,keep:true,fn:function(){S.bomImg=!S.bomImg;save();bomSheet()}},
-    {ic:'pdf',label:'Share sketch + list as PDF',fn:function(){S.bomImg=true;save();doShare('pdf')}}
+    {ic:'pdf',label:'Quote…',sub:quoteSummary(),fn:quoteSheet},
+    {ic:'pdf',label:'Share job pack (PDF)',sub:'Job card, photos, sketch and this list',fn:function(){doShare('pdf',{pack:true})}}
   ],{cols:1});
   var box=$('#sheetBox'),g=box.querySelector('.sgrid'),d=document.createElement('div');d.className='bom';
   if(!rows.length)d.innerHTML='<p class="bomempty">Nothing on the sketch yet – draw pipes and add parts, then the list builds itself.</p>';
@@ -2585,18 +2959,18 @@ function setJobIndex(a){try{localStorage.setItem(JOBSKEY,JSON.stringify(a))}catc
 function saveJobSlot(o){
   if(!S.jobId)return;
   var idx=jobIndex(),e=idx.filter(function(x){return x.id===S.jobId})[0];if(!e){e={id:S.jobId};idx.push(e)}
-  e.name=(S.title||'').trim()||'Untitled job';e.updated=Date.now();e.count=S.items.filter(function(i){return i.t!=='erase'}).length;
+  e.name=(S.title||'').trim()||((S.card&&S.card.cust)?'Job – '+S.card.cust:'Untitled job');e.updated=Date.now();e.count=S.items.filter(function(i){return i.t!=='erase'}).length;
   try{localStorage.setItem(JOBPFX+S.jobId,JSON.stringify(o))}catch(err){if(!saveJobSlot.w){saveJobSlot.w=1;toast('Phone storage is nearly full – delete old jobs')}}
   try{if(S.bg)localStorage.setItem(JOBBG+S.jobId,S.bg);else localStorage.removeItem(JOBBG+S.jobId)}catch(err){}
   setJobIndex(idx);
 }
 function applyDoc(j,bg){
-  S.mode=j.mode==='elev'?'elev':'plan';S.floorY=(typeof j.floorY==='number'&&isFinite(j.floorY))?j.floorY:null;
+  S.card=cleanCard(j.card);S.quote=cleanQuote(j.quote);S.hj=cleanHJ(j.hj);S.mode=normMode(j.mode);S.floorY=(typeof j.floorY==='number'&&isFinite(j.floorY))?j.floorY:null;
   S.title=j.title||'';S.showDate=j.showDate!==false;S.legend=!!j.legend;S.grid=!!j.grid;S.bomImg=!!j.bomImg;S.hide=j.hide||{};S.jobId=j.jobId||null;
-  S.items=j.items||[];S.bgRect=j.bgRect||null;setBg(bg||null,S.bgRect);
+  syncMode();S.items=j.items||[];S.bgRect=j.bgRect||null;setBg(bg||null,S.bgRect);
   if(j.view&&j.view.z){V.z=j.view.z;V.tx=j.view.tx;V.ty=j.view.ty;S.viewSet=1}else{V.z=1.6;V.tx=cw/2;V.ty=ch/2;S.viewSet=0}
   $('#title').value=S.title;sel=null;multi=[];if(selMode)setSelMode(false);hideEndMenu();
-  hist=[snap()];hi=0;updUndo();updBar();updLayBtn();render();
+  hist=[snap()];hi=0;updUndo();updBar();updLayBtn();render();tipsSoon();
 }
 function openJob(id){
   saveNow();var raw=null;try{raw=localStorage.getItem(JOBPFX+id)}catch(e){}
@@ -2617,7 +2991,7 @@ function deleteJob(id){
   try{localStorage.removeItem(JOBPFX+id);localStorage.removeItem(JOBBG+id)}catch(e){}
   setJobIndex(jobIndex().filter(function(x){return x.id!==id}));
   if(S.jobId===id){applyDoc({items:[],title:''},null);S.jobId=null;S.showDate=true;saveNow()}
-  toast('Job deleted');jobsSheet()
+  phGc();toast('Job deleted');jobsSheet()
 }
 function ago(t){var s=(Date.now()-t)/1000;if(s<90)return 'just now';if(s<3600)return Math.round(s/60)+' min ago';if(s<86400)return Math.round(s/3600)+' h ago';return new Date(t).toLocaleDateString('en-ZA',{day:'numeric',month:'short'})}
 function jobsSheet(){
@@ -2646,8 +3020,12 @@ function jobFileObj(id){
   if(!doc)return null;doc=JSON.parse(JSON.stringify(doc));delete doc.jobId;
   return {app:'plumbing-sketch',format:1,version:VERSION,saved:new Date().toISOString(),doc:doc,bg:bg||undefined};
 }
+async function jobFileObjA(id){
+  var o=jobFileObj(id);if(!o)return null;var c=o.doc.card;
+  if(c&&c.photos&&c.photos.length){o.photos={};for(var i=0;i<c.photos.length;i++){var p=await phGet(c.photos[i].id);if(p)o.photos[c.photos[i].id]=p}}
+  return o}
 async function exportJob(id){
-  var o=jobFileObj(id);if(!o){toast('Nothing to export');return}
+  var o=await jobFileObjA(id);if(!o){toast('Nothing to export');return}
   var name=(((o.doc.title||'').trim())||'plumbing-job').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'plumbing-job';
   var d=new Date(),p=function(n){return (n<10?'0':'')+n};name+='-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'.plumbing.json';
   var blob=new Blob([JSON.stringify(o)],{type:'application/json'}),file=new File([blob],name,{type:'application/json'});
@@ -2660,7 +3038,7 @@ function cleanItems(arr){
   (Array.isArray(arr)?arr:[]).slice(0,6000).forEach(function(i){
     var ok=i&&typeof i==='object';
     if(ok){
-      if(i.t==='stamp'){ok=!!stampDef(i.k)&&n(i.x)&&n(i.y);if(ok&&i.mat&&!MATS[i.mat])i.mat='pvc';if(ok&&i.v&&!(VW[i.k]&&VW[i.k][i.v]))delete i.v}
+      if(i.t==='stamp'){ok=!!stampDef(i.k)&&n(i.x)&&n(i.y);if(ok&&i.mat&&!MATS[i.mat])i.mat='pvc';if(ok&&i.v&&!(VW[i.k]&&VW[i.k][i.v]))delete i.v;if(ok&&(!i.v||i.v!=='iso'||!(i.io>=0&&i.io<24&&Math.floor(i.io)===i.io)))delete i.io}
       else if(i.t==='pipe'){ok=i.a&&i.b&&n(i.a.x)&&n(i.a.y)&&n(i.b.x)&&n(i.b.y);if(ok&&i.mat!=='wall'&&i.mat!=='dim'&&!MATS[i.mat])i.mat='pvc'}
       else if(i.t==='text'){ok=typeof i.text==='string'&&n(i.x)&&n(i.y)&&n(i.size);if(ok)i.text=i.text.slice(0,300)}
       else if(i.t==='pen'||i.t==='erase'){ok=Array.isArray(i.pts)&&i.pts.length>=2&&n(i.w)&&i.pts.every(n)}
@@ -2673,20 +3051,26 @@ function importJobPick(){
   inp.onchange=function(){var f=inp.files&&inp.files[0];inp.remove();if(f)importJobFile(f)};inp.click();
 }
 function importJobFile(file){
-  if(file.size>12*1024*1024){toast('That file is too big to be a job');return}
+  if(file.size>60*1024*1024){toast('That file is too big to be a job');return}
   var fr=new FileReader();
   fr.onerror=function(){toast('Could not read that file')};
   fr.onload=function(){
     var o;try{o=JSON.parse(String(fr.result))}catch(e){toast('That is not a Plumbing Sketch job file');return}
-    if(!o||o.app!=='plumbing-sketch'||!o.doc||!Array.isArray(o.doc.items)){toast('That is not a Plumbing Sketch job file');return}
+    importJobObj(o)
+  };
+  fr.readAsText(file);
+}
+function importJobObj(o,opt){
+  opt=opt||{};
+  if(!o||o.app!=='plumbing-sketch'||!o.doc||!Array.isArray(o.doc.items)){toast('That is not a Plumbing Sketch job file');return}
     var c=cleanItems(o.doc.items),d=o.doc;if(!c.items.length&&!d.items.length){toast('That job is empty');return}
-    saveNow();var id=newJobId(),title=String(d.title||'').slice(0,80),
-      doc={v:3,mode:d.mode==='elev'?'elev':'plan',floorY:(typeof d.floorY==='number'&&isFinite(d.floorY))?d.floorY:null,title:title,showDate:d.showDate!==false,legend:!!d.legend,grid:!!d.grid,bomImg:!!d.bomImg,hide:(d.hide&&typeof d.hide==='object')?d.hide:{},jobId:id,items:c.items,bgRect:d.bgRect||null,view:d.view||null};
+    saveNow();var id=newJobId(),title=String(d.title||'').slice(0,80),pcard=cleanCard(d.card);
+    if(pcard&&o.photos&&typeof o.photos==='object'){pcard.photos=pcard.photos.filter(function(p){var q=o.photos[p.id];if(q&&typeof q.full==='string'&&q.full.indexOf('data:image/')===0&&typeof q.thumb==='string'&&q.thumb.indexOf('data:image/')===0){phPut(p.id,{full:q.full,thumb:q.thumb});return true}return false})}else if(pcard)pcard.photos=[];
+    var
+      doc={v:3,card:pcard,quote:cleanQuote(d.quote),hj:cleanHJ(d.hj),mode:normMode(d.mode),floorY:(typeof d.floorY==='number'&&isFinite(d.floorY))?d.floorY:null,title:title,showDate:d.showDate!==false,legend:!!d.legend,grid:!!d.grid,bomImg:!!d.bomImg,hide:(d.hide&&typeof d.hide==='object')?d.hide:{},jobId:id,items:c.items,bgRect:d.bgRect||null,view:d.view||null};
     var idx=jobIndex();idx.push({id:id,name:title.trim()||'Imported job',updated:Date.now(),count:c.items.length});
     try{localStorage.setItem(JOBPFX+id,JSON.stringify(doc));if(typeof o.bg==='string'&&o.bg.indexOf('data:image/')===0)localStorage.setItem(JOBBG+id,o.bg)}catch(e){toast('Not enough storage to import');return}
     setJobIndex(idx);openJob(id);if(c.dropped)toast('Imported – '+c.dropped+' item(s) from a newer version were skipped',4200)
-  };
-  fr.readAsText(file);
 }
 
 /* ---------- templates ---------- */
@@ -2742,6 +3126,7 @@ var TEMPLATES=[
 ];
 function placeTemplate(t){
   var wasEmpty=!S.items.some(function(i){return i.t!=='erase'});
+  if(t[4]==='iso'&&S.mode!=='iso'){S.mode='iso';syncMode()}else if(t[4]!=='iso'&&S.mode!=='plan'&&!t[4]){S.mode='plan';syncMode()}
   var items=t[3]();if(!items.length)return;
   var tw=items.filter(isWall);items.forEach(function(s2){if(!isHost(s2))return;tw.forEach(function(w){var pr=projSeg(s2,w.a,w.b),g=wallGeo(w);if(pr.d<g.h+3){s2.wt=(w.mm||110)/(s2.s||1)}})});
   var x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;items.forEach(function(i){var b=bounds(i);if(!b)return;x0=Math.min(x0,b.x);y0=Math.min(y0,b.y);x1=Math.max(x1,b.x+b.w);y1=Math.max(y1,b.y+b.h)});
@@ -2752,8 +3137,697 @@ function placeTemplate(t){
   toast(t[1]+' template added – drag it, or tap Select to edit',3200);
 }
 function templatesSheet(){
-  sheet('Templates',TEMPLATES.map(function(t){return {ic:'tmpl',label:t[1],sub:t[2],fn:function(){placeTemplate(t)}}}),{cols:1,note:'Templates are a starting point – move, resize or delete anything.'});
+  var items=[],jobs=TEMPLATES.filter(function(t){return t[0]!=='bathroom'&&t[0]!=='kitchen'&&t[0]!=='laundry'&&t[0]!=='geyser'&&t[0]!=='septic'}),rooms=TEMPLATES.filter(function(t){return jobs.indexOf(t)<0});
+  function add(t){items.push({ic:'tmpl',label:t[1],sub:t[2],fn:function(){placeTemplate(t)}})}
+  items.push({head:'Common jobs'});jobs.forEach(add);
+  items.push({head:'Rooms & layouts'});rooms.forEach(add);
+  items.push({head:'Isometric'});ISOTPL.forEach(add);
+  sheet('Templates',items,{cols:1,note:'Templates are a starting point with typical sizes – move, resize, relabel or delete anything. Check each job on site.'});
 }
+
+/* =====================================================================
+   v3.13  JOB CARD: customer, address, phone, notes, date, checklist, site photos
+   Photos live in IndexedDB (compressed JPEG + thumbnail); the card text lives in the job.
+   Everything goes into the job file and into the multi-page PDF job pack.
+   ===================================================================== */
+var STD_CHECKS=['Isolate water & drain down','Check existing pipework','Fit new fixture / pipework','Pressure test','Check for leaks','Test hot & cold flow','Fit drip tray / safety drain','Customer shown how it works','Site cleaned up','Customer signed off','Compliance certificate (COC) issued'];
+function emptyCard(){return {cust:'',phone:'',addr:'',ref:'',date:'',notes:'',checks:[],photos:[]}}
+function cardHas(c){return !!(c&&(c.cust||c.phone||c.addr||c.ref||c.notes||(c.checks&&c.checks.length)||(c.photos&&c.photos.length)))}
+function cleanCard(c){
+  if(!c||typeof c!=='object')return null;var o=emptyCard(),s=function(v,n){return typeof v==='string'?v.slice(0,n):''};
+  o.cust=s(c.cust,120);o.phone=s(c.phone,40);o.addr=s(c.addr,300);o.ref=s(c.ref,60);o.notes=s(c.notes,4000);o.date=/^\d{4}-\d{2}-\d{2}$/.test(c.date||'')?c.date:'';
+  if(Array.isArray(c.checks))o.checks=c.checks.slice(0,60).map(function(k){return k&&typeof k==='object'&&typeof k.t==='string'?{t:k.t.slice(0,140),d:k.d?1:0}:null}).filter(Boolean);
+  if(Array.isArray(c.photos))o.photos=c.photos.slice(0,24).map(function(p){return p&&typeof p==='object'&&typeof p.id==='string'&&/^[a-z0-9]{4,24}$/i.test(p.id)?{id:p.id,c:typeof p.c==='string'?p.c.slice(0,80):''}:null}).filter(Boolean);
+  return o}
+function todayISO(){var d=new Date(),p=function(n){return (n<10?'0':'')+n};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())}
+function fmtISO(s){if(!s)return '';var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);if(!m)return s;return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'})}
+function theCard(){if(!S.card)S.card=emptyCard();return S.card}
+/* ---- photo store (IndexedDB, memory cache) ---- */
+var PHC={},PHDB=null;
+function phDb(){if(PHDB)return PHDB;PHDB=new Promise(function(res){try{var r=indexedDB.open('plumbing-sketch',1);r.onupgradeneeded=function(){r.result.createObjectStore('photos')};r.onsuccess=function(){res(r.result)};r.onerror=function(){res(null)};r.onblocked=function(){res(null)}}catch(e){res(null)}});return PHDB}
+function phGet(id){if(PHC[id])return Promise.resolve(PHC[id]);return phDb().then(function(db){if(!db)return null;return new Promise(function(res){try{var q=db.transaction('photos').objectStore('photos').get(id);q.onsuccess=function(){if(q.result)PHC[id]=q.result;res(q.result||null)};q.onerror=function(){res(null)}}catch(e){res(null)}})})}
+function phPut(id,o){PHC[id]=o;return phDb().then(function(db){if(!db)return false;return new Promise(function(res){try{var t=db.transaction('photos','readwrite');t.objectStore('photos').put(o,id);t.oncomplete=function(){res(true)};t.onerror=function(){res(false)}}catch(e){res(false)}})})}
+function phDel(id){delete PHC[id];return phDb().then(function(db){if(!db)return;return new Promise(function(res){try{var t=db.transaction('photos','readwrite');t.objectStore('photos').delete(id);t.oncomplete=function(){res()};t.onerror=function(){res()}}catch(e){res()}})})}
+function phKeys(){return phDb().then(function(db){if(!db)return Object.keys(PHC);return new Promise(function(res){try{var q=db.transaction('photos').objectStore('photos').getAllKeys();q.onsuccess=function(){res(q.result||[])};q.onerror=function(){res([])}}catch(e){res([])}})})}
+function allPhotoRefs(){var refs={};function add(c){if(c&&c.photos)c.photos.forEach(function(p){refs[p.id]=1})}
+  add(S.card);jobIndex().forEach(function(j){try{var d=JSON.parse(localStorage.getItem(JOBPFX+j.id)||'null');if(d)add(d.card)}catch(e){}});return refs}
+function phGc(){return phKeys().then(function(keys){var refs=allPhotoRefs();return Promise.all(keys.filter(function(k){return !refs[k]}).map(phDel))}).catch(function(){})}
+function newPhId(){return 'p'+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36)}
+function shrinkImg(img,max,q){var W=img.naturalWidth||img.width,H=img.naturalHeight||img.height,sc=Math.min(1,max/Math.max(W,H)),w=Math.max(1,Math.round(W*sc)),h=Math.max(1,Math.round(H*sc)),c=document.createElement('canvas');c.width=w;c.height=h;var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(img,0,0,w,h);return c.toDataURL('image/jpeg',q)}
+function addCardPhoto(file){
+  return new Promise(function(res){
+    if(!file){res(false);return}var url=URL.createObjectURL(file),im=new Image();
+    im.onload=function(){var full,thumb;try{full=shrinkImg(im,1280,0.72);thumb=shrinkImg(im,220,0.7)}catch(e){URL.revokeObjectURL(url);toast('Could not process that photo');res(false);return}
+      URL.revokeObjectURL(url);var card=theCard();if(card.photos.length>=24){toast('Up to 24 photos per job');res(false);return}
+      var id=newPhId();card.photos.push({id:id,c:''});phPut(id,{full:full,thumb:thumb}).then(function(ok){if(!ok)toast('Photo kept in memory only – storage unavailable',3600);ensureJobId();save();res(true)})};
+    im.onerror=function(){URL.revokeObjectURL(url);toast('Could not open that photo');res(false)};im.src=url})}
+function ensureJobId(){if(!S.jobId)S.jobId=newJobId()}
+/* ---- card overlay ---- */
+var cardOv=null,cardPhotoBusy=false;
+function cardSummary(){var c=S.card;if(!cardHas(c))return 'Customer, address, checklist, photos';var p=[];if(c.cust)p.push(c.cust);if(c.checks.length)p.push(c.checks.filter(function(k){return k.d}).length+'/'+c.checks.length+' done');if(c.photos.length)p.push(c.photos.length+' photo'+(c.photos.length===1?'':'s'));return p.join(' · ')||'Started'}
+function jobCardSheet(){
+  var c=theCard();if(!c.date)c.date=todayISO();
+  if(!cardOv){cardOv=document.createElement('div');cardOv.className='ov';cardOv.id='cardOv';cardOv.style.alignItems='flex-end';document.body.insertBefore(cardOv,$('#dlg'));
+    var f1=document.createElement('input');f1.type='file';f1.accept='image/*';f1.capture='environment';f1.hidden=true;f1.id='cardCam';var f2=document.createElement('input');f2.type='file';f2.accept='image/*';f2.multiple=true;f2.hidden=true;f2.id='cardGal';
+    document.body.appendChild(f1);document.body.appendChild(f2);
+    function onF(e){var fs=Array.prototype.slice.call(e.target.files||[]);e.target.value='';if(!fs.length)return;cardPhotoBusy=true;toast('Adding photo'+(fs.length>1?'s':'')+'…',1500);
+      fs.reduce(function(p,f){return p.then(function(){return addCardPhoto(f)})},Promise.resolve()).then(function(){cardPhotoBusy=false;renderCard()})}
+    f1.addEventListener('change',onF);f2.addEventListener('change',onF)}
+  cardOv.classList.add('show');renderCard()}
+function closeCard(){if(cardOv)cardOv.classList.remove('show');save();updBar&&0}
+function renderCard(){
+  var c=theCard(),o=cardOv;o.innerHTML='';var box=document.createElement('div');box.className='sbox cardbox';o.appendChild(box);
+  var t0=Date.now();o.onclick=function(e){if(e.target===o&&Date.now()-t0>450)closeCard()};
+  var h=document.createElement('h3');h.textContent='Job card';box.appendChild(h);
+  function field(lbl,key,o2){o2=o2||{};var w=document.createElement('label');w.className='cf'+(o2.half?' half':'');var s=document.createElement('span');s.textContent=lbl;w.appendChild(s);
+    var i=document.createElement(o2.area?'textarea':'input');if(!o2.area)i.type=o2.type||'text';i.value=c[key]||'';i.maxLength=o2.max||120;if(o2.area)i.rows=o2.rows||3;if(o2.ph)i.placeholder=o2.ph;if(o2.mode)i.inputMode=o2.mode;i.dataset.f=key;i.autocomplete='off';
+    i.addEventListener('input',function(){c[key]=i.value;save()});w.appendChild(i);return w}
+  var row=document.createElement('div');row.className='cfrow';box.appendChild(row);
+  row.appendChild(field('Customer name','cust',{ph:'e.g. Mrs Naidoo'}));row.appendChild(field('Phone','phone',{mode:'tel',max:40,ph:'e.g. 082 123 4567',half:1}));row.appendChild(field('Date','date',{type:'date',half:1}));
+  row.appendChild(field('Address','addr',{area:1,rows:2,max:300,ph:'Street, suburb, town'}));row.appendChild(field('Job / reference no.','ref',{max:60,ph:'optional'}));row.appendChild(field('Notes','notes',{area:1,rows:3,max:4000,ph:'What was found, what was done, materials to fetch…'}));
+  /* checklist */
+  var ch=document.createElement('div');ch.className='cfh';ch.textContent='Checklist'+(c.checks.length?' – '+c.checks.filter(function(k){return k.d}).length+' of '+c.checks.length+' done':'');box.appendChild(ch);
+  var list=document.createElement('div');list.className='cklist';box.appendChild(list);
+  c.checks.forEach(function(k,i){var r=document.createElement('div');r.className='ck'+(k.d?' done':'');
+    var b=document.createElement('button');b.type='button';b.className='cbx';b.setAttribute('aria-label','Tick');b.innerHTML=k.d?ico('check'):'';b.onclick=function(){k.d=k.d?0:1;save();buzz(8);renderCard()};
+    var t=document.createElement('input');t.type='text';t.value=k.t;t.maxLength=140;t.dataset.ck=i;t.addEventListener('input',function(){k.t=t.value;save()});
+    var d=document.createElement('button');d.type='button';d.className='cdel';d.setAttribute('aria-label','Remove item');d.textContent='✕';d.onclick=function(){c.checks.splice(i,1);save();renderCard()};
+    r.appendChild(b);r.appendChild(t);r.appendChild(d);list.appendChild(r)});
+  var cr=document.createElement('div');cr.className='cfbtns';box.appendChild(cr);
+  var ad=document.createElement('button');ad.type='button';ad.className='sbtn';ad.dataset.act='addck';ad.innerHTML=ico('plus')+'<span>Add item</span>';ad.onclick=async function(){var v=await askText({title:'New checklist item',value:'',chips:STD_CHECKS.slice(0,6),placeholder:'e.g. Test geyser thermostat',cancel:'Cancel'});if(v&&v.trim()){c.checks.push({t:v.trim().slice(0,140),d:0});save();renderCard()}};cr.appendChild(ad);
+  var st=document.createElement('button');st.type='button';st.className='sbtn';st.dataset.act='stdck';st.innerHTML=ico('list')+'<span>Add standard items<small>Isolate, pressure test, sign-off…</small></span>';
+  st.onclick=function(){var have={};c.checks.forEach(function(k){have[k.t]=1});STD_CHECKS.forEach(function(t){if(!have[t]&&c.checks.length<60)c.checks.push({t:t,d:0})});save();renderCard()};cr.appendChild(st);
+  /* photos */
+  var ph=document.createElement('div');ph.className='cfh';ph.textContent='Site photos'+(c.photos.length?' ('+c.photos.length+')':'');box.appendChild(ph);
+  var grid=document.createElement('div');grid.className='phgrid';box.appendChild(grid);
+  c.photos.forEach(function(p,i){var b=document.createElement('button');b.type='button';b.className='phb';b.dataset.ph=p.id;b.innerHTML='<i></i>'+(p.c?'<em>'+esc(p.c)+'</em>':'');
+    phGet(p.id).then(function(o){if(o&&o.thumb)b.firstChild.style.backgroundImage='url('+o.thumb+')'});b.onclick=function(){photoView(i)};grid.appendChild(b)});
+  var pr=document.createElement('div');pr.className='cfbtns';box.appendChild(pr);
+  var cam=document.createElement('button');cam.type='button';cam.className='sbtn';cam.dataset.act='cam';cam.innerHTML=ico('photo')+'<span>Take photo</span>';cam.onclick=function(){$('#cardCam').click()};pr.appendChild(cam);
+  var gal=document.createElement('button');gal.type='button';gal.className='sbtn';gal.dataset.act='gal';gal.innerHTML=ico('gallery')+'<span>From gallery</span>';gal.onclick=function(){$('#cardGal').click()};pr.appendChild(gal);
+  /* output */
+  var out=document.createElement('div');out.className='cfbtns one';box.appendChild(out);
+  var pd=document.createElement('button');pd.type='button';pd.className='sbtn primary';pd.dataset.act='pack';pd.innerHTML=ico('pdf')+'<span>Share job pack (PDF)<small>Job card + photos + sketch + materials list</small></span>';pd.onclick=function(){closeCard();doShare('pdf',{pack:true})};out.appendChild(pd);
+  var dn=document.createElement('button');dn.type='button';dn.className='sbtn';dn.dataset.act='done';dn.innerHTML=ico('check')+'<span>Done</span>';dn.onclick=closeCard;out.appendChild(dn);
+  var p=document.createElement('p');p.textContent='Saved on this phone with the job. Photos are compressed and included in the job file and the PDF.';box.appendChild(p)}
+function photoView(i){
+  var c=theCard(),p=c.photos[i];if(!p)return;
+  sheet('Photo '+(i+1)+' of '+c.photos.length,[
+    {ic:'edit',label:'Add / change caption',sub:p.c||'e.g. Before, After, Leak',keep:true,fn:async function(){var v=await askText({title:'Caption',value:p.c||'',chips:['Before','After','Leak','Existing pipework','Meter / isolator','Finished'],placeholder:'optional',cancel:'Cancel'});if(v!==null){p.c=v.trim().slice(0,80);save();renderCard();photoView(i)}}},
+    {ic:'trash',label:'Delete photo',danger:true,keep:true,fn:function(){c.photos.splice(i,1);save();phGc();renderCard();closeSheet()}},
+    {ic:'aleft',label:'Back',fn:function(){}}],{cols:1});
+  var box=$('#sheetBox'),g=box.querySelector('.sgrid'),im=document.createElement('img');im.className='phfull';im.alt='';box.insertBefore(im,g);
+  phGet(p.id).then(function(o){if(o)im.src=o.full})}
+/* ---- pages for the PDF pack ---- */
+var PGW=1240,PGH=1754;
+function newPage(land){var c=document.createElement('canvas');c.width=land?PGH:PGW;c.height=land?PGW:PGH;var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);return {c:c,x:x,w:c.width,h:c.height}}
+function pageHead(pg,kind){var x=pg.x,t=(S.title||'').trim(),d=(S.card&&S.card.date)?fmtISO(S.card.date):dateText();
+  x.fillStyle='#0b3d6e';x.fillRect(0,0,pg.w,150);x.textBaseline='alphabetic';x.textAlign='left';x.fillStyle='#9fc3ea';x.font='800 24px '+FONT;x.fillText(kind,70,62);
+  x.fillStyle='#fff';x.font='800 46px '+FONT;x.fillText(t||'Plumbing job',70,118,pg.w-140-260);x.textAlign='right';x.fillStyle='#c9dcf2';x.font='700 28px '+FONT;x.fillText(d,pg.w-70,118);x.textAlign='left'}
+function pageFoot(pg,n,tot){var x=pg.x;x.fillStyle='#8a99ab';x.font='600 20px '+FONT;x.textAlign='left';x.textBaseline='alphabetic';x.fillText('Plumbing Sketch v'+VERSION+' · guide drawing – check on site',70,pg.h-40);x.textAlign='right';if(tot>1)x.fillText('Page '+n+' of '+tot,pg.w-70,pg.h-40);x.textAlign='left'}
+function wrapLines(x,txt,maxW,maxLines){var out=[];String(txt).split(/\r?\n/).forEach(function(par){var words=par.split(/\s+/),line='';
+  words.forEach(function(w){var t=line?line+' '+w:w;if(x.measureText(t).width>maxW&&line){out.push(line);line=w}else line=t});out.push(line)});
+  if(maxLines&&out.length>maxLines){out=out.slice(0,maxLines);out[maxLines-1]=out[maxLines-1].replace(/\s*\S*$/,'')+' …'}return out}
+function cardPage(){
+  var c=S.card||emptyCard(),pg=newPage(false),x=pg.x,y=210;pageHead(pg,'JOB CARD');
+  function lbl(t,px,py){x.fillStyle='#5a7089';x.font='800 20px '+FONT;x.textAlign='left';x.fillText(t.toUpperCase(),px,py)}
+  function val(t,px,py,w){x.fillStyle='#12263a';x.font='700 32px '+FONT;x.fillText(t||'—',px,py,w)}
+  lbl('Customer',70,y);val(c.cust,70,y+40,600);lbl('Phone',720,y);val(c.phone,720,y+40,450);y+=96;
+  lbl('Date',70,y);val(fmtISO(c.date),70,y+40,600);lbl('Job / reference',720,y);val(c.ref,720,y+40,450);y+=96;
+  lbl('Address',70,y);x.font='700 32px '+FONT;var al=wrapLines(x,c.addr||'—',1100,3);x.fillStyle='#12263a';al.forEach(function(l,i){x.fillText(l,70,y+40+i*42)});y+=40+al.length*42+34;
+  x.fillStyle='#d3dbe4';x.fillRect(70,y-16,pg.w-140,2);
+  if(c.notes){lbl('Notes',70,y+14);x.font='500 28px '+FONT;var nl=wrapLines(x,c.notes,pg.w-140,16);x.fillStyle='#12263a';nl.forEach(function(l,i){x.fillText(l,70,y+58+i*38)});y+=58+nl.length*38+30;x.fillStyle='#d3dbe4';x.fillRect(70,y-16,pg.w-140,2)}
+  if(c.checks.length){var dn=c.checks.filter(function(k){return k.d}).length;lbl('Checklist – '+dn+' of '+c.checks.length+' done',70,y+14);y+=48;
+    var cols=c.checks.length>12?2:1,cw=(pg.w-140)/cols,per=Math.ceil(c.checks.length/cols);x.font='600 27px '+FONT;
+    c.checks.forEach(function(k,i){var col=Math.floor(i/per),row=i%per,px=70+col*cw,py=y+row*46;
+      x.strokeStyle=k.d?'#1a9a3c':'#5a7089';x.lineWidth=3;x.fillStyle=k.d?'#e3f6ea':'#fff';x.fillRect(px,py-24,30,30);x.strokeRect(px,py-24,30,30);
+      if(k.d){x.beginPath();x.moveTo(px+6,py-8);x.lineTo(px+13,py);x.lineTo(px+25,py-19);x.strokeStyle='#1a9a3c';x.lineWidth=4.5;x.lineCap='round';x.lineJoin='round';x.stroke()}
+      x.fillStyle=k.d?'#4a6a58':'#12263a';x.fillText(k.t,px+46,py,cw-64)});
+    y+=per*46+24}
+  if(c.photos.length){x.fillStyle='#5a7089';x.font='700 24px '+FONT;x.fillText(c.photos.length+' site photo'+(c.photos.length===1?'':'s')+' attached on the following page'+(c.photos.length>6?'s':''),70,Math.max(y+20,pg.h-110))}
+  pageFoot(pg,1,1);return pg}
+function loadImg(src){return new Promise(function(res){var im=new Image();im.onload=function(){res(im)};im.onerror=function(){res(null)};im.src=src})}
+async function photoPages(){
+  var c=S.card;if(!c||!c.photos.length)return [];var out=[],per=6,n=Math.ceil(c.photos.length/per);
+  for(var pgi=0;pgi<n;pgi++){var pg=newPage(false),x=pg.x;pageHead(pg,'SITE PHOTOS'+(n>1?' ('+(pgi+1)+'/'+n+')':''));
+    var cw=(pg.w-140-30)/2,chh=470,y0=190;
+    for(var k=0;k<per;k++){var p=c.photos[pgi*per+k];if(!p)break;var px=70+(k%2)*(cw+30),py=y0+Math.floor(k/2)*(chh+64);
+      x.fillStyle='#f3f6f9';x.fillRect(px,py,cw,chh);
+      var o=await phGet(p.id),im=o?await loadImg(o.full):null;
+      if(im){var sc=Math.min(cw/im.width,chh/im.height),w=im.width*sc,h=im.height*sc;x.drawImage(im,px+(cw-w)/2,py+(chh-h)/2,w,h)}
+      else{x.fillStyle='#8a99ab';x.font='600 22px '+FONT;x.textAlign='center';x.fillText('photo not on this phone',px+cw/2,py+chh/2);x.textAlign='left'}
+      x.strokeStyle='#d3dbe4';x.lineWidth=2;x.strokeRect(px,py,cw,chh);
+      x.fillStyle='#12263a';x.font='700 24px '+FONT;x.textAlign='left';x.fillText((pgi*per+k+1)+(p.c?' – '+p.c:''),px,py+chh+34,cw)}
+    pageFoot(pg,1,1);out.push(pg)}
+  return out}
+function bomPages(){
+  var rows=bomRows();if(!rows.length)return [];var out=[],per=44,i=0;
+  while(i<rows.length){var pg=newPage(false),x=pg.x;pageHead(pg,'MATERIALS LIST'+(out.length?' (cont.)':''));var y=215,n=0;
+    while(i<rows.length&&n<per){var r=rows[i];
+      if(r.h){if(n>per-4)break;x.fillStyle='#1259e8';x.font='800 22px '+FONT;x.textAlign='left';x.fillText(r.h.toUpperCase(),70,y+6);y+=24;n+=1.4}
+      else{x.fillStyle='#12263a';x.font='600 28px '+FONT;x.textAlign='left';x.fillText(r.a,70,y+6,pg.w-140-260);x.font='800 28px '+FONT;x.textAlign='right';x.fillText(r.b,pg.w-70,y+6);x.textAlign='left';
+        if(r.c){x.fillStyle='#5a7089';x.font='500 20px '+FONT;x.fillText(r.c,70,y+32);y+=8}
+        x.fillStyle='#e3e9f0';x.fillRect(70,y+(r.c?40:18),pg.w-140,1.5);y+=(r.c?58:44);n++}
+      i++}
+    if(i>=rows.length){x.fillStyle='#5a7089';x.font='500 22px '+FONT;x.fillText('Pipe lengths use the typed / drawn lengths. Add about 10 % for cuts and waste.',70,Math.min(y+50,pg.h-90))}
+    pageFoot(pg,1,1);out.push(pg)}
+  return out}
+
+/* =====================================================================
+   v3.14  QUOTE SHEET: built from the materials list. Prices come from a local,
+   editable price book (typed or pasted / CSV) – nothing is fetched online.
+   ===================================================================== */
+var PBKEY='plumbing-sketch-prices';
+function num(v){if(typeof v==='number')return isFinite(v)?v:0;var s=String(v==null?'':v).replace(/[Rr]\s*/g,'').replace(/\s|\u00a0/g,'');if(!s)return 0;
+  if(/,/.test(s)&&/\./.test(s))s=s.replace(/,/g,'');else if(/,/.test(s)){s=/,\d{1,2}$/.test(s)?s.replace(/,/g,'.'):s.replace(/,/g,'')}
+  var n=parseFloat(s.replace(/[^0-9.\-]/g,''));return isFinite(n)?n:0}
+function r2(n){return Math.round(n*100+1e-9)/100}
+function fmtR(n){n=r2(n||0);var neg=n<0;n=Math.abs(n);var p=n.toFixed(2).split('.');return (neg?'-':'')+'R'+p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0')+'.'+p[1]}
+function emptyQuote(){return {mk:30,vat:15,vatOn:1,itemised:1,qty:{},off:{},extra:[],labour:[],note:'Quote valid for 30 days.'}}
+function cleanQuote(q){
+  if(!q||typeof q!=='object')return null;var o=emptyQuote(),n=function(v,lo,hi,d){v=+v;return isFinite(v)?Math.min(hi,Math.max(lo,v)):d};
+  o.mk=n(q.mk,0,1000,30);o.vat=n(q.vat,0,100,15);o.vatOn=q.vatOn===0||q.vatOn===false?0:1;o.itemised=q.itemised===0||q.itemised===false?0:1;
+  o.note=typeof q.note==='string'?q.note.slice(0,600):o.note;
+  var okk=/^[A-Za-z0-9_|.\- ]{1,90}$/;
+  if(q.qty&&typeof q.qty==='object')Object.keys(q.qty).slice(0,300).forEach(function(k){if(okk.test(k)&&isFinite(+q.qty[k])&&+q.qty[k]>=0)o.qty[k]=+q.qty[k]});
+  if(q.off&&typeof q.off==='object')Object.keys(q.off).slice(0,300).forEach(function(k){if(okk.test(k)&&q.off[k])o.off[k]=1});
+  ['extra','labour'].forEach(function(f){if(Array.isArray(q[f]))o[f]=q[f].slice(0,40).map(function(e){return e&&typeof e==='object'?{t:typeof e.t==='string'?e.t.slice(0,100):'',q:n(e.q,0,1e6,1),p:n(e.p,0,1e8,0)}:null}).filter(Boolean)});
+  return o}
+function theQuote(){if(!S.quote)S.quote=emptyQuote();return S.quote}
+function quoteHas(q){return !!(q&&(q.extra.length||q.labour.length||Object.keys(q.qty).length||Object.keys(q.off).length))}
+/* ---- price book ---- */
+var PB=null;
+function pbLoad(){if(PB)return PB;PB={items:{}};try{var o=JSON.parse(localStorage.getItem(PBKEY)||'null');if(o&&o.items&&typeof o.items==='object')Object.keys(o.items).slice(0,3000).forEach(function(k){var e=o.items[k];if(e&&typeof e==='object'&&isFinite(+e.p)&&typeof e.n==='string')PB.items[k]={n:e.n.slice(0,100),p:Math.max(0,+e.p),u:typeof e.u==='string'?e.u.slice(0,12):''}})}catch(e){}return PB}
+function pbSave(){try{localStorage.setItem(PBKEY,JSON.stringify({v:1,items:pbLoad().items}))}catch(e){toast('Could not save the price book – storage is full')}}
+var SYN={elbow:'bend',elbows:'bend',bends:'bend',tees:'tee',junction:'tee',tjunction:'tee',reducer:'reducer'};
+function toks(s){return String(s).toLowerCase().replace(/(\d)\s*mm\b/g,'$1mm').replace(/t[\s-]+junction/g,'tee').replace(/[^a-z0-9.]+/g,' ').split(' ').filter(function(w){return w&&['per','m','each','the','a','and','x','ea','length','metre','meter','r','for','of','pvc','waste','pipe','pipes','fitting','fittings','1'].indexOf(w)<0}).map(function(w){return SYN[w]||w})}
+function nameMatch(rowName,lineName){var a=toks(rowName),b=toks(lineName);if(!a.length||!b.length)return 0;
+  var sz=b.filter(function(w){return /^\d+mm$/.test(w)});for(var i=0;i<sz.length;i++)if(a.indexOf(sz[i])<0)return 0;
+  var hit=a.filter(function(w){return b.indexOf(w)>=0}).length;if(hit<a.length)return 0;if(hit<1)return 0;return hit/b.length+hit*0.01}
+function nameKey(s){var t=String(s).toLowerCase().replace(/(\d)\s*mm\b/g,'$1mm').replace(/[^a-z0-9.]+/g,' ').split(' ').filter(function(w){return w&&['per','m','each','pipe','the','a','and','x','ea','length','metre','meter'].indexOf(w)<0});return t.sort().join(' ')}
+function pbFind(key,name){var b=pbLoad().items;if(b[key])return b[key];var best=null,bs=0;Object.keys(b).forEach(function(k){if(k.indexOf('name|')!==0)return;var s=nameMatch(b[k].n,name);if(s>bs){bs=s;best=b[k]}});return best}
+function pbSet(key,name,unit,p){pbLoad().items[key]={n:name,p:Math.max(0,p),u:unit||''};pbSave()}
+/* ---- lines ---- */
+function qLines(){
+  var d=bomData(),q=theQuote(),out=[],idx={};
+  function add(key,name,unit,defq){if(idx[key]){idx[key].defq+=defq;return}var l={key:key,name:name,unit:unit,defq:defq};idx[key]=l;out.push(l)}
+  d.pipes.forEach(function(p){var M=MATS[p.mat];add('pipe|'+p.mat+'|'+p.mm,p.mm+' mm '+(M?M.n:p.mat)+' pipe','m',Math.max(0.1,Math.ceil(p.len*1.1/100)/10))});
+  d.fits.forEach(function(f){add('fit|'+f.k+'|'+f.mat+'|'+f.mm,f.name+' – '+f.mm+' mm '+(MATS[f.mat]?MATS[f.mat].n:''),'ea',f.n)});
+  d.other.forEach(function(o){add('part|'+o.k,o.name,'ea',o.n)});
+  out.forEach(function(l){l.qty=q.qty[l.key]!=null?q.qty[l.key]:l.defq;l.off=!!q.off[l.key];var e=pbFind(l.key,l.name);l.price=e?e.p:0;l.hasPrice=!!(e&&e.p>0)});
+  return out}
+function quoteCalc(){
+  var q=theQuote(),L=qLines(),mk=1+q.mk/100,res={lines:[],mat:0,matSell:0,lab:[],labTot:0,extra:[],miss:0};
+  L.forEach(function(l){if(l.off)return;var us=r2(l.price*mk),lt=r2(l.qty*us);res.lines.push({key:l.key,name:l.name,unit:l.unit,qty:l.qty,cost:r2(l.qty*l.price),us:us,total:lt});res.mat+=l.qty*l.price;res.matSell+=lt;if(!l.hasPrice)res.miss++});
+  q.extra.forEach(function(e){var us=r2(e.p*mk),lt=r2(e.q*us);res.extra.push({name:e.t||'Extra item',unit:'ea',qty:e.q,cost:r2(e.q*e.p),us:us,total:lt});res.mat+=e.q*e.p;res.matSell+=lt});
+  q.labour.forEach(function(e){var lt=r2(e.q*e.p);res.lab.push({name:e.t||'Labour',qty:e.q,rate:e.p,total:lt});res.labTot+=lt});
+  res.mat=r2(res.mat);res.matSell=r2(res.matSell);res.labTot=r2(res.labTot);res.markup=r2(res.matSell-res.mat);
+  res.sub=r2(res.matSell+res.labTot);res.vat=q.vatOn?r2(res.sub*q.vat/100):0;res.total=r2(res.sub+res.vat);return res}
+function qtyTxt(n){return (Math.round(n*100)/100).toString()}
+function quoteSummary(){var q=S.quote;if(!q||!quoteHas(q)&&!qLines().some(function(l){return l.hasPrice}))return 'Prices, markup, VAT – PDF / WhatsApp';var c=quoteCalc();return fmtR(c.total)+(S.quote.vatOn?' incl. VAT':'')+(c.miss?' · '+c.miss+' unpriced':'')}
+/* ---- quote text ---- */
+function quoteText(){
+  var c=quoteCalc(),q=theQuote(),cd=S.card,L=[],t=(S.title||'').trim();
+  L.push('QUOTE'+(t?' – '+t:''));L.push(cd&&cd.date?fmtISO(cd.date):dateText());
+  if(cd&&cd.cust)L.push('For: '+cd.cust);if(cd&&cd.addr)L.push(cd.addr.replace(/\s*\n\s*/g,', '));L.push('');
+  if(q.itemised){if(c.lines.length||c.extra.length){L.push('MATERIALS');c.lines.concat(c.extra).forEach(function(l){L.push('• '+qtyTxt(l.qty)+(l.unit==='m'?' m ':' × ')+l.name+' – '+fmtR(l.total))})}}
+  else if(c.matSell)L.push('Materials: '+fmtR(c.matSell));
+  if(c.lab.length){L.push('');L.push('LABOUR');c.lab.forEach(function(l){L.push('• '+l.name+(l.qty!==1?' ('+qtyTxt(l.qty)+' × '+fmtR(l.rate)+')':'')+' – '+fmtR(l.total))})}
+  L.push('');if(q.vatOn){L.push('Subtotal: '+fmtR(c.sub));L.push('VAT '+qtyTxt(q.vat)+'%: '+fmtR(c.vat))}L.push('TOTAL'+(q.vatOn?' (incl. VAT)':'')+': '+fmtR(c.total));
+  if(q.note){L.push('');L.push(q.note)}return L.join('\n')}
+/* ---- PDF pages ---- */
+function quotePages(){
+  var c=quoteCalc(),q=theQuote(),cd=S.card||emptyCard(),pages=[],pg=null,x,y;
+  function np(first){pg=newPage(false);x=pg.x;pageHead(pg,'QUOTE'+(first?'':' (cont.)'));pages.push(pg);y=first?200:200;x.textBaseline='alphabetic'}
+  np(true);
+  function lbl(t,px,py){x.fillStyle='#5a7089';x.font='800 20px '+FONT;x.textAlign='left';x.fillText(t.toUpperCase(),px,py)}
+  function val(t,px,py,w){x.fillStyle='#12263a';x.font='700 30px '+FONT;x.textAlign='left';x.fillText(t||'—',px,py,w)}
+  if(cd.cust||cd.addr||cd.phone||cd.ref){lbl('Prepared for',70,y+12);val(cd.cust,70,y+52,700);lbl('Phone',800,y+12);val(cd.phone,800,y+52,370);y+=84;
+    if(cd.addr){x.font='500 26px '+FONT;x.fillStyle='#12263a';wrapLines(x,cd.addr,1100,2).forEach(function(l,i){x.fillText(l,70,y+i*34)});y+=(Math.min(2,cd.addr.split(/\n/).length)+0)*34+20}
+    if(cd.ref){lbl('Reference',70,y+4);val(cd.ref,250,y+8,500);y+=40}
+    x.fillStyle='#d3dbe4';x.fillRect(70,y,pg.w-140,2);y+=34}
+  function head(){x.fillStyle='#eef3f9';x.fillRect(70,y-30,pg.w-140,46);x.fillStyle='#5a7089';x.font='800 20px '+FONT;x.textAlign='left';x.fillText('DESCRIPTION',84,y);x.textAlign='right';x.fillText('QTY',760,y);x.fillText('UNIT',960,y);x.fillText('TOTAL',pg.w-84,y);y+=38}
+  function sec(t){if(y>pg.h-180)np();x.fillStyle='#1259e8';x.font='800 22px '+FONT;x.textAlign='left';x.fillText(t.toUpperCase(),70,y+4);y+=36}
+  function row(name,qty,unit,tot){if(y>pg.h-150){np()}x.fillStyle='#12263a';x.font='600 26px '+FONT;x.textAlign='left';x.fillText(name,84,y,560);x.textAlign='right';x.fillText(qty,760,y);x.fillText(unit,960,y);x.font='800 26px '+FONT;x.fillText(tot,pg.w-84,y);x.fillStyle='#e3e9f0';x.fillRect(70,y+16,pg.w-140,1.5);y+=46}
+  head();
+  if(q.itemised){var all=c.lines.concat(c.extra);if(all.length){sec('Materials');all.forEach(function(l){row(l.name,qtyTxt(l.qty)+(l.unit==='m'?' m':''),fmtR(l.us),fmtR(l.total))})}}
+  else if(c.matSell){sec('Materials');row('Materials supplied','1','',fmtR(c.matSell))}
+  if(c.lab.length){sec('Labour');c.lab.forEach(function(l){row(l.name,qtyTxt(l.qty),fmtR(l.rate),fmtR(l.total))})}
+  if(y>pg.h-360)np();y+=10;
+  function tl(t,v,b){x.fillStyle=b?'#0b3d6e':'#12263a';x.font=(b?'800 34px ':'600 28px ')+FONT;x.textAlign='left';x.fillText(t,pg.w-560,y);x.textAlign='right';x.fillText(v,pg.w-84,y);y+=b?60:46}
+  if(q.vatOn){tl('Subtotal (excl. VAT)',fmtR(c.sub));tl('VAT '+qtyTxt(q.vat)+'%',fmtR(c.vat))}
+  x.fillStyle='#0b3d6e';x.fillRect(pg.w-580,y-40,510,3);y+=16;tl('TOTAL'+(q.vatOn?' (incl. VAT)':''),fmtR(c.total),true);
+  if(q.note){y+=20;x.font='500 24px '+FONT;x.fillStyle='#5a7089';x.textAlign='left';wrapLines(x,q.note,pg.w-140,8).forEach(function(l,i){if(y+i*32<pg.h-90)x.fillText(l,70,y+i*32)})}
+  var tot=pages.length;pages.forEach(function(p,i){pageFoot(p,i+1,tot)});return pages}
+/* ---- quote overlay ---- */
+var quoteOv=null;
+function quoteSheet(){
+  if(!quoteOv){quoteOv=document.createElement('div');quoteOv.className='ov';quoteOv.id='quoteOv';quoteOv.style.alignItems='flex-end';document.body.insertBefore(quoteOv,$('#dlg'))}
+  theQuote();quoteOv.classList.add('show');renderQuote()}
+function closeQuote(){if(quoteOv)quoteOv.classList.remove('show');save()}
+function renderQuote(keepScroll){
+  var q=theQuote(),o=quoteOv,old=o.firstChild&&o.firstChild.scrollTop;o.innerHTML='';var box=document.createElement('div');box.className='sbox cardbox quotebox';o.appendChild(box);
+  var t0=Date.now();o.onclick=function(e){if(e.target===o&&Date.now()-t0>450)closeQuote()};
+  function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+  function inp(v,w,mode,cb,ph){var i=document.createElement('input');i.type='text';i.inputMode=mode||'decimal';i.value=v;i.className='qin';if(w)i.style.width=w;if(ph)i.placeholder=ph;i.addEventListener('input',function(){cb(i.value);tot()});i.addEventListener('focus',function(){try{i.select()}catch(e){}});return i}
+  var h=el('h3',0,'Quote');box.appendChild(h);
+  var c0=quoteCalc();
+  var L=qLines(),mk=1+q.mk/100,totEls=[];
+  var un=L.filter(function(l){return !l.off&&!l.hasPrice}).length;
+  box.appendChild(el('p','qhint','Enter prices <b>excluding VAT</b>. Prices you type are remembered in your price book and used again on every job.'));
+  /* materials */
+  var shown=L.filter(function(l){return !l.off});
+  box.appendChild(el('div','cfh','Materials from the sketch'+(shown.length?' ('+shown.length+')':'')));
+  if(!L.length)box.appendChild(el('p','qhint','Nothing on the sketch yet – draw pipes and add parts and the list fills in by itself. You can still add extra items and labour below.'));
+  var rowsEls=[];
+  shown.forEach(function(l){var r=el('div','qrow'+(l.hasPrice?'':' miss'));r.dataset.key=l.key;r.appendChild(el('div','qnm',esc(l.name)+(l.hasPrice?'':'<small>no price yet</small>')));
+    var ctl=el('div','qctl');ctl.appendChild(inp(qtyTxt(l.qty),'64px','decimal',function(v){q.qty[l.key]=Math.max(0,num(v));l.qty=q.qty[l.key];save()}));ctl.appendChild(el('span','qu',esc(l.unit)+' ×'));
+    ctl.appendChild(el('span','qu','R'));ctl.appendChild(inp(l.price?String(l.price):'','84px','decimal',function(v){l.price=Math.max(0,num(v));l.hasPrice=l.price>0;pbSet(l.key,l.name,l.unit,l.price);r.classList.toggle('miss',!l.hasPrice)},'price'));
+    var tt=el('b','qt','');ctl.appendChild(tt);var rm=el('button','qx','✕');rm.type='button';rm.setAttribute('aria-label','Remove line');rm.onclick=function(){q.off[l.key]=1;save();renderQuote(1)};ctl.appendChild(rm);r.appendChild(ctl);box.appendChild(r);
+    totEls.push(function(){tt.textContent=fmtR(r2(l.qty*r2(l.price*(1+q.mk/100))))});rowsEls.push(r)});
+  var offN=L.filter(function(l){return l.off}).length;
+  if(offN){var rb=el('button','sbtn qsm','<span>Restore '+offN+' removed line'+(offN>1?'s':'')+'</span>');rb.type='button';rb.onclick=function(){q.off={};save();renderQuote(1)};box.appendChild(rb)}
+  /* extras & labour */
+  function listBlock(title,arr,kind){
+    box.appendChild(el('div','cfh',title));
+    arr.forEach(function(e,i){var r=el('div','qrow');var nm=document.createElement('input');nm.type='text';nm.className='qin qname';nm.value=e.t;nm.maxLength=100;nm.placeholder=kind==='lab'?'e.g. Labour':'e.g. Drip tray';nm.addEventListener('input',function(){e.t=nm.value;save()});r.appendChild(nm);
+      var ctl=el('div','qctl');ctl.appendChild(inp(qtyTxt(e.q),'64px','decimal',function(v){e.q=Math.max(0,num(v));save()}));ctl.appendChild(el('span','qu',kind==='lab'?'h ×':'ea ×'));ctl.appendChild(el('span','qu','R'));
+      ctl.appendChild(inp(e.p?String(e.p):'','84px','decimal',function(v){e.p=Math.max(0,num(v));save()},kind==='lab'?'rate':'price'));
+      var tt=el('b','qt','');ctl.appendChild(tt);totEls.push(function(){tt.textContent=fmtR(kind==='lab'?r2(e.q*e.p):r2(e.q*r2(e.p*(1+q.mk/100))))});
+      var rm=el('button','qx','✕');rm.type='button';rm.setAttribute('aria-label','Remove');rm.onclick=function(){arr.splice(i,1);save();renderQuote(1)};ctl.appendChild(rm);r.appendChild(ctl);box.appendChild(r)});
+    var ad=el('button','sbtn qsm','<span>+ Add '+(kind==='lab'?'labour line':'extra item')+'</span>');ad.type='button';ad.dataset.act=kind==='lab'?'addlab':'addext';ad.onclick=function(){if(arr.length>=40)return;arr.push(kind==='lab'?{t:'Labour',q:1,p:0}:{t:'',q:1,p:0});save();renderQuote(1)};box.appendChild(ad)}
+  listBlock('Extra items (markup applies)',q.extra,'ext');
+  listBlock('Labour (no markup)',q.labour,'lab');
+  /* markup & vat */
+  box.appendChild(el('div','cfh','Markup & VAT'));
+  var mr=el('div','qmv');var a=el('label','qf','<span>Markup on materials %</span>');var mi=inp(String(q.mk),'100%','decimal',function(v){q.mk=Math.min(1000,Math.max(0,num(v)));save()});mi.dataset.f='mk';a.appendChild(mi);mr.appendChild(a);
+  var b=el('label','qf','<span>VAT %</span>');var vi=inp(String(q.vat),'100%','decimal',function(v){q.vat=Math.min(100,Math.max(0,num(v)));save()});vi.dataset.f='vat';b.appendChild(vi);mr.appendChild(b);box.appendChild(mr);
+  var tg=el('div','cfbtns');
+  var vb=el('button','sbtn'+(q.vatOn?' on':''),'<span>Add VAT: '+(q.vatOn?'YES':'no')+'</span>');vb.type='button';vb.dataset.act='vat';vb.onclick=function(){q.vatOn=q.vatOn?0:1;save();renderQuote(1)};tg.appendChild(vb);
+  var ib=el('button','sbtn'+(q.itemised?' on':''),'<span>Show item prices: '+(q.itemised?'YES':'no')+'<small>'+(q.itemised?'Customer sees each line':'Materials as one line')+'</small></span>');ib.type='button';ib.dataset.act='itemised';ib.onclick=function(){q.itemised=q.itemised?0:1;save();renderQuote(1)};tg.appendChild(ib);box.appendChild(tg);
+  /* notes */
+  var nf=el('label','cf','<span>Notes / terms on the quote</span>');var ta=document.createElement('textarea');ta.rows=2;ta.maxLength=600;ta.value=q.note;ta.dataset.f='qnote';ta.addEventListener('input',function(){q.note=ta.value;save()});nf.appendChild(ta);box.appendChild(nf);
+  /* totals */
+  var tb=el('div','qtot');box.appendChild(tb);
+  function tot(){var c=quoteCalc();totEls.forEach(function(f){f()});
+    tb.innerHTML='<div><span>Materials (cost)</span><b>'+fmtR(c.mat)+'</b></div><div><span>Markup '+qtyTxt(q.mk)+'%</span><b>'+fmtR(c.markup)+'</b></div><div><span>Materials (sell)</span><b>'+fmtR(c.matSell)+'</b></div><div><span>Labour</span><b>'+fmtR(c.labTot)+'</b></div><div class="sub"><span>Subtotal</span><b>'+fmtR(c.sub)+'</b></div>'+(q.vatOn?'<div><span>VAT '+qtyTxt(q.vat)+'%</span><b>'+fmtR(c.vat)+'</b></div>':'')+'<div class="grand"><span>TOTAL'+(q.vatOn?' incl. VAT':'')+'</span><b id="qGrand">'+fmtR(c.total)+'</b></div>'+(c.miss?'<div class="warn">'+c.miss+' line'+(c.miss>1?'s have':' has')+' no price yet</div>':'');
+    h.textContent='Quote – '+fmtR(c.total)}
+  tot();
+  /* actions */
+  var bt=el('div','cfbtns');box.appendChild(bt);
+  function btn(ic,label,sub,act,fn,cls){var x=el('button','sbtn '+(cls||''),ico(ic)+'<span>'+label+(sub?'<small>'+sub+'</small>':'')+'</span>');x.type='button';x.dataset.act=act;x.onclick=fn;bt.appendChild(x)}
+  btn('pdf','Share quote (PDF)','For the customer','qpdf',function(){closeQuote();doShare('pdf',{quote:true})},'primary');
+  btn('share','WhatsApp text','Copy / share as text','qtxt',function(){shareText(quoteText(),'Quote'+(S.title?' – '+S.title:''),fname('txt'))});
+  btn('list','Price book',Object.keys(pbLoad().items).length+' saved prices','pb',function(){priceBookSheet()});
+  btn('pdf','Quote + job pack (PDF)','Card, photos, sketch, list, quote','qpack',function(){closeQuote();doShare('pdf',{pack:true,quote:true})});
+  var dn=el('div','cfbtns one');var d1=el('button','sbtn',ico('check')+'<span>Done</span>');d1.type='button';d1.dataset.act='qdone';d1.onclick=closeQuote;dn.appendChild(d1);box.appendChild(dn);
+  box.appendChild(el('p',0,'Guide prices only – you set them. No prices are fetched online; import or paste your supplier list in the price book.'));
+  if(keepScroll&&old)box.scrollTop=old}
+/* ---- price book overlay ---- */
+var pbOv=null,pbFilter='',pbMode='list';
+function priceBookSheet(){
+  if(!pbOv){pbOv=document.createElement('div');pbOv.className='ov';pbOv.id='pbOv';pbOv.style.alignItems='flex-end';pbOv.style.zIndex=55;document.body.insertBefore(pbOv,$('#dlg'));
+    var f=document.createElement('input');f.type='file';f.accept='.csv,.txt,text/csv,text/plain';f.hidden=true;f.id='pbFile';document.body.appendChild(f);
+    f.addEventListener('change',function(e){var fl=e.target.files&&e.target.files[0];e.target.value='';if(!fl)return;if(fl.size>2*1024*1024){toast('That file is too big for a price list');return}var fr=new FileReader();fr.onload=function(){pbMode='import';renderPB(String(fr.result))};fr.readAsText(fl)})}
+  pbMode='list';pbFilter='';pbOv.classList.add('show');renderPB()}
+function closePB(){pbOv.classList.remove('show');if(quoteOv&&quoteOv.classList.contains('show'))renderQuote(1);save()}
+function splitCSV(line,d){var out=[],cur='',q=false;for(var i=0;i<line.length;i++){var ch=line[i];if(q){if(ch==='"'){if(line[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}else if(ch==='"')q=true;else if(ch===d){out.push(cur);cur=''}else cur+=ch}out.push(cur);return out}
+function parsePrices(txt){
+  var out=[],bad=0;String(txt).split(/\r?\n/).forEach(function(line){line=line.trim();if(!line)return;
+    var f;if(line.indexOf('\t')>=0)f=line.split('\t');else if(line.indexOf(';')>=0)f=splitCSV(line,';');else if(/^"|",|,.*\d/.test(line)&&line.indexOf(',')>=0)f=splitCSV(line,',');else f=null;
+    var key=null,name='',price=null,unit='';
+    if(f){f=f.map(function(s){return s.trim()});if(/^(pipe|fit|part)\|/.test(f[0])){key=f.shift()}
+      for(var i=f.length-1;i>=0;i--){if(/^[Rr]?\s*-?[\d\s.,]+$/.test(f[i])&&/\d/.test(f[i])){price=num(f[i]);f.splice(i,1);break}}
+      name=(f[0]||'');if(f.length>1&&/^(m|ea|each|per m|length|box|pack|roll)$/i.test(f[f.length-1]))unit=f[f.length-1]}
+    else{var m=/^(.*?)[\s:=\-–]+R?\s*(\d[\d\s]*(?:[.,]\d{1,2})?)\s*(?:\/\s*(m|ea))?\s*$/i.exec(line);if(m){name=m[1];price=num(m[2]);unit=m[3]||''}}
+    name=String(name).replace(/^["']|["']$/g,'').trim();
+    if(!name||price==null||price<=0||!isFinite(price)){bad++;return}
+    out.push({key:key,name:name.slice(0,100),p:price,u:unit})});
+  return {rows:out,bad:bad}}
+function pbApply(rows){
+  var b=pbLoad().items,lines=qLines(),matched=0,n=0,done={};
+  rows.forEach(function(r){if(Object.keys(b).length>=3000)return;var k=r.key||('name|'+nameKey(r.name));b[k]={n:r.name,p:r.p,u:r.u||''};n++;
+    if(r.key)return;var best=null,bs=0;lines.forEach(function(l){var s=nameMatch(r.name,l.name);if(s>bs){bs=s;best=l}});
+    if(best){b[best.key]={n:best.name,p:r.p,u:best.unit};matched++}});
+  pbSave();return {n:n,matched:matched}}
+function pbCSV(){var b=pbLoad().items;return 'key,name,unit,price\n'+Object.keys(b).sort().map(function(k){var e=b[k];return [k,'"'+e.n.replace(/"/g,'""')+'"',e.u,e.p.toFixed(2)].join(',')}).join('\n')}
+function renderPB(pasteTxt){
+  var o=pbOv,box=document.createElement('div');box.className='sbox cardbox quotebox';o.innerHTML='';o.appendChild(box);
+  var t0=Date.now();o.onclick=function(e){if(e.target===o&&Date.now()-t0>450)closePB()};
+  function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+  if(pbMode==='import'){
+    box.appendChild(el('h3',0,'Import / paste prices'));
+    box.appendChild(el('p','qhint','One item per line: <b>name, price</b> (comma, semicolon or tab). e.g.<br><code>50mm PVC pipe, 62.50</code><br><code>Elbow 90 50mm; 11,20</code><br>Prices should exclude VAT. Names that match lines in this job are filled in automatically.'));
+    var ta=document.createElement('textarea');ta.id='pbText';ta.rows=9;ta.className='qpaste';ta.value=pasteTxt||'';ta.placeholder='Paste your supplier price list here…';ta.spellcheck=false;box.appendChild(ta);
+    var bt=el('div','cfbtns');box.appendChild(bt);
+    var go=el('button','sbtn primary',ico('check')+'<span>Import these prices</span>');go.type='button';go.dataset.act='pbgo';go.onclick=function(){var r=parsePrices(ta.value);if(!r.rows.length){toast('No prices found – use “name, price” on each line',3200);return}var a=pbApply(r.rows);toast('Imported '+a.n+' price'+(a.n===1?'':'s')+(a.matched?' · '+a.matched+' matched this job':'')+(r.bad?' · '+r.bad+' line(s) skipped':''),3600);pbMode='list';renderPB()};bt.appendChild(go);
+    var fl=el('button','sbtn',ico('import')+'<span>Choose CSV file</span>');fl.type='button';fl.onclick=function(){$('#pbFile').click()};bt.appendChild(fl);
+    var bk=el('button','sbtn',ico('aleft')+'<span>Back</span>');bk.type='button';bk.dataset.act='pbback';bk.onclick=function(){pbMode='list';renderPB()};bt.appendChild(bk);return}
+  var n=Object.keys(pbLoad().items).length;
+  box.appendChild(el('h3',0,'Price book'));
+  box.appendChild(el('p','qhint',n+' saved price'+(n===1?'':'s')+' (excluding VAT). Stored only on this phone. Edit a price here or right on the quote.'));
+  var sr=document.createElement('input');sr.type='search';sr.className='qin qsearch';sr.placeholder='Search prices…';sr.value=pbFilter;box.appendChild(sr);
+  var list=el('div','pblist');box.appendChild(list);
+  function draw(){list.innerHTML='';var b=pbLoad().items,ks=Object.keys(b).filter(function(k){return !pbFilter||b[k].n.toLowerCase().indexOf(pbFilter.toLowerCase())>=0}).sort(function(a,c){return b[a].n<b[c].n?-1:1}),lim=ks.slice(0,120);
+    if(!ks.length)list.appendChild(el('p','qhint',n?'No match.':'Nothing yet. Import or paste a price list, or add items one by one.'));
+    lim.forEach(function(k){var e=b[k],r=el('div','qrow'),nm=el('div','qnm',esc(e.n)+(e.u?'<small>per '+esc(e.u)+'</small>':''));r.appendChild(nm);var c=el('div','qctl');c.appendChild(el('span','qu','R'));
+      var i=document.createElement('input');i.type='text';i.inputMode='decimal';i.className='qin';i.style.width='100px';i.value=e.p?String(e.p):'';i.addEventListener('input',function(){e.p=Math.max(0,num(i.value));pbSave()});c.appendChild(i);
+      var rm=el('button','qx','✕');rm.type='button';rm.setAttribute('aria-label','Delete price');rm.onclick=function(){delete b[k];pbSave();renderPB()};c.appendChild(rm);r.appendChild(c);list.appendChild(r)});
+    if(ks.length>lim.length)list.appendChild(el('p','qhint','Showing first '+lim.length+' of '+ks.length+' – search to narrow down.'))}
+  sr.addEventListener('input',function(){pbFilter=sr.value;draw()});draw();
+  var bt2=el('div','cfbtns');box.appendChild(bt2);
+  function btn(ic,label,act,fn,cls){var x=el('button','sbtn '+(cls||''),ico(ic)+'<span>'+label+'</span>');x.type='button';x.dataset.act=act;x.onclick=fn;bt2.appendChild(x)}
+  btn('plus','Add price','pbadd',async function(){var nm=await askText({title:'Item name',value:'',placeholder:'e.g. 50 mm PVC pipe (per m)',cancel:'Cancel'});if(!nm||!nm.trim())return;var pr=await askText({title:'Price excl. VAT (R)',value:'',placeholder:'e.g. 62.50',cancel:'Cancel'});if(pr===null)return;var p=num(pr);if(p<=0){toast('Enter a price above 0');return}pbApply([{key:null,name:nm.trim(),p:p,u:''}]);renderPB()});
+  btn('import','Import / paste','pbimp',function(){pbMode='import';renderPB('')},'primary');
+  btn('export','Export CSV','pbexp',function(){download(new Blob([pbCSV()],{type:'text/csv'}),'plumbing-sketch-prices.csv');toast('Price list saved as CSV')});
+  btn('trash','Clear all prices','pbclr',function(){askText({title:'Type YES to clear the whole price book',value:'',placeholder:'YES',cancel:'Cancel'}).then(function(v){if(v&&v.trim().toUpperCase()==='YES'){pbLoad().items={};pbSave();toast('Price book cleared');renderPB()}})},'danger');
+  var dn=el('div','cfbtns one');var d1=el('button','sbtn',ico('check')+'<span>Done</span>');d1.type='button';d1.dataset.act='pbdone';d1.onclick=closePB;dn.appendChild(d1);box.appendChild(dn)}
+
+/* =====================================================================
+   v3.15  COMPLIANCE TIPS – friendly, non-blocking, dismissible, offline.
+   Based on SANS 10252-1:2018 (water supply), SANS 10252-2:1993 (drainage),
+   SANS 10254 (storage water heaters) and SANS 10400-P (drainage). GUIDE ONLY.
+   ===================================================================== */
+var GUIDE='Guide only – check the current standard.';
+function cleanHJ(o){var r={};if(o&&typeof o==='object')Object.keys(o).slice(0,40).forEach(function(k){if(/^[a-z0-9_]{1,24}$/.test(k)&&o[k])r[k]=1});return r}
+function supportSpacing(mat,mm){
+  var d=mm;
+  if(mat==='pvc')return d<=50?[0.6,1.5]:[1.0,1.8];                                   /* SANS 10252-2 Table 20 (uPVC) */
+  if(mat==='ci')return [1.2,2.0];                                                    /* SANS 10252-2 Table 20 */
+  if(mat==='cu'||mat==='ss'||mat==='gal'){                                           /* SANS 10252-1 Table 21 */
+    if(d<=25)return [1.6,3.0];if(d<=40)return [2.7,3.0];if(d<=50)return [3.0,3.6];if(d<=65)return [3.6,4.5];return [4.0,4.5]}
+  if(mat==='upvcp'){if(d<=20)return [0.6,1.2];if(d<=32)return [0.8,1.7];if(d<=50)return [1.0,1.75];if(d<=80)return [1.15,2.25];if(d<=100)return [1.35,2.7];return [1.5,3.0]}  /* Table 22 PVC-U */
+  if(mat==='poly'||mat==='hdpe'){if(d<=20)return [0.3,0.6];if(d<=32)return [0.4,0.8];if(d<=50)return [0.42,0.87];if(d<=80)return [0.55,1.1];if(d<=100)return [0.67,1.35];return [0.75,1.5]}  /* Table 22 polyethylene */
+  return null}
+function mTxt(n){return (Math.round(n*100)/100).toString().replace('.',',')}
+function tipsOn(){return prefs.hints!==false}
+function tipList(){
+  var out=[];if(!S.items.length)return out;
+  var items=S.items.length>2500?S.items.slice(0,2500):S.items,pipes=[],cnt={};
+  items.forEach(function(it){
+    if(it.t==='pipe'&&isRealPipe(it))pipes.push(it);
+    else if(it.t==='stamp'){cnt[it.k]=(cnt[it.k]||0)+1}});
+  function nm(k,m){return (cnt[k]||0)}
+  var geys=nm('geyser')+nm('geyser_h')+nm('geyser_slim');
+  function tip(id,title,body,std,sel){out.push({id:id,title:title,body:body,std:std,sel:sel||[]})}
+  /* 1. fall of waste pipes (side view only, we only know heights there) */
+  if(S.mode==='elev'){
+    var flat=[],worst=0;
+    pipes.forEach(function(p){if(p.mat!=='pvc'&&p.mat!=='ci')return;var dx=Math.abs(p.b.x-p.a.x),dy=Math.abs(p.b.y-p.a.y);if(dx<1||pipeMM(p)<250)return;
+      if(Math.atan2(dy,dx)>12*PI/180)return;var s=dy/dx,big=p.mm>=100,min=big?1/60:1/46;
+      if(s<min-1e-4){flat.push(p);var r=s>0.0005?Math.round(1/s):0;if(!worst||(r===0)||r>worst)worst=r===0?-1:(worst===-1?-1:r)}});
+    if(flat.length)tip('fall','Waste pipe looks too flat',flat.length+' waste pipe'+(flat.length>1?'s':'')+' in this side view '+(worst===-1?'look level':'fall less than the usual minimum')+'. Give them a steady fall towards the outlet: SANS 10252-2 (Table 15) lists 1:46 as the minimum for waste branches and 1:40 for soil branches. On site, 1:40 for 50 mm waste and about 1:60 for 110 mm drains are the commonly used figures. Type a height on one end of the pipe to set the fall.','SANS 10252-2 Table 15 · common site practice',flat)}
+  /* 2. long waste runs with no vent */
+  var wp=pipes.filter(function(p){return (p.mat==='pvc'||p.mat==='ci')&&p.mm<=75});
+  if(wp.length&&wp.length<=400){
+    var tol=10,nodes=[],par=[];function nid(x,y){for(var i=0;i<nodes.length;i++)if(Math.abs(nodes[i].x-x)<=tol&&Math.abs(nodes[i].y-y)<=tol)return i;nodes.push({x:x,y:y});return nodes.length-1}
+    var edges=wp.map(function(p){return {a:nid(p.a.x,p.a.y),b:nid(p.b.x,p.b.y),w:pipeMM(p),p:p}});
+    var vents=[];items.forEach(function(it){if(it.t==='stamp'&&(it.k==='vent'||it.k==='aav'||it.k==='gully'||it.k==='manhole'||it.k==='ic2'||it.k==='sewer'||it.k==='downpipe')){try{portsW(it).forEach(function(q){vents.push({i:nid(q.x,q.y),k:it.k})});vents.push({i:nid(it.x,it.y),k:it.k})}catch(e){}}});
+    var ventNode={};vents.forEach(function(v){ventNode[v.i]=1});
+    var adj=nodes.map(function(){return []});edges.forEach(function(e,i){adj[e.a].push(i);adj[e.b].push(i)});
+    var seen={},bad=[],best=0;
+    nodes.forEach(function(_,s){if(seen[s])return;var comp=[],q=[s];seen[s]=1;while(q.length){var n=q.pop();comp.push(n);adj[n].forEach(function(ei){var e=edges[ei],o=e.a===n?e.b:e.a;if(!seen[o]){seen[o]=1;q.push(o)}})}
+      function far(st){var dist={};dist[st]=0;var qq=[st],bn=st;while(qq.length){var n=qq.shift();adj[n].forEach(function(ei){var e=edges[ei],o=e.a===n?e.b:e.a;if(dist[o]==null){dist[o]=dist[n]+e.w;qq.push(o);if(dist[o]>dist[bn])bn=o}})}return {n:bn,d:dist[bn]}}
+      var f1=far(comp[0]),f2=far(f1.n),len=f2.d;
+      var hasV=comp.some(function(n){return ventNode[n]});
+      if(len>6000&&!hasV){comp.forEach(function(n){adj[n].forEach(function(ei){if(bad.indexOf(edges[ei].p)<0)bad.push(edges[ei].p)})});best=Math.max(best,len)}});
+    if(bad.length)tip('vent','Long waste run – is it vented?','The longest waste run here is about '+mTxt(best/1000)+' m with no vent pipe, air admittance valve, gully or drain on it. SANS 10252-2 (6.4.2) wants a vent when a trap outlet is more than 6 m of pipe from a ventilated stack or drain (up to 10 m for waste fixtures if the pipe is one size bigger). An air admittance valve or trap vent valve can be used where the local authority allows.','SANS 10252-2 6.4.2',bad)}
+  /* 3. geyser protection */
+  if(geys){
+    if(nm('drip')<geys)tip('gtray','Geyser: drip (safety) tray','Every storage geyser needs a drip tray that covers the heater and its valves, with a drain pipe that falls continuously and discharges outside where it can be seen (commonly 40 mm pipe suitable for hot water, no 90° elbows on horizontal runs). It must not be used for the T&P valve discharge.','SANS 10252-1 safety trays (6.1.6, 8.4.4) · SANS 10254',[]);
+    if(nm('ptr')<geys)tip('gtp','Geyser: T&P / safety valve','A temperature-and-pressure (or separate pressure and temperature) safety valve is required. Its discharge pipe must be metal, at least the valve outlet size (22 mm is typical; bigger if the run is over 4 m), fall continuously, have 3 bends or fewer (45° or large radius) and end outside in a visible spot. Do not join it to other discharge pipes.','SANS 10252-1 relief valve drain pipes (6.6.5) · SANS 10254',[]);
+    if(nm('vacbreak')<geys*2)tip('gvac','Geyser: vacuum breakers','Vacuum breakers are needed on both the cold feed and the hot outlet of a closed (sealed) geyser so it cannot siphon dry or collapse. Fit them as close to the geyser as practical, on an upstand about 300 mm above the top of the geyser when the local authority or maker asks for it. No isolating valve may sit between the geyser and its expansion, pressure or vacuum relief devices.','SANS 10252-1 vacuum breakers (6.3.3, 6.6) · SANS 10254',[])}
+  /* 4. outside taps / hose bibs */
+  var hb=nm('hosebib')+nm('hosereel');
+  if(hb&&(nm('vacbreak')+nm('backflow'))<geys*2+hb)tip('hose','Outside tap: backflow protection','A tap that takes a hose can suck dirty water back into the house supply. Fit a hose-connection vacuum breaker or a check valve/vacuum breaker next to the tap, or a vacuum breaker at least 300 mm above the highest outlet. Standpipe taps should be at least 450 mm above ground.','SANS 10252-1 prevention of backflow (7.4.3)',[]);
+  /* 5. WC needs 100 mm soil pipe */
+  var wcN=nm('toilet')+nm('wc_wall')+nm('cistern')+nm('wc_squat');
+  if(wcN){var anyWaste=pipes.filter(function(p){return p.mat==='pvc'||p.mat==='ci'});
+    if(anyWaste.length&&!anyWaste.some(function(p){return p.mm>=100}))tip('wc','WC needs a 100 mm soil pipe','The soil pipe from a WC must be at least 100 mm (110 mm PVC is the usual size). Only smaller waste pipes are drawn so far.','SANS 10252-2 6.3.3',anyWaste)}
+  /* 6. support spacing summary */
+  var grp={};
+  pipes.forEach(function(p){var sp=supportSpacing(p.mat,p.mm);if(!sp)return;var L=pipeMM(p),vert=false;
+    if(S.mode==='elev')vert=Math.abs(p.b.y-p.a.y)>Math.abs(p.b.x-p.a.x);else if(S.mode==='iso'){vert=Math.abs(p.b.x-p.a.x)<Math.abs(p.b.y-p.a.y)*0.2}else vert=true;/* plan view: orientation unknown, use the looser (vertical) limit */
+    var lim=(vert?sp[1]:sp[0])*1000;if(L<=lim)return;var k=p.mat+'|'+p.mm,g=grp[k]||(grp[k]={mat:p.mat,mm:p.mm,sp:sp,n:0,max:0,items:[]});g.n++;g.max=Math.max(g.max,L);g.items.push(p)});
+  var gk=Object.keys(grp);
+  if(gk.length){var lines=gk.slice(0,5).map(function(k){var g=grp[k];return '• '+g.mm+' mm '+MATS[g.mat].n+': supports about every '+mTxt(g.sp[0])+' m (horizontal) / '+mTxt(g.sp[1])+' m (vertical) – longest run '+mTxt(g.max/1000)+' m'}).join('\n');
+    var all=[];gk.forEach(function(k){all=all.concat(grp[k].items)});
+    tip('support','Pipe supports','Some pipes are longer than the usual maximum distance between supports, so plan clips or brackets along them (also at every fitting and change of direction):\n'+lines+(gk.length>5?'\n• …and '+(gk.length-5)+' more':'')+'\nFollow the pipe maker’s instructions too – closer supports are needed for hot water.','SANS 10252-1 tables 21–22 · SANS 10252-2 table 20',all)}
+  return out}
+var tipT=0,tipCache=[],tipPill=null,tipOv=null;
+function tipsVisible(){if(!tipsOn())return [];var off=prefs.hintOff||{},hj=S.hj||{};return tipList().filter(function(t){return !off[t.id]&&!hj[t.id]})}
+function tipsSoon(){clearTimeout(tipT);tipT=setTimeout(tipsUpdate,500)}
+function tipsUpdate(){
+  try{tipCache=tipsVisible()}catch(e){tipCache=[]}
+  if(!tipPill){tipPill=document.createElement('button');tipPill.type='button';tipPill.id='tipPill';tipPill.setAttribute('aria-label','Compliance tips');tipPill.onclick=function(){tipSheet()};$('#stage').appendChild(tipPill)}
+  var n=tipCache.length;tipPill.style.display=n?'flex':'none';tipPill.innerHTML=ico('info')+'<span>'+n+' tip'+(n===1?'':'s')+'</span>';
+  if(tipOv&&tipOv.classList.contains('show'))renderTips()}
+function tipSheet(){
+  if(!tipOv){tipOv=document.createElement('div');tipOv.className='ov';tipOv.id='tipOv';tipOv.style.alignItems='flex-end';document.body.insertBefore(tipOv,$('#dlg'))}
+  tipCache=tipsVisible();tipOv.classList.add('show');renderTips()}
+function closeTips(){if(tipOv)tipOv.classList.remove('show')}
+function renderTips(){
+  var o=tipOv,old=o.firstChild&&o.firstChild.scrollTop;o.innerHTML='';var box=document.createElement('div');box.className='sbox cardbox tipbox';o.appendChild(box);
+  var t0=Date.now();o.onclick=function(e){if(e.target===o&&Date.now()-t0>450)closeTips()};
+  function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+  box.appendChild(el('h3',0,'Compliance tips'));
+  box.appendChild(el('p','qhint','Friendly reminders based on SANS 10252 / 10254 / 10400-P basics. They never block you. <b>'+GUIDE+'</b>'));
+  if(!tipsOn())box.appendChild(el('p','qhint','Tips are switched off.'));
+  else if(!tipCache.length)box.appendChild(el('p','qhint','Nothing to flag on this sketch right now. Add a geyser, long waste runs or an outside tap and relevant tips will appear here.'));
+  tipCache.forEach(function(t){var r=el('div','hrow');r.dataset.tip=t.id;
+    r.appendChild(el('div','htitle',ico('info')+'<span>'+esc(t.title)+'</span>'));
+    r.appendChild(el('div','hbody',esc(t.body).replace(/\n/g,'<br>')));
+    r.appendChild(el('div','hstd',esc(t.std)+' · <b>'+GUIDE+'</b>'));
+    var b=el('div','hbtn');
+    if(t.sel&&t.sel.length){var s=el('button','sbtn',ico('select')+'<span>Show on sketch</span>');s.type='button';s.dataset.act='show';s.onclick=function(){closeTips();setMulti(t.sel);};b.appendChild(s)}
+    var d1=el('button','sbtn',ico('check')+'<span>Got it<small>hide for this job</small></span>');d1.type='button';d1.dataset.act='gotit';d1.onclick=function(){(S.hj||(S.hj={}))[t.id]=1;save();tipsUpdate()};b.appendChild(d1);
+    var d2=el('button','sbtn',ico('minus')+'<span>Never show<small>this tip anywhere</small></span>');d2.type='button';d2.dataset.act='never';d2.onclick=function(){(prefs.hintOff||(prefs.hintOff={}))[t.id]=1;savePrefs();tipsUpdate()};b.appendChild(d2);
+    r.appendChild(b);box.appendChild(r)});
+  var bt=el('div','cfbtns');box.appendChild(bt);
+  var tg=el('button','sbtn'+(tipsOn()?' on':''),'<span>Tips: '+(tipsOn()?'ON':'off')+'<small>Switch all tips '+(tipsOn()?'off':'on')+'</small></span>');tg.type='button';tg.dataset.act='toggle';tg.onclick=function(){prefs.hints=tipsOn()?false:true;savePrefs();tipsUpdate();renderTips()};bt.appendChild(tg);
+  var rs=el('button','sbtn',ico('undo')+'<span>Reset hidden tips<small>Show all again</small></span>');rs.type='button';rs.dataset.act='reset';rs.onclick=function(){prefs.hintOff={};S.hj={};savePrefs();save();tipsUpdate();toast('All tips will show again')};bt.appendChild(rs);
+  var dn=el('div','cfbtns one');var d=el('button','sbtn',ico('check')+'<span>Done</span>');d.type='button';d.dataset.act='tipdone';d.onclick=closeTips;dn.appendChild(d);box.appendChild(dn);
+  box.appendChild(el('p',0,'Sources checked: SANS 10252-1:2018 (Ed 3.2) tables 21–22, safety trays, relief-valve drain pipes, backflow; SANS 10252-2:1993 table 15 (gradients), 6.4.2 (venting), table 20 (supports); SANS 10254 geyser requirements as summarised by IOPSA. Standards are updated from time to time – always check the current edition and your local authority.'));
+  if(old)box.scrollTop=old}
+
+/* =====================================================================
+   v3.16  SHARE LINK – the job is compressed into the #fragment of a URL.
+   No server: the fragment is never sent over the network, but the LINK ITSELF
+   contains the job, so anyone who has it can read it. Photos are never included.
+   ===================================================================== */
+var LINK_MAX=8000,LINK_HARD=60000,LINK_PFX='#job=';
+function b64uEnc(u8){var s='',i,CH=0x8000;for(i=0;i<u8.length;i+=CH)s+=String.fromCharCode.apply(null,u8.subarray(i,i+CH));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function b64uDec(t){t=String(t).replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';var s=atob(t),u=new Uint8Array(s.length),i;for(i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
+async function streamBytes(stream,limit){var r=stream.getReader(),parts=[],n=0;for(;;){var x=await r.read();if(x.done)break;n+=x.value.length;if(limit&&n>limit){try{r.cancel()}catch(e){}throw new Error('too big')}parts.push(x.value)}var out=new Uint8Array(n),o=0;parts.forEach(function(p){out.set(p,o);o+=p.length});return out}
+async function deflateRaw(u8){var cs=new CompressionStream('deflate-raw'),w=cs.writable.getWriter();w.write(u8);w.close();return streamBytes(cs.readable)}
+async function inflateRaw(u8,limit){var ds=new DecompressionStream('deflate-raw'),w=ds.writable.getWriter();w.write(u8).catch(function(){});w.close().catch(function(){});return streamBytes(ds.readable,limit)}
+function shortNums(k,v){return typeof v==='number'?Math.round(v*100)/100:v}
+function linkDoc(opt){
+  opt=opt||{};var o=jobFileObj();if(!o)return null;var d=o.doc;
+  delete d.jobId;delete d.view;
+  var c=d.card;
+  if(c){c.photos=[];if(!opt.who){c.cust='';c.phone='';c.addr='';c.ref='';c.notes=''}}
+  if(!opt.quote)delete d.quote;
+  if(d.card&&!cardHas(d.card))delete d.card;
+  return {app:'plumbing-sketch',format:1,v:VERSION,doc:d}}
+async function makeJobLink(opt){
+  var o=linkDoc(opt);if(!o)return null;
+  var raw=new TextEncoder().encode(JSON.stringify(o,shortNums)),tag='0.',body=raw;
+  if(typeof CompressionStream==='function'){try{body=await deflateRaw(raw);tag='1.'}catch(e){body=raw;tag='0.'}}
+  var enc=b64uEnc(body),base=location.origin+location.pathname,url=base+LINK_PFX+tag+enc;
+  return {url:url,len:url.length,raw:raw.length,items:o.doc.items.length,ok:url.length<=LINK_MAX,hard:url.length>LINK_HARD,compressed:tag==='1.'}}
+async function parseJobLink(hash){
+  var m=/^#job=([01])\.([A-Za-z0-9_\-]+)$/.exec(hash||'');if(!m)throw new Error('bad link');
+  if(m[2].length>LINK_HARD*2)throw new Error('too big');
+  var u8=b64uDec(m[2]);
+  if(m[1]==='1'){if(typeof DecompressionStream!=='function')throw new Error('nodecomp');u8=await inflateRaw(u8,6*1024*1024)}
+  else if(u8.length>6*1024*1024)throw new Error('too big');
+  var o=JSON.parse(new TextDecoder().decode(u8));
+  if(!o||o.app!=='plumbing-sketch'||!o.doc||!Array.isArray(o.doc.items))throw new Error('bad link');
+  if(o.doc.card&&typeof o.doc.card==='object')o.doc.card.photos=[];
+  return o}
+function clearHash(){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
+async function openLinkHash(hash,auto){
+  var o;try{o=await parseJobLink(hash)}catch(e){clearHash();toast(e&&e.message==='nodecomp'?'This browser can’t open compressed links – ask for the job file instead':e&&e.message==='too big'?'That link is too big to open':'That is not a valid Plumbing Sketch link',4200);return false}
+  var n=o.doc.items.length,t=String(o.doc.title||'').slice(0,80).trim()||'Untitled job',who=o.doc.card&&o.doc.card.cust?String(o.doc.card.cust).slice(0,60):'';
+  return new Promise(function(res){
+    sheet('Open shared job?',[
+      {ic:'import',label:'Open “'+t+'”',sub:n+' item'+(n===1?'':'s')+(who?' · '+who:'')+' – saved as a NEW job, your current job stays in My jobs',primary:true,fn:function(){clearHash();importJobObj(o);res(true)}},
+      {ic:'aleft',label:'Cancel',fn:function(){clearHash();res(false)}}],
+      {cols:1,note:'Someone sent you a link that contains a whole job. Only open links from people you trust.'})})}
+function linkBoot(){
+  if(/^#job=/.test(location.hash||''))setTimeout(function(){openLinkHash(location.hash,true)},700)}
+window.addEventListener('hashchange',function(){if(/^#job=/.test(location.hash||''))openLinkHash(location.hash,true)});
+var linkWho=false,linkQuote=false;
+async function linkSheet(){
+  toast('Preparing link…',900);
+  var L=await makeJobLink({who:linkWho,quote:linkQuote});
+  if(!L){toast('Nothing to share yet');return}
+  var kb=Math.max(1,Math.round(L.len/1000));
+  var items=[];
+  if(L.ok){
+    items.push({ic:'share',label:'Share link',sub:'WhatsApp, email, message…',primary:true,fn:function(){shareLink(L)}});
+    items.push({ic:'dup',label:'Copy link',sub:L.len+' characters',fn:function(){copyLink(L)}})}
+  else{
+    items.push({ic:'export',label:'Send job file instead',sub:'This job is too big for a link ('+kb+' KB)',primary:true,fn:function(){exportJob()}});
+    if(!L.hard)items.push({ic:'dup',label:'Copy the long link anyway',sub:kb+' KB – some apps will cut it off',fn:function(){copyLink(L)}})}
+  items.push({ic:'info',label:'Include customer details: '+(linkWho?'YES':'no'),sub:linkWho?'Name, phone, address, notes are inside the link':'Sketch & checklist only',on:linkWho,keep:true,fn:function(){linkWho=!linkWho;linkSheet()}});
+  items.push({ic:'pdf',label:'Include quote lines: '+(linkQuote?'YES':'no'),sub:linkQuote?'Quantities, extras, labour & markup':'Prices stay on your phone',on:linkQuote,keep:true,fn:function(){linkQuote=!linkQuote;linkSheet()}});
+  sheet('Share job as a link',items,{cols:1,note:'The link contains the job itself (compressed) – there is no server. Anyone who gets the link can read it, so send it only to people you trust. Photos are never included; use the job file for those. The other person opens it in this app and gets a copy.'})}
+async function shareLink(L){
+  var t=(S.title||'').trim()||'Plumbing job';
+  if(navigator.share){try{await navigator.share({title:'Plumbing job: '+t,text:'Plumbing job: '+t+' – open in Plumbing Sketch',url:L.url});return}catch(e){if(e&&e.name==='AbortError')return}}
+  copyLink(L)}
+async function copyLink(L){
+  try{await navigator.clipboard.writeText(L.url);toast('Link copied – paste it into WhatsApp or a message',3600);return}catch(e){}
+  try{var ta=document.createElement('textarea');ta.value=L.url;ta.style.cssText='position:fixed;left:0;top:0;opacity:0';document.body.appendChild(ta);ta.focus();ta.select();var ok=document.execCommand('copy');ta.remove();if(ok){toast('Link copied – paste it into WhatsApp or a message',3600);return}}catch(e){}
+  askText({title:'Copy this link',value:L.url,placeholder:'',cancel:'Close'})}
+
+/* =====================================================================
+   v3.17  JOB TEMPLATES - common jobs, pre-placed parts, labels and typical sizes.
+   Everything is normal, editable sketch items (move, resize, relabel, delete).
+   Sizes are typical starting points - check the job, the maker's instructions and the current standard.
+   ===================================================================== */
+var C_COLD='#1565e6',C_HOT='#e0202f',C_INK='#14202e';
+function tLab(o,txt,x,y,col,size){o.push(tT(txt,x,y,col||C_INK,size))}
+/* geyser replacement: roof space (horizontal geyser on a drip tray) */
+function tplGeyserRoof(){
+  var o=[],tr=tS('drip',0,0,PI,{s:1.45});o.push(tr);
+  var g=tS('geyser_h',0,0,PI,{mm:22,mat:'cu'});o.push(g);var P=portsW(g);
+  var hotP=P[0].y<P[1].y?P[0]:P[1],coldP=hotP===P[0]?P[1]:P[0],tp=P[2];
+  tChain(hotP,[120,'vacbreak',500],'cu',22,'hot',o);
+  tChain(coldP,[120,'vacbreak',100,'prv',100,'nrv',100,'ballvalve',400],'cu',22,'cold',o);
+  tChain(tp,[120,'ptr',300],'cu',22,null,o);
+  var dp=portsW(tr)[0];o.push(tP(dp.x/K,dp.y/K,dp.x/K,dp.y/K+900,'pvc',40,null,'Tray waste 40 mm - to outside'));
+  o.push(tS('isolator',700,-800));
+  tLab(o,'GEYSER REPLACEMENT - ROOF SPACE',0,-1200,C_INK,18);
+  tLab(o,'Hot out: vacuum breaker, 22 mm copper',1300,-330,C_HOT);
+  tLab(o,'Cold in: isolating valve, NRV, PRV, vacuum breaker',1300,330,C_COLD);
+  tLab(o,'T&P valve: 22 mm metal pipe to outside, falling, visible',-1900,-420,C_INK);
+  tLab(o,'Drip tray under geyser & valves, 40 mm waste falling to outside (1:40)',-300,1250,C_INK);
+  tLab(o,'Isolator switch',700,-1000,C_INK);
+  tLab(o,'Flush unions on valves - insulate first 1 m hot & T&P pipe - support pipes',0,1500,'#e07b00',12);
+  return o}
+/* geyser replacement: indoor (vertical cylinder in a cupboard) */
+function tplGeyserIndoor(){
+  var o=tRoom(1100,1100,110),tr=tS('drip',550,620,0,{s:1.15});o.push(tr);
+  var g=tS('geyser',550,560,0,{mm:22,mat:'cu'});o.push(g);var P=portsW(g);
+  var hotP=P[0].x<P[1].x?P[0]:P[1],coldP=hotP===P[0]?P[1]:P[0];
+  tChain(hotP,[200,'ptr',150,'vacbreak',800],'cu',22,'hot',o);
+  tChain(coldP,[250,'vacbreak',150,'prv',150,'nrv',150,'ballvalve',700],'cu',22,'cold',o);
+  var dp=portsW(tr)[0];o.push(tP(dp.x/K,dp.y/K,dp.x/K-1300,dp.y/K,'pvc',40,null,'Tray waste 40 mm to outside'));
+  o.push(tS('isolator',1400,900),tS('door',550,1100));
+  tLab(o,'GEYSER REPLACEMENT - INDOOR',550,-2000,C_INK,18);
+  tLab(o,'Hot out: T&P valve, vacuum breaker',1200,-1450,C_HOT);
+  tLab(o,'Cold in: isolator, NRV, PRV, vacuum breaker',1200,-900,C_COLD);
+  tLab(o,'T&P discharge 22 mm metal to outside (falling)',-1500,300,C_INK);
+  tLab(o,'Drip tray + 40 mm waste falling to outside (1:40)',-1500,1000,C_INK);
+  return o}
+/* basin swap */
+function tplBasinSwap(){
+  var o=[tW(-900,0,1500,0,110)],b=tS('basin_wall',300,210,0);o.push(b);
+  o.push(tS('mixer',300,55,0));
+  o.push(tS('stopcock',100,-420,0),tS('stopcock',500,-420,0));
+  o.push(tP(100,-900,100,-450,'cu',15,'cold','Cold 15 mm'),tP(500,-900,500,-450,'cu',15,'hot','Hot 15 mm'));
+  o.push(tP(100,-420,100,-60,'cu',15,'cold'),tP(500,-420,500,-60,'cu',15,'hot'));
+  o.push(tS('btrap',300,480,0,{mm:32}));
+  o.push(tP(300,600,300,1100,'pvc',32,null,'Waste 32-40 mm'),tP(300,1100,-800,1100,'pvc',40,null,'to stack / gully, fall 1:40'));
+  tLab(o,'BASIN SWAP',300,-1200,C_INK,18);
+  tLab(o,'Isolate with angle stop taps, flexi hoses to new taps',900,-420,C_COLD,12);
+  tLab(o,'Bottle / P-trap with water seal - check waste for leaks',900,480,C_INK,12);
+  tLab(o,'1. Isolate & drain  2. Remove old basin  3. Fit new  4. Test  5. Check for leaks',300,1400,'#e07b00',12);
+  return o}
+/* new bathroom rough-in */
+function tplBathRough(){
+  var o=tRoom(3000,2400);
+  o.push(tS('toilet',2650,405),tS('basin_wall',2050,255),tS('shower_rect',450,600),tS('door',2300,2400),tS('window',0,1600,PI/2),tS('room',1300,1500,0,{label:'BATHROOM - ROUGH-IN',s:0.5}));
+  o.push(tP(300,1250,2750,1250,'cu',22,'cold','Cold 22 mm'),tP(300,1320,2200,1320,'cu',22,'hot','Hot 22 mm'),
+    tP(2050,1250,2050,455,'cu',15,'cold'),tP(1950,1320,1950,455,'cu',15,'hot'),tP(2650,1250,2650,800,'cu',15,'cold'),
+    tP(450,1250,450,1100,'cu',15,'cold'),tP(350,1320,350,1100,'cu',15,'hot'));
+  o.push(tS('ballvalve',900,1250,0,{mm:22,mat:'cu'}),tS('ballvalve',900,1320,0,{mm:22,mat:'cu'}));
+  o.push(tP(2650,800,2650,1800,'pvc',110,null,'WC 110 mm'),tP(2650,1800,300,1800,'pvc',110,null,'110 mm soil to drain, fall 1:40'),
+    tP(2050,455,2050,1800,'pvc',40,null,'Basin 40'),tP(450,1100,450,1800,'pvc',50,null,'Shower 50'));
+  o.push(tS('ftrap',450,1000,0),tS('aav',300,1800,0,{mm:110,mat:'pvc'}),tS('ic2',-200,1800,0));
+  tLab(o,'Supply: isolating valves at entry, pressure test before closing up',1500,1600,C_COLD,12);
+  tLab(o,'Set pan / tap / shower positions from the fixture makers rough-in sheets',1500,2050,'#e07b00',12);
+  return o}
+/* kitchen sink + dishwasher */
+function tplKitchenDW(){
+  var o=[tW(-600,0,3400,0,110)];
+  o.push(tS('cupboard',1100,300,0),tS('sink',1750,320,0),tS('dishw',2750,300,0));
+  o.push(tS('stopcock',1500,-300,0),tS('stopcock',1900,-300,0),tS('stopcock',2750,-300,0));
+  o.push(tP(1500,-900,1500,-330,'cu',15,'cold','Cold 15'),tP(1900,-700,1900,-330,'cu',15,'hot','Hot 15'),tP(1500,-700,2750,-700,'cu',15,'cold'),tP(2750,-700,2750,-330,'cu',15,'cold'));
+  o.push(tS('mixer',1700,120,0),tS('nrv',2750,-520,0,{mm:15,mat:'cu'}));
+  o.push(tP(1700,600,1700,1100,'pvc',40,null,'Sink waste 40 mm'),tS('btrap',2400,1100,0,{mm:40}));
+  o.push(tP(1700,1100,-500,1100,'pvc',50,null,'50 mm to gully, fall 1:40'));
+  o.push(tP(2750,600,2750,1000,'pvc',40,null,'Dishwasher drain hose to trap spigot'),tP(2750,1000,1700,1100,'pvc',40));
+  tLab(o,'KITCHEN SINK + DISHWASHER',1500,-1300,C_INK,18);
+  tLab(o,'Angle stop taps + flexi hoses; dishwasher cold feed with NRV',2400,-900,C_COLD,12);
+  tLab(o,'Dishwasher hose loops high (above trap) before the spigot',2100,1350,C_INK,12);
+  return o}
+/* washing machine point */
+function tplWasher(){
+  var o=[tW(-800,0,2000,0,110)];
+  o.push(tS('washer',600,360,0));
+  o.push(tS('stopcock',300,-320,0),tS('stopcock',900,-320,0));
+  o.push(tP(300,-900,300,-350,'cu',15,'cold','Cold 15 mm'),tP(900,-900,900,-350,'cu',15,'hot','Hot 15 mm (optional)'));
+  o.push(tP(1400,100,1400,900,'pvc',40,null,'Standpipe 40 mm'),tS('ptrap',1400,900,0,{mm:40}));
+  o.push(tP(1400,1000,1400,1400,'pvc',40),tP(1400,1400,-600,1400,'pvc',50,null,'to gully / waste, fall 1:40'));
+  tLab(o,'WASHING MACHINE POINT',600,-1200,C_INK,18);
+  tLab(o,'Machine has its own cold (and hot) stop taps, braided hoses',1300,-320,C_COLD,12);
+  tLab(o,'Standpipe: open top, trapped, hose hooks in - not sealed',1750,600,C_INK,12);
+  return o}
+/* outside tap */
+function tplOutsideTap(){
+  var o=[tW(-1500,0,1500,0,230)];
+  o.push(tS('ballvalve',0,-550,0,{mm:15,mat:'cu'}),tS('draincock',0,-850,0,{mm:15,mat:'cu'}));
+  o.push(tP(0,-1800,0,-600,'cu',15,'cold','Cold 15 mm from main / branch'));
+  o.push(tP(0,-500,0,300,'cu',15,'cold'));
+  o.push(tS('vacbreak',0,420,0,{mm:15,mat:'cu'}),tP(0,470,0,700,'cu',15,'cold'));
+  o.push(tS('hosebib',0,850,PI/2,{mm:15,mat:'cu'}));
+  tLab(o,'OUTSIDE TAP',0,-2100,C_INK,18);
+  tLab(o,'Isolating valve + drain cock inside the wall (frost)',700,-700,C_COLD,12);
+  tLab(o,'Hose-connection vacuum breaker / check valve at the tap',500,430,C_INK,12);
+  tLab(o,'OUTSIDE',-1100,600,'#6b7a8c',12);tLab(o,'INSIDE',-1100,-600,'#6b7a8c',12);
+  return o}
+/* septic connection (house to an existing tank) */
+function tplSepticConn(){
+  var o=[tW(-1500,0,1500,0,230)];
+  o.push(tS('toilet',0,-450,0));
+  o.push(tP(0,-200,0,810,'pvc',110,null,'110 mm soil'),tS('ic2',0,1100,PI/2),tS('vent',400,-150,0,{mm:110,mat:'pvc'}));
+  var st=tS('septic',0,4300,PI/2);o.push(st);
+  o.push(tP(0,1390,0,3150,'pvc',110,null,'110 mm drain, fall 1:40 (min 1:60)'));
+  o.push(tS('fall',300,2200,PI/2,{s:0.5}));
+  o.push(tD(1000,0,1000,1100),tD(1000,1100,1000,4300));
+  tLab(o,'SEPTIC CONNECTION',0,-1300,C_INK,18);
+  tLab(o,'Inspection eye at the house (rodding access)',700,1100,C_INK,12);
+  tLab(o,'Septic tank inlet - pipe enters sealed, invert above outlet',700,3150,C_INK,12);
+  tLab(o,'Keep clear of boundaries / borehole - check local authority',-1400,2200,'#e07b00',12);
+  return o}
+/* gully / drain replacement */
+function tplGullyRepl(){
+  var o=[];
+  o.push(tS('gully',0,0,0),tS('ic2',1800,0,0),tS('sewer',3600,0,0));
+  var gp=portsW(o[0])[0];
+  o.push(tP(gp.x/K,gp.y/K,1510,0,'pvc',110,null,'110 mm drain, fall 1:40'),tP(2090,0,3330,0,'pvc',110,null,'to sewer / main drain'));
+  o.push(tP(-700,-900,-200,-300,'pvc',50,null,'50 mm waste ends below grating'));
+  o.push(tS('fall',1100,-250,0,{s:0.5}));
+  o.push(tD(0,650,1800,650),tD(1800,650,3600,650));
+  tLab(o,'GULLY / DRAIN REPLACEMENT',1800,-1200,C_INK,18);
+  tLab(o,'Yard gully: grating above ground level, water seal in place',-300,300,C_INK,12);
+  tLab(o,'Inspection eye for rodding',1800,-350,C_INK,12);
+  tLab(o,'Bed & surround pipe in sand, test before backfilling',1800,1000,'#e07b00',12);
+  return o}
+TEMPLATES.push(
+ ['geyser_roof','Geyser replacement - roof space','Horizontal geyser, drip tray, T&P, vacuum breakers, PRV, NRV',tplGeyserRoof],
+ ['geyser_in','Geyser replacement - indoor','Vertical geyser in cupboard, drip tray & waste, valves',tplGeyserIndoor],
+ ['basin_swap','Basin swap','Wall basin, mixer, stop taps, trap and waste',tplBasinSwap],
+ ['bath_rough','New bathroom rough-in','Supply 22/15 mm, 110 mm soil, 50/40 mm wastes, vent',tplBathRough],
+ ['kitchen_dw','Kitchen sink + dishwasher','Sink, dishwasher, stop taps, NRV, trap, waste',tplKitchenDW],
+ ['washer_pt','Washing machine point','Stop taps, standpipe, trap and waste',tplWasher],
+ ['outside_tap','Outside tap','Isolator, drain cock, vacuum breaker, hose bib',tplOutsideTap],
+ ['septic_conn','Septic connection','House outlet, inspection eye, 110 mm drain to tank',tplSepticConn],
+ ['gully_repl','Gully / drain replacement','Gully, 110 mm drain, inspection eye, sewer',tplGullyRepl]);
 
 /* ---------- photo ---------- */
 function onPhoto(file){
@@ -2851,11 +3925,43 @@ function pdfFromCanvas(c){
   put('trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF');
   return new Blob(parts,{type:'application/pdf'});
 }
-async function doShare(kind){
-  if(!S.items.length&&!S.bg){toast('Draw something first');return}
+function pdfFromPages(pages){
+  var N=pages.length,parts=[],off=[],len=0;function put(s){var u=new Uint8Array(s.length);for(var k=0;k<s.length;k++)u[k]=s.charCodeAt(k)&255;parts.push(u);len+=u.length}
+  function obj(id,s){off[id]=len;put(id+' 0 obj\n'+s+'\nendobj\n')}
+  put('%PDF-1.4\n');obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  var kids=[];for(var p=0;p<N;p++)kids.push((3+p*3)+' 0 R');obj(2,'<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+N+' >>');
+  pages.forEach(function(cv,p){
+    var base=3+p*3,jpg=atob(cv.toDataURL('image/jpeg',0.86).split(',')[1]),n=jpg.length,bytes=new Uint8Array(n),k;for(k=0;k<n;k++)bytes[k]=jpg.charCodeAt(k);
+    var sc=(cv.width>cv.height?842:595)/cv.width,pw=Math.round(cv.width*sc),ph=Math.round(cv.height*sc);
+    obj(base,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+pw+' '+ph+'] /Resources << /XObject << /Im0 '+(base+2)+' 0 R >> >> /Contents '+(base+1)+' 0 R >>');
+    var cs='q '+pw+' 0 0 '+ph+' 0 0 cm /Im0 Do Q';obj(base+1,'<< /Length '+cs.length+' >>\nstream\n'+cs+'\nendstream');
+    off[base+2]=len;put((base+2)+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+cv.width+' /Height '+cv.height+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+n+' >>\nstream\n');
+    parts.push(bytes);len+=n;put('\nendstream\nendobj\n')});
+  var total=3+N*3,xr=len;put('xref\n0 '+total+'\n0000000000 65535 f \n');for(var q=1;q<total;q++)put(('0000000000'+off[q]).slice(-10)+' 00000 n \n');
+  put('trailer\n<< /Size '+total+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF');
+  return new Blob(parts,{type:'application/pdf'})}
+function sketchPage(){
+  var ex=renderExport(),land=ex.width/ex.height>1.2,pg=newPage(land),x=pg.x;pageHead(pg,'SKETCH');
+  var mx=50,top=170,bot=70,aw=pg.w-2*mx,ah=pg.h-top-bot,sc=Math.min(aw/ex.width,ah/ex.height),w=ex.width*sc,h=ex.height*sc;
+  x.drawImage(ex,mx+(aw-w)/2,top+(ah-h)/2,w,h);x.strokeStyle='#d3dbe4';x.lineWidth=2;x.strokeRect(mx+(aw-w)/2,top+(ah-h)/2,w,h);pageFoot(pg,1,1);return pg}
+async function buildPdf(opts){
+  opts=opts||{};var pack=opts.pack||cardHas(S.card)||opts.quote;
+  if(!pack)return pdfFromCanvas(renderExport());
+  var pgs=[];
+  if(opts.quote&&!opts.pack){quotePages().forEach(function(p){pgs.push(p)});return pdfFromPages(pgs.map(function(p){return p.c}))}
+  if(cardHas(S.card))pgs.push(cardPage());
+  if(S.card&&S.card.photos.length){var pp=await photoPages();pp.forEach(function(p){pgs.push(p)})}
+  if(S.items.some(function(i){return i.t!=='erase'})||S.bg)pgs.push(sketchPage());
+  bomPages().forEach(function(p){pgs.push(p)});
+  if(opts.quote)quotePages().forEach(function(p){pgs.push(p)});
+  if(!pgs.length)pgs.push(sketchPage());
+  var tot=pgs.length;pgs.forEach(function(pg,i){if(tot>1){var x=pg.x;x.fillStyle='#fff';x.fillRect(pg.w-330,pg.h-66,260,34);x.fillStyle='#8a99ab';x.font='600 20px '+FONT;x.textAlign='right';x.textBaseline='alphabetic';x.fillText('Page '+(i+1)+' of '+tot,pg.w-70,pg.h-40);x.textAlign='left'}});
+  return pdfFromPages(pgs.map(function(p){return p.c}))}
+async function doShare(kind,opts){
+  if(!S.items.length&&!S.bg&&!cardHas(S.card)){toast('Draw something first');return}
   var name,blob,type;
-  toast('Preparing image…',1500);await new Promise(function(r){setTimeout(r,30)});
-  if(kind==='pdf'){blob=pdfFromCanvas(renderExport());name=fname('pdf');type='application/pdf'}
+  toast('Preparing '+(kind==='pdf'?'PDF':'image')+'…',1800);await new Promise(function(r){setTimeout(r,30)});
+  if(kind==='pdf'){blob=await buildPdf(opts);name=fname('pdf');type='application/pdf'}
   else{blob=await exportBlob();name=fname('png');type='image/png'}
   var file=new File([blob],name,{type:type});
   if(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){
@@ -2864,8 +3970,8 @@ async function doShare(kind){
   }
   download(blob,name);toast('Sharing isn’t available here – saved '+name+'. Send it from your gallery / downloads.',4200);
 }
-async function doSave(kind){
-  if(kind==='pdf'){download(pdfFromCanvas(renderExport()),fname('pdf'));toast('PDF saved');return}
+async function doSave(kind,opts){
+  if(kind==='pdf'){toast('Preparing PDF…',1500);await new Promise(function(r){setTimeout(r,30)});download(await buildPdf(opts),fname('pdf'));toast('PDF saved');return}
   var b=await exportBlob();download(b,fname('png'));toast('Image saved');
 }
 
@@ -2895,15 +4001,19 @@ window.addEventListener('appinstalled',function(){deferredInstall=null;toast('In
 function menuSheet(){
   var items=[
     {head:'Job'},
-    {ic:'list',label:'Materials list',sub:'Fittings & pipe lengths',primary:true,fn:bomSheet},
+    {ic:'list',label:'Job card',sub:cardSummary(),primary:true,fn:jobCardSheet},
+    {ic:'list',label:'Materials list',sub:'Fittings & pipe lengths',fn:bomSheet},
+    {ic:'pdf',label:'Quote',sub:quoteSummary(),fn:quoteSheet},
     {ic:'folder',label:'My jobs',sub:jobIndex().length+' saved',fn:jobsSheet},
     {ic:'tmpl',label:'Templates',sub:'Bathroom, kitchen, geyser, septic…',fn:templatesSheet},
+    {ic:'info',label:'Compliance tips',sub:tipsOn()?(tipCache.length?tipCache.length+' to look at':'On – nothing flagged'):'Off',fn:tipSheet},
     {ic:'layers',label:'Layers'+(hiddenCount()?' ('+hiddenCount()+' hidden)':''),fn:layersSheet},
+    {ic:'share',label:'Share job link',sub:'Compact link, no server',fn:linkSheet},
     {ic:'export',label:'Send job file',sub:'For your workers',fn:function(){exportJob()}},
     {ic:'import',label:'Import job file',fn:importJobPick},
     {head:'Share'},
     {ic:'share',label:'Share as image (PNG)',sub:'Best for WhatsApp',primary:true,fn:function(){doShare('png')}},
-    {ic:'pdf',label:'Share as PDF',fn:function(){doShare('pdf')}},
+    {ic:'pdf',label:'Share as PDF',sub:cardHas(S.card)?'Job card + photos + sketch + materials':'Sketch (add a job card to include it)',fn:function(){doShare('pdf')}},
     {ic:'save',label:'Save image',fn:function(){doSave('png')}},
     {ic:'pdf',label:'Save PDF',fn:function(){doSave('pdf')}},
     {head:'Drawing'},
@@ -2920,10 +4030,10 @@ function menuSheet(){
     {ic:'legend',label:'Room colours & area: '+(prefs.rooms!==false?'ON':'off'),sub:'Closed wall loops get a colour and m²',on:prefs.rooms!==false,fn:function(){prefs.rooms=prefs.rooms===false;savePrefs();render()}},
     {ic:'fit',label:'Scale bar: '+(prefs.scalebar!==false?'ON':'off'),on:prefs.scalebar!==false,fn:function(){prefs.scalebar=prefs.scalebar===false;savePrefs();render()}},
     {ic:'type',label:'Pipe size on labels: '+(prefs.sizeTag!==false?'ON':'off'),sub:'Shows e.g. “22 mm · 1.5 m” on every pipe',on:prefs.sizeTag!==false,fn:function(){prefs.sizeTag=prefs.sizeTag===false;savePrefs();render()}},
-    {ic:'view',label:'Drawing mode: '+(elevOn()?'Elevation':'Plan'),sub:elevOn()?'Front/side views, floor line & heights – tap for Plan':'Tap for Elevation: build a wall elevation with heights',on:elevOn(),fn:function(){S.mode=elevOn()?'plan':'elev';if(elevOn()){ensureFloor()}save();buildOpts();render();toast(elevOn()?'Elevation mode – parts are placed front-on, heights from the floor line':'Plan mode',2600)}},
+    {ic:'view',label:'Drawing mode: '+(isoOn()?'Isometric':elevOn()?'Elevation':'Plan'),sub:'Plan · Elevation (heights) · Isometric (3-D pipe runs)',on:S.mode!=='plan',fn:modeSheet},
     {ic:'grid',label:'Grid: '+(S.grid?'ON':'off'),sub:'Helps line things up',on:S.grid,fn:function(){S.grid=!S.grid;save();render()}},
     {ic:'type',label:'Ask for pipe label: '+(prefs.ask?'ON':'off'),on:prefs.ask,fn:function(){prefs.ask=!prefs.ask;savePrefs()}},
-    {ic:'fit',label:'Pipe length scale: '+LSN.filter(function(z){return z[1]===LS})[0][0],sub:'How long typed lengths are drawn',fn:function(){var i=0;LSN.forEach(function(z,n){if(z[1]===LS)i=n});LS=LSN[(i+1)%LSN.length][1];savePrefs();rescaleAll();toast('Length scale: '+LSN.filter(function(z){return z[1]===LS})[0][0])}},
+    {ic:'fit',hide:S.mode!=='plan',label:'Pipe length scale: '+LSN.filter(function(z){return z[1]===LS})[0][0],sub:'How long typed lengths are drawn',fn:function(){var i=0;LSN.forEach(function(z,n){if(z[1]===LS)i=n});LS=LSN[(i+1)%LSN.length][1];savePrefs();rescaleAll();toast('Length scale: '+LSN.filter(function(z){return z[1]===LS})[0][0])}},
     {ic:'fit',label:'Fit to screen',fn:function(){fitView()}},
     {ic:'example',label:'Load example',fn:loadExample},
     {ic:'clear',label:'Clear drawing',danger:true,fn:function(){if(!S.items.length){toast('Nothing to clear');return}S.items=[];setSel(null);commit();toast('Cleared – tap Undo to bring it back')}},
@@ -2931,6 +4041,7 @@ function menuSheet(){
   ];
   var standalone=window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches;
   if(!standalone){items.push({head:'App'});items.push({ic:'install',label:'Install on phone',sub:deferredInstall?'Adds to home screen':'Chrome menu ⋮ → Add to Home screen',fn:function(){if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast('In Chrome tap ⋮ then “Add to Home screen”',4200)}})}
+  items=items.filter(function(m){return !m.hide});
   sheet('Menu',items,{note:'Plumbing Sketch v'+VERSION+' · works offline · drawings are saved on this phone.'});
 }
 function applyTheme(){var t=prefs.theme;if(t!=='dark'&&t!=='light')t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
@@ -2965,11 +4076,11 @@ window.addEventListener('orientationchange',function(){setTimeout(fit,250)});
 if(window.ResizeObserver)new ResizeObserver(function(){fit()}).observe(stage);
 
 /* ---------- init ---------- */
-load();applyView();initButtons();buildTools();buildOpts();
+load();applyView();initButtons();buildTools();buildOpts();tipsSoon();linkBoot();
 hist=[snap()];hi=0;updUndo();updLayBtn();
 fit();
 window.addEventListener('load',fit);
-window.__ps={setSel:setSel,dbgDrag:function(){return drag&&drag.type},selInfo:function(){return sel&&sel.t},setMulti:setMulti,__draw:function(x,sp,lw){INKC=INK;PXL=1/lw;FLIP=1;DZ=1;vDraw(x,sp,lw)},elev:{on:elevOn,level:vLevel,setLevel:vSetLevel,setView:setViewOf,placeView:placeView,ensureFloor:ensureFloor,VW:VW,vSpec:vSpec},labelStats:function(){return [LSHOWN,LTOTAL]},applyView:applyView,findRooms:findRooms,wallCtx:wallCtx,wallCtxEnd:wallCtxEnd,wallSetLen:wallSetLen,snapToWall:snapToWall,wallPolys:wallPolys,wallsAll:wallsAll,ridersOf:ridersOf,bomData:bomData,bomText:bomText,bomRows:bomRows,TEMPLATES:TEMPLATES,placeTemplate:placeTemplate,jobIndex:jobIndex,openJob:openJob,newJob:newJob,duplicateJob:duplicateJob,deleteJob:deleteJob,jobFileObj:jobFileObj,importJobFile:importJobFile,layerOf:layerOf,hidden:hidden,autoDim:autoDim,renderExport:renderExport,saveNow:saveNow,selSet:selSet,setSelMode:setSelMode,alignSet:alignSet,shiftItem:shiftItem,commit:commit,undo:undo,redo:redo,hist:function(){return hist.length},S:S,V:V,fitView:fitView,loadExample:loadExample,stampDef:stampDef,STAMPS:STAMPS,portsW:portsW,render:render,MATS:MATS,tileCanvas:tileCanvas,CATS:CATS,partCatSet:function(c){partCat=c;partSearch='';buildOpts()}};
+window.__ps={makeJobLink:makeJobLink,parseJobLink:parseJobLink,openLinkHash:openLinkHash,linkSheet:linkSheet,importJobObj:importJobObj,tipList:tipList,tipsVisible:tipsVisible,tipsUpdate:tipsUpdate,tipSheet:tipSheet,supportSpacing:supportSpacing,quoteSheet:quoteSheet,quoteCalc:quoteCalc,quoteText:quoteText,qLines:qLines,parsePrices:parsePrices,pbApply:pbApply,pbLoad:pbLoad,pbCSV:pbCSV,cleanQuote:cleanQuote,theQuote:theQuote,num:num,fmtR:fmtR,priceBookSheet:priceBookSheet,quotePages:quotePages,importJobFile:importJobFile,theCard:theCard,phGet:phGet,phGc:phGc,phKeys:phKeys,buildPdf:buildPdf,jobFileObjA:jobFileObjA,cleanCard:cleanCard,jobCardSheet:jobCardSheet,setSel:setSel,dbgDrag:function(){return drag&&drag.type},selInfo:function(){return sel&&sel.t},setMulti:setMulti,__draw:function(x,sp,lw){INKC=INK;PXL=1/lw;FLIP=1;DZ=1;vDraw(x,sp,lw)},elev:{on:elevOn,level:vLevel,setLevel:vSetLevel,setView:setViewOf,placeView:placeView,ensureFloor:ensureFloor,VW:VW,vSpec:vSpec},labelStats:function(){return [LSHOWN,LTOTAL]},applyView:applyView,findRooms:findRooms,wallCtx:wallCtx,wallCtxEnd:wallCtxEnd,wallSetLen:wallSetLen,snapToWall:snapToWall,wallPolys:wallPolys,wallsAll:wallsAll,ridersOf:ridersOf,bomData:bomData,bomText:bomText,bomRows:bomRows,TEMPLATES:TEMPLATES,ISOTPL:ISOTPL,placeTemplate:placeTemplate,jobIndex:jobIndex,openJob:openJob,newJob:newJob,duplicateJob:duplicateJob,deleteJob:deleteJob,jobFileObj:jobFileObj,importJobFile:importJobFile,layerOf:layerOf,hidden:hidden,autoDim:autoDim,renderExport:renderExport,saveNow:saveNow,selSet:selSet,setSelMode:setSelMode,alignSet:alignSet,shiftItem:shiftItem,commit:commit,undo:undo,redo:redo,hist:function(){return hist.length},S:S,V:V,fitView:fitView,loadExample:loadExample,stampDef:stampDef,STAMPS:STAMPS,portsW:portsW,render:render,MATS:MATS,tileCanvas:tileCanvas,CATS:CATS,partCatSet:function(c){partCat=c;partSearch='';buildOpts()}};
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')){
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(r){window.__swReg=true}).catch(function(){})});
 }
