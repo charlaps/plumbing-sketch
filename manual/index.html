@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en-ZA" data-theme="auto" data-size="m">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="APS Manual">
+<meta name="theme-color" content="#0b2a4a" id="themeMeta">
+<meta name="description" content="APS Field Service Manual: offline plumbing checklists, safety, SANS quick guide and calculators for the APS crew.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>APS Field Manual</title>
+<script>try{var p=JSON.parse(localStorage.getItem('apsm.pref')||'{}');var d=document.documentElement;if(p.theme)d.setAttribute('data-theme',p.theme);if(p.size)d.setAttribute('data-size',p.size)}catch(e){}</script>
+<style>
+:root{--bg:#f1f5f9;--surface:#fff;--surface2:#eaf0f6;--line:#d3dde8;--text:#10243a;--muted:#4f647b;--brand:#0b2a4a;--brand2:#134a78;--accent:#0b8196;--accent-soft:#dff3f7;--on-accent:#fff;--warn:#b42318;--warn-soft:#fdecea;--ok:#177a43;--ok-soft:#e3f5ea;--amber:#8a5a00;--amber-soft:#fff4d6;--shadow:0 2px 8px rgba(10,30,60,.12);--r:16px}
+html[data-theme=dark]{--bg:#0b131c;--surface:#15202c;--surface2:#1d2b3a;--line:#2b3c4f;--text:#e9eff6;--muted:#a1b3c7;--brand:#08182a;--brand2:#0f3a60;--accent:#3cc6d9;--accent-soft:#12394a;--on-accent:#04222a;--warn:#ff8d82;--warn-soft:#3a1a1a;--ok:#5fd68f;--ok-soft:#133323;--amber:#f3c969;--amber-soft:#3a2e10;--shadow:0 2px 8px rgba(0,0,0,.5)}
+@media (prefers-color-scheme:dark){html[data-theme=auto]{--bg:#0b131c;--surface:#15202c;--surface2:#1d2b3a;--line:#2b3c4f;--text:#e9eff6;--muted:#a1b3c7;--brand:#08182a;--brand2:#0f3a60;--accent:#3cc6d9;--accent-soft:#12394a;--on-accent:#04222a;--warn:#ff8d82;--warn-soft:#3a1a1a;--ok:#5fd68f;--ok-soft:#133323;--amber:#f3c969;--amber-soft:#3a2e10;--shadow:0 2px 8px rgba(0,0,0,.5)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;font-size:100%}
+html[data-size=l]{font-size:112.5%}
+html[data-size=xl]{font-size:125%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:1.125rem;line-height:1.5;overflow-wrap:anywhere}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation;border:0;background:none;padding:0}
+a{color:var(--accent)}
+svg.ic{width:1.5rem;height:1.5rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#bar{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--brand),var(--brand2));color:#fff;display:flex;align-items:center;gap:4px;padding:calc(env(safe-area-inset-top) + 6px) 8px 6px;min-height:58px}
+#bar h1{flex:1;min-width:0;margin:0;font-size:1.1rem;line-height:1.2;font-weight:700;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ib{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;flex:none}
+.ib:active{background:rgba(255,255,255,.18)}
+.ib[hidden]{display:none}
+#bar .on svg{fill:#ffd34d;stroke:#ffd34d}
+#view{max-width:760px;margin:0 auto;padding:12px 12px calc(96px + env(safe-area-inset-bottom))}
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+#nav a{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:60px;font-size:.72rem;font-weight:600;color:var(--muted);text-decoration:none}
+#nav a.cur{color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:0 0 12px;box-shadow:var(--shadow)}
+.hero{display:flex;align-items:center;gap:12px;margin:2px 0 12px}
+.hero .logo{width:56px;height:56px;border-radius:14px;flex:none}
+.hero h2{margin:0;font-size:1.35rem;line-height:1.15}
+.hero p{margin:2px 0 0;color:var(--muted);font-size:.9rem}
+.searchbtn{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;border-radius:16px;background:var(--surface);border:2px solid var(--line);padding:0 16px;color:var(--muted);text-align:left;font-size:1.05rem;margin-bottom:12px}
+.quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.qbtn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:56px;border-radius:16px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:1rem;text-decoration:none;padding:6px 10px;text-align:center;line-height:1.2}
+.qbtn.alt{background:var(--brand2);color:#fff}
+html[data-theme=dark] .qbtn.alt{background:var(--surface2);color:var(--text)}
+@media (prefers-color-scheme:dark){html[data-theme=auto] .qbtn.alt{background:var(--surface2);color:var(--text)}}
+.sechd{margin:16px 2px 8px;font-size:.85rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;gap:4px;min-height:132px;padding:12px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);text-decoration:none;color:var(--text);position:relative}
+.tile:active,.row:active{transform:scale(.98)}
+.tile .ti{width:46px;height:46px;border-radius:14px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:2px}
+.tile .tn{position:absolute;top:10px;right:12px;font-weight:800;color:var(--muted);font-size:.9rem}
+.tile b{font-size:1.05rem;line-height:1.2}
+.tile small{color:var(--muted);font-size:.8rem;line-height:1.25}
+.tile.red .ti{background:var(--warn-soft);color:var(--warn)}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:10px;min-height:60px;padding:10px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--text);font-weight:600;line-height:1.25}
+.row span.t{flex:1;min-width:0}
+.row small{display:block;color:var(--muted);font-weight:400;font-size:.8rem}
+.row .chev{color:var(--muted)}
+.row .pin{color:#e0a800}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:8px 16px;border-radius:14px;background:var(--surface2);border:1px solid var(--line);font-weight:700;font-size:1rem;color:var(--text);text-decoration:none;flex:1 1 140px;text-align:center;line-height:1.2}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.wa{background:#1fa855;border-color:#1fa855;color:#fff}
+.btn.dng{color:var(--warn)}
+.btn:active{transform:scale(.97)}
+.btn.sm{min-height:46px;font-size:.95rem;flex:0 1 auto}
+h2.pt{font-size:1.4rem;line-height:1.2;margin:4px 0 4px}
+.crumb{color:var(--muted);font-size:.85rem;margin-bottom:6px}
+.blk{margin:0 0 14px}
+h3.bh{font-size:1.15rem;margin:18px 0 6px;color:var(--accent)}
+p.bp{margin:0 0 10px}
+ul.bl,ol.bl{margin:0 0 10px;padding-left:1.4em}
+ul.bl li,ol.bl li{margin:0 0 8px;padding-left:2px}
+ol.bl li::marker{font-weight:800;color:var(--accent)}
+.note,.warn,.sans,.verify{border-radius:14px;padding:12px 14px;margin:0 0 14px;border-left:6px solid var(--accent);background:var(--accent-soft)}
+.warn{border-color:var(--warn);background:var(--warn-soft)}
+.warn::before{content:"Warning";display:block;font-weight:800;color:var(--warn);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.sans{border-color:var(--ok);background:var(--ok-soft)}
+.verify{border-color:#d9a000;background:var(--amber-soft)}
+.badge{display:inline-block;margin-top:6px;padding:2px 10px;border-radius:99px;font-size:.78rem;font-weight:800;background:var(--surface);border:1px solid currentColor;color:var(--ok)}
+.verify .badge{color:var(--amber)}
+.tc{border:1px solid var(--line);background:var(--surface);border-radius:14px;margin:0 0 10px;overflow:hidden}
+.tc .th{padding:10px 14px;background:var(--surface2);font-weight:800}
+.tc .tr{padding:8px 14px;border-top:1px solid var(--line)}
+.tc .tr small{display:block;color:var(--muted);font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+table.ct{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 14px}
+table.ct th,table.ct td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+table.ct th{background:var(--surface2);font-size:.85rem}
+table.ct td:last-child{text-align:right;white-space:nowrap}
+.chk{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin:0 0 16px;box-shadow:var(--shadow);overflow:hidden}
+.chk .ch{display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--accent-soft)}
+.chk .ch b{flex:1;min-width:0}
+.chk .cnt{font-weight:800;color:var(--accent);flex:none}
+.prog{height:6px;background:var(--line)}
+.prog i{display:block;height:100%;width:0;background:var(--ok);transition:width .2s}
+label.ci{display:flex;align-items:flex-start;gap:14px;min-height:56px;padding:12px 14px;border-top:1px solid var(--line);cursor:pointer}
+label.ci:first-of-type{border-top:0}
+label.ci input{width:30px;height:30px;margin:0;flex:none;accent-color:var(--accent)}
+label.ci span{flex:1;min-width:0;padding-top:2px}
+label.ci input:checked+span{text-decoration:line-through;color:var(--muted)}
+.chk .cf{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+.chk .cf .btn{min-height:46px;font-size:.95rem}
+.fl{display:block;margin:0 0 12px}
+.fl>span{display:block;font-weight:700;font-size:.95rem;margin-bottom:4px}
+.fl input,.fl textarea,.fl select,.ci2{width:100%;min-height:52px;border-radius:12px;border:2px solid var(--line);background:var(--surface);padding:10px 12px;font-size:1rem}
+.fl textarea{min-height:100px;resize:vertical}
+.fl input:focus,.fl textarea:focus,.fl select:focus{border-color:var(--accent);outline:none}
+.fcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:0 0 16px;box-shadow:var(--shadow)}
+.fcard>h3{margin:0 0 10px;font-size:1.1rem}
+.tpl textarea{min-height:170px}
+.res{background:var(--brand);color:#fff;border-radius:var(--r);padding:14px;margin:6px 0 12px}
+html[data-theme=dark] .res{background:var(--surface2)}
+@media (prefers-color-scheme:dark){html[data-theme=auto] .res{background:var(--surface2)}}
+.res .big{font-size:1.9rem;font-weight:800;line-height:1.1;color:#fff;word-break:break-word}
+html[data-theme=dark] .res .big,html[data-theme=dark] .res{color:var(--text)}
+.res small{opacity:.85}
+.rrow{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.18)}
+.rrow:last-child{border-bottom:0}
+.rrow b{white-space:nowrap}
+.rrow.tot{font-size:1.15rem;font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.chip{min-height:52px;padding:6px 14px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font-weight:700;flex:1 1 90px;text-align:center;line-height:1.2}
+.chip small{display:block;font-weight:400;font-size:.7rem;color:var(--muted)}
+.chip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.sw{display:flex;align-items:center;gap:12px;min-height:52px;font-weight:600;margin:0 0 12px}
+.sw input{width:28px;height:28px;accent-color:var(--accent);flex:none}
+#q{width:100%;min-height:56px;border-radius:16px;border:2px solid var(--accent);background:var(--surface);padding:0 16px;font-size:1.1rem;margin-bottom:12px}
+mark{background:#ffe27a;color:#222;border-radius:3px;padding:0 1px}
+.snip{display:block;color:var(--muted);font-weight:400;font-size:.85rem;margin-top:2px}
+.pn{display:flex;gap:8px;margin-top:18px}
+.pn a{flex:1}
+#toast{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:50;margin:0 auto;max-width:520px;background:#111c28;color:#fff;border-radius:14px;padding:12px 16px;text-align:center;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+.foot{color:var(--muted);font-size:.8rem;text-align:center;margin:18px 0}
+.seg{display:flex;gap:8px;margin:0 0 14px}
+.seg button{flex:1;min-height:52px;border-radius:12px;border:2px solid var(--line);background:var(--surface);font-weight:700}
+.seg button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.inst{display:flex;align-items:center;gap:10px;background:var(--accent-soft);border-radius:16px;padding:10px 12px;margin-bottom:12px}
+.inst span{flex:1;font-weight:600;line-height:1.25}
+
+</style>
+</head>
+<body>
+<header id="bar">
+<button class="ib" id="back" type="button" aria-label="Back" hidden><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+<h1 id="title">APS Field Manual</h1>
+<button class="ib" id="star" type="button" aria-label="Pin this page" hidden><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg></button>
+</header>
+<main id="view" aria-live="off"><noscript>This manual needs JavaScript.</noscript></main>
+<nav id="nav" aria-label="Main">
+<a href="#/" data-nav="home"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></svg>Home</a>
+<a href="#/q" data-nav="search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/></svg>Search</a>
+<a href="#/fav" data-nav="fav"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Pinned</a>
+<a href="#/s/calc" data-nav="calc"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 11h2M12 11h2M8 15h2M12 15h2M8 19h2M12 19h2"/></svg>Calculators</a>
+<a href="#/settings" data-nav="settings"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Settings</a>
+</nav>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+var SECTIONS=[];
+SECTIONS.push({id:'about',title:'About APS & how we work',icon:'info',blurb:'Who we are, standards, punctuality, photos',pages:[
+{id:'about-us',title:'Who we are',kw:'company aps charl victor krugersdorp pretoria edenvale crew team promise values',b:[
+['p','APS is a plumbing company run by **Charl Knoetze**. We work in and around **Krugersdorp, Pretoria and Edenvale**.'],
+['p','This manual is for Charl and the crew. It is a quick guide for on site: short, plain steps you can follow with dirty hands. It does **not** replace the SANS standards, the manufacturer’s instructions or your training.'],
+['h','Our promise to every customer'],
+['ul',['Do the job properly the first time.','Be on time. If we will be late, say so early.','Explain the problem and the price in plain words, before we start.','Keep the site clean and protect the customer’s property.','Work safely and to the South African standards.','Take photos: before, during and after.','Leave the customer knowing what was done and what to do if there is a problem.']],
+['note','Put APS’s own details (VAT number, PIRB number, bank details, phone numbers) in **Contacts & company details**. They are saved on this phone only.'],
+['goto','Open Contacts & company details','co-details']
+]},
+{id:'about-how',title:'How we work',kw:'standards customers punctuality late on time landlord tenant body corporate access keys professional behaviour',b:[
+['h','Standards'],
+['ul',['We follow the South African national standards for plumbing (SANS 10252-1 water supply, SANS 10252-2 drainage, SANS 10254 geysers, SANS 10400-P drainage in the building regulations). See the **SANS quick guide**.','We follow the pipe and fitting maker’s instructions.','Where a Certificate of Compliance is needed, it is done by a person who is registered to issue it. See PIRB basics in the SANS quick guide.']],
+['sans','The SANS quick guide is a short summary only.'],
+['h','Customers'],
+['p','Our customers are homeowners, landlords and tenants, body corporates, estate agents, and small businesses. Always find out who the **decision maker** is (who approves the price and who pays) and who has the **keys and access**.'],
+['h','Punctuality'],
+['ol',['Confirm the address, time and job the day before.','Message the customer when you leave: “On my way, ETA ___”.','Aim to arrive on time. If you will be more than 15 minutes late, message the customer **before** the booked time.','If you cannot make it at all, phone – do not only send a message.','Be neat: clean APS clothing, clean boots, name on the shirt if possible.']],
+['h','On site behaviour'],
+['ul',['Greet and introduce yourself by name.','Ask before using the customer’s toilet, power or water.','No smoking, loud music or swearing on site.','Keep pets and children safely away from the work.','Never criticise another tradesperson in front of the customer. Tell Charl.','Do not promise what you cannot do. Phone Charl if unsure.']]
+]},
+{id:'about-photos',title:'Photos: what to take',kw:'photos pictures camera proof insurance evidence before after',b:[
+['p','Photos protect us and the customer. They prove what was there before, what we did, and that the job was finished properly. They also help with quotes and insurance claims.'],
+['chk','c.photos','Photo checklist',['Wide photo of the area before we start','Close photo of the problem (leak, damage, blocked fixture)','Geyser or fitting data plate (make, size, pressure rating, serial number)','Water meter reading (for leak jobs)','Pressure gauge reading before/after','Pipes in walls or floors BEFORE they are covered','Trench or drain with a tape measure showing depth/fall','Safety valve and its discharge pipe (geyser)','Finished work, from the same angle as the “before”','Area after clean-up','Signed certificate or job card']],
+['h','Tips'],
+['ul',['Hold the phone sideways (landscape). Wipe the lens.','Take one wide photo and one close photo.','Use a tape measure or your hand to show size.','Ask permission before photographing inside a home. Do not photograph people, documents or valuables.','Name the folder with the address and date, for example “12 Main St 2026-10-03”.','Send the photos to the end-of-day report.']]
+]}
+]});
+
+SECTIONS.push({id:'daily',title:'Daily routine',blurb:'Van check, arrival, hand-over, end-of-day report',icon:'sun',pages:[
+{id:'daily-van',title:'Van & tool check (morning)',kw:'van vehicle tools morning checklist stock fuel ladder',b:[
+['p','Do this every morning before you leave. It takes 5 minutes and saves a trip back.'],
+['chk','c.van','Morning van check',['Fuel, tyres and lights OK','Licence and phone with you; phone charged, power bank packed','Today’s job list and addresses','First aid kit complete','Fire extinguisher in date and in the van','PPE packed: boots, gloves, glasses, mask, hard hat, ear plugs','Tool bags loaded (see Tools and equipment)','Ladder(s) tied down; extension ladder in good condition','Pipe, fittings and consumables for today’s jobs','Spare isolating valves, flexi hoses, washers, PTFE tape','Drain cleaning kit (rods/machine), plunger','Dust sheets, buckets, mop, bags for waste','Pressure test pump and gauge (if needed)','Job cards / quotes and invoice book (or app) ready','Plumbing Sketch app opened once while online (works offline)']]
+]},
+{id:'daily-arrive',title:'Arrival on site',kw:'arrive arrival customer greet walk site isolating valve main shutoff',b:[
+['ol',['**Park** so you do not block the driveway or the neighbours.','**Greet** the customer and introduce yourself and APS.','**Ask** what the problem is and when it started. Let them explain fully.','**Walk the site** with the customer. Look before you touch.','**Find the main water shut-off valve** and the electrical DB board. Show the customer you know where they are.','**Take “before” photos.**','**Protect** floors and furniture with dust sheets.','**Agree** what will be done and the price (or the call-out and hourly basis) **before** you start.','Do a quick safety check of the work area.']],
+['chk','c.arrive','Arrival checklist',['Customer greeted and problem understood','Main water valve located','DB board located (if geysers or pumps are involved)','Before photos taken','Floors and furniture protected','Price or basis agreed with the customer','Safety check of the work area done']]
+]},
+{id:'daily-during',title:'During the job',kw:'during work extra work variation approval materials notes water off notice',b:[
+['ul',['Keep the customer informed. Tell them if something unexpected shows up.','**Extra work = ask first.** Explain it, give the price and get a yes before doing it. Write it on the job card.','Tell everyone in the house or building before the water is switched off, and how long it will be off.','Write down the **materials you use** as you go (needed for the invoice and the end-of-day report).','Keep tools and parts tidy in one place. Keep walkways clear.','Take photos of anything that will be covered up.','Check your own work: tighten, align, test.','Phone Charl if you find asbestos, a major leak, damage you did not cause, or anything you are not sure about.','Lock the gate or door again when you leave or go to the van.']],
+['warn','If you break or damage something, tell the customer and Charl straight away. Take a photo. Honesty protects us.']
+]},
+{id:'daily-handover',title:'Hand-over & clean-up',kw:'handover hand over cleanup clean up finish customer sign off warranty',b:[
+['chk','c.handover','Hand-over checklist',['Every tap/fixture/valve worked and tested','No leaks after 10–15 minutes (check again before leaving)','Water and power back on and normal','Isolating valve location shown to the customer','Customer shown what was done and how to use it','Old parts removed (or customer asked if they want them)','Waste, offcuts and packaging removed','Floors, basin and surfaces wiped clean','After photos taken','Certificate or job card completed and signed (if required)','Invoice or payment arrangement explained','Aftercare and guarantee explained (see Customer communication)','Thanked the customer']],
+['p','Leave it cleaner than you found it. A clean site is the best advert APS has.']
+]},
+{id:'daily-report',title:'End-of-day report (WhatsApp)',kw:'report end of day attendance work done materials photos whatsapp',b:[
+['p','Fill this in at the end of each day and share it to Charl on WhatsApp. Blank lines are left out when you share.'],
+['form','f.eod','End-of-day report',[['date','Date','date'],['site','Site / customer / address','text'],['team','Attendance (who was on site)','text','Charl, Victor …'],['times','Time on site (start – finish)','text','07:30 – 16:00'],['work','Work done','textarea'],['mats','Materials used','textarea'],['photos','Photos taken (how many / sent?)','text'],['issues','Problems / extra work / safety issues','textarea'],['next','Plan for tomorrow','textarea']]]
+]}
+]});
+
+SECTIONS.push({id:'safety',title:'Safety',blurb:'PPE, roofs, trenches, hot water, electricity, lifting, first aid',icon:'shield',pages:[
+{id:'saf-prestart',title:'Pre-start safety check',kw:'safety check risk assessment start of job hazards',b:[
+['p','Before you start, look around for hazards. Do this on every job – it takes two minutes.'],
+['chk','c.prestart','Pre-start safety check',['PPE on for the task','Work area clear and tidy','Ladder safe, level and tied/held','Water isolated where needed; know where the main valve is','Electricity isolated and tested dead where needed','Hot water (geyser, pipes) allowed to cool or controlled','Asbestos suspected? Stop and phone Charl','Trench or excavation safe (see Trenches)','Customer, children and pets kept away','Fire extinguisher and first aid kit within reach','Second person available for lifting or roof work']]
+]},
+{id:'saf-ppe',title:'PPE (protective gear)',kw:'ppe boots gloves glasses mask hard hat ear plugs hi-vis knee pads protective',b:[
+['table',['PPE','When'],[['Safety boots','Always on site'],['Work gloves','Handling pipe, cutting, drains. Use waterproof/chemical gloves for sewage and chemicals'],['Safety glasses','Cutting, chasing, drilling, soldering, drain cleaning, chemicals, working overhead'],['Dust mask (FFP2 or better)','Chasing or drilling brick/concrete, insulation, dusty roof spaces'],['Hard hat','Under or near overhead work, in trenches and on building sites'],['Ear plugs/muffs','Breaker, chasing machine, grinder, jetter'],['Hi-vis vest','Roadside, building sites, driveways'],['Knee pads','Floor work, bathrooms, kitchens']]],
+['warn','PPE is the last line of defence. Remove or control the hazard first (isolate, cool, support, ventilate).']
+]},
+{id:'saf-roof',title:'Roof spaces & ladders',kw:'roof ceiling ladder fall height geyser attic trusses heat',b:[
+['h','Ladders'],
+['ul',['Check the ladder before use: feet, rungs, locks, no cracks.','Set it at about 1 m out for every 4 m of height (1:4), on firm level ground.','Tie it at the top or have someone foot it.','Three points of contact. Do not carry heavy items up while climbing – hoist them.','Never use a metal ladder near electrical wires or the DB.']],
+['h','Working in a roof space (geysers)'],
+['ol',['Isolate the geyser power at the DB first.','Tell someone in the house that you are in the roof.','Step **only on the trusses/rafters or a board laid across them**. Never on the ceiling board – it will not carry you and you can fall through.','Use a head torch. Watch for sharp nails, live cables and wasps.','Wear a dust mask and gloves. In summer the roof gets very hot: go early, drink water, take breaks.','Do not work in a roof space alone if you can avoid it.','Keep the geyser tray and pipes clear of insulation that blocks them.']],
+['warn','Asbestos-cement roof sheets are fragile and may contain asbestos. Do not walk on or drill roof sheets. Use crawling boards.']
+]},
+{id:'saf-trench',title:'Trenches & excavations',kw:'trench excavation digging collapse shoring services cables sewer',b:[
+['ul',['Find out what is buried **before you dig**: electrical cables, water, telecom lines, sewer. Ask the owner and look for plans. Dig carefully near services and hand-dig the last bit.','Keep spoil (dug soil) at least 0.5 m back from the edge, and keep tools off the edge.','Do not work in a deep trench with unsupported sides. As a rule of thumb, anything deeper than knee height and in loose soil needs the sides sloped back or shored. For deeper than about 1 m treat it as needing support and get advice.','Never work alone in a trench.','Keep a ladder or exit within easy reach. Barricade the trench so people and pets do not fall in.','After rain, re-check the sides. Do not enter a trench with water in it.','Never enter a manhole or sewer chamber. Gas can kill very quickly.']],
+['warn','Trench collapse is one of the most deadly construction accidents. If in doubt, do not go in. Phone Charl.']
+]},
+{id:'saf-hot',title:'Hot water & scalding',kw:'scald hot water geyser burn temperature 60 legionella cool',b:[
+['ul',['Geysers are normally set to about **60 °C**. Water at this temperature can scald in seconds.','Let the geyser and pipes cool, or draw the hot water off, before you work on them.','Drain into a bucket or a hose to a safe place, not onto your feet or the customer’s floor.','Open a hot tap before you undo a joint on a hot line to release pressure.','Warn children and the customer when you are working on hot water.','Never block or cap the safety valve discharge pipe.','When filling a new geyser, open a hot tap so air can escape, and do not switch the power on until the geyser is full.']],
+['h','If someone is scalded'],
+['ol',['Remove them from the hot water. Remove wet clothing near the burn, but do not pull off stuck clothing.','Cool the burn under **cool running water for 20 minutes**. Do not use ice, butter or toothpaste.','Cover loosely with a clean non-fluffy cover (cling film is good).','Phone for help for large burns, burns on the face/hands/genitals, or any burn on a child or baby.']]
+]},
+{id:'saf-elec',title:'Electrical isolation near geysers',kw:'electrical isolate electricity geyser dB isolator element thermostat shock lock out',b:[
+['warn','Water and electricity can kill. Geyser wiring, elements and thermostats must be done by a **registered electrical person**. Plumbers isolate and make safe – they do not do the electrical work unless registered.'],
+['ol',['Switch off the geyser at the **DB board** (the geyser breaker) **and** at the geyser isolator switch if there is one.','Put a label or tape on the breaker: “Do not switch on – plumber at work”.','If you can, lock the DB or keep the key with you.','Test that it is dead with a tester or ask the electrician.','Never touch cables or terminals because someone says “it’s off”. Check yourself.','Never switch the geyser back on until it is **full of water**. A dry element burns out.','Keep wet hands and wet tools away from the DB and cable joints.']],
+['note','After a geyser replacement an Electrical Certificate of Compliance may be needed for the electrical part. That is issued by the electrician, not by the plumber.'],
+['verify','Confirm the electrical certificate requirements for the municipality and the customer’s insurer.']
+]},
+{id:'saf-lift',title:'Lifting & manual handling',kw:'lifting heavy back geyser weight handling team',b:[
+['ul',['Geysers are heavy: a full 150 ℓ geyser weighs more than 150 kg. Always drain before lifting, and use **two people** for 150 ℓ and bigger.','Plan the route: doors, stairs, ladders, hatch openings.','Bend your knees, keep your back straight, hold the load close.','Do not twist while carrying. Turn your feet.','Use a trolley, straps or a rope-and-pulley to the roof, not your shoulders on a ladder.','Share the weight of long pipe lengths: one person at each end.','Stop if it is too heavy. Ask for help.']]
+]},
+{id:'saf-asbestos',title:'Asbestos awareness',kw:'asbestos cement pipe roof sheets ac pipe dust fibre',b:[
+['p','Many older South African buildings (before about the 1980s–90s) have **asbestos-cement** (AC) roof sheets, flue pipes, gutters, water pipes and ceiling boards. Breathing the fibres can cause serious lung disease years later.'],
+['ul',['Look before you cut, drill or break anything on an old building. If it looks like grey fibre-cement and you are not sure, treat it as asbestos.','**Do not** drill, cut, sand, break or scrub it. Do not use power tools on it. Do not sweep it dry.','Stop work. Keep other people away. Phone Charl.','If it is in good condition and not disturbed, it is usually left alone. Damaged or disturbed asbestos must be handled by a registered asbestos contractor.','Wet the material lightly only if disturbed by accident, and keep away from the dust.','Wash your hands and change clothes. Do not shake dusty clothes.']],
+['warn','Never cut AC water pipe with a saw or grinder. Phone Charl to arrange the right method.']
+]},
+{id:'saf-fire',title:'Hot work & fire',kw:'soldering brazing flame torch gas fire extinguisher roof timber',b:[
+['ul',['Hot work = soldering, brazing, gas torch.','Check what is behind the wall or above you: timber, insulation, ceilings, thatch. Use a **heat shield/flame guard mat**.','Keep a fire extinguisher or a bucket of water next to you.','Never solder on a pipe that still has water in it. Drain and dry it first.','Gas bottles: upright, tied, away from heat, valve closed when not in use. Check hoses for leaks with soapy water.','After finishing, check the work area again for smouldering 30 minutes later.','Do not use a naked flame in a roof space with dry dust or thatch.']]
+]},
+{id:'saf-sewage',title:'Sewage & hygiene',kw:'sewage hygiene germs gloves wash tetanus chemicals drain gas',b:[
+['ul',['Wear waterproof gloves and glasses when working on drains and sewers.','Do not eat, drink or smoke until you have washed your hands with soap.','Cover cuts with waterproof plasters. See a doctor if a cut is exposed to sewage.','Keep your tetanus injection up to date.','Ventilate enclosed spaces. Sewer gas (hydrogen sulphide) smells like rotten eggs but you can stop smelling it – do not trust your nose. Never enter manholes.','Do not mix chemicals. Read the label of drain cleaners. Wear glasses.','Clean and disinfect tools and the work area afterwards. Bag contaminated waste.']]
+]},
+{id:'saf-firstaid',title:'First aid & emergencies',kw:'first aid emergency ambulance 112 10177 injury cut electric shock burn',b:[
+['h','Emergency numbers (South Africa)'],
+['ul',['**112** – emergency from any cellphone','**10177** – ambulance (landline or cellphone)','**10111** – police']],
+['note','Add your local doctor, hospital and the nearest clinic in **Contacts & company details > Emergency**.'],
+['goto','Open emergency contacts','co-emergency'],
+['h','Quick actions'],
+['table',['Situation','Do this'],[['Electric shock','Switch off the power first. Do not touch the person until it is off. Call for help. Start CPR if not breathing.'],['Bleeding','Press firmly on the wound with a clean cloth. Raise the limb. Keep pressing. Call for help if serious.'],['Burn or scald','Cool under running water for 20 minutes. Cover loosely. Call for help for large burns.'],['Eye injury or chemical in eye','Rinse with clean water for at least 15 minutes. Get medical help.'],['Fall from height','Do not move the person unless in danger. Call for help.'],['Fainting or heat exhaustion','Move to shade, lay down, give sips of water, cool the person.'],['Gas smell','Do not switch anything on or off. Open windows, leave, call the gas supplier or emergency services.']]],
+['verify','First aid course training is recommended for everyone on the crew.']
+]}
+]});
+
+SECTIONS.push({id:'quote',title:'Quoting & invoicing',blurb:'Site assessment, materials list, markup & VAT, payment',icon:'doc',pages:[
+{id:'q-assess',title:'Site assessment',kw:'quote assessment site visit measure inspect',b:[
+['p','A good quote starts with a good look at the site. Do not guess. A missed item costs APS money.'],
+['chk','c.assess','Site assessment checklist',['Customer details and address','What exactly does the customer want? Write it down','Photos of the area, the problem and the existing pipes','Measure lengths, heights and distances (and note fall for drains)','Existing pipe type and size (copper, galvanised, uPVC …)','Water pressure (gauge on outside tap) – high or low?','Access: roof, crawl space, tiled walls, ceiling, trenches','What must be broken out and made good?','Who does the extras: tiler, electrician, painter?','Special parts needed (lead times)','Do we need a Certificate of Compliance?','Customer’s budget and timing']]
+]},
+{id:'q-materials',title:'Materials list',kw:'materials list bill of quantities fittings pipe quote sketch',b:[
+['ol',['Draw the job in the **Plumbing Sketch** app. It makes a materials list for you.','Add every pipe length, fitting, valve, tap and fixture.','Add the small items: clips, PTFE tape, solder, flux, glue, silicone, sealing washers, screws, wall plugs.','Add **10%** extra for waste on long pipe runs if you cut often (your choice).','Price each item from your supplier’s current price list.','Check the list against the sketch twice.']],
+['link','Open Plumbing Sketch','https://charlaps.github.io/plumbing-sketch/']
+]},
+{id:'q-price',title:'Markup & VAT convention',kw:'markup 30 vat 15 price calculator margin selling price cost',b:[
+['p','The APS convention:'],
+['ol',['Take the supplier’s price **excluding VAT**.','Add **30% markup** to the materials.','Add labour and call-out at the APS rates (no markup on labour).','Add **VAT of 15%** on the total (only if APS is VAT registered).']],
+['h','Worked example'],
+['table',['Line','Amount'],[['Materials cost (excl. VAT)','R1 000.00'],['+ 30% markup','R300.00'],['Materials selling price','R1 300.00'],['+ Labour','R500.00'],['Subtotal (excl. VAT)','R1 800.00'],['+ VAT 15%','R270.00'],['**Total incl. VAT**','**R2 070.00**']],true],
+['note','A 30% markup is a gross margin of about **23%** of the selling price (300 ÷ 1 300). Markup is on cost; margin is on selling price.'],
+['goto','Open the price calculator','calc-price'],
+['goto','Edit our rates','q-rates']
+]},
+{id:'q-labour',title:'Labour, call-out & rates',kw:'labour call-out callout hourly rate day rate travel after hours',b:[
+['ul',['**Call-out fee:** covers coming to site and the first assessment. Tell the customer the fee before you go.','**Hourly or day rate:** for jobs that are difficult to price (unknown problems, leak finding).','**Fixed price:** for jobs you can see and measure (geyser replacement, tap replacement).','**Travel:** add for far addresses (for example Pretoria to Krugersdorp).','**After hours / weekends / public holidays:** higher rate – agree it first.','**Minimum charge:** so small jobs still pay for the trip.','**Disposal:** old geysers and rubble – charge for removal if needed.']],
+['p','Charl sets the rates. Enter them on the next page, and they are used in the manual and calculators.'],
+['goto','Edit our rates','q-rates']
+]},
+{id:'q-rates',title:'Our rates (fill in)',kw:'rates call out fee hourly day minimum deposit vat markup percentage fill in',b:[
+['note','These are blank on purpose. Charl enters the real numbers. They are saved on this phone only.'],
+['fields','r','Rates and quote settings',[['rate.markup','Markup on materials (%)','number','30'],['rate.vat','VAT rate (%) – use 0 if not VAT registered','number','15'],['rate.callout','Call-out fee (R, excl. VAT)','number'],['rate.hour','Hourly rate (R, excl. VAT)','number'],['rate.day','Day rate (R, excl. VAT)','number'],['rate.min','Minimum charge (R, excl. VAT)','number'],['rate.after','After-hours / weekend rate (R/h)','number'],['rate.km','Travel charge (R per km, or text)','text'],['rate.deposit','Deposit (% of quote)','number'],['rate.valid','Quote valid for (days)','number','14'],['rate.notes','Other pricing notes','textarea']]]
+]},
+{id:'q-deposit',title:'Deposits & payment',kw:'deposit payment eft cash proof of payment banking credit terms',b:[
+['ol',['Tell the customer **before** the work how and when to pay.','For larger jobs, ask for a **deposit** to cover materials. The amount is set by Charl (see rates).','Give the banking details clearly (from Contacts & company details). Use the customer’s name or invoice number as reference.','Take **proof of payment** before ordering large special-order parts.','On completion: hand over the invoice and ask for the balance.','No work is “done” until it is paid, or agreed in writing.','Follow up politely if unpaid: see Customer communication scripts.']],
+['goto','Banking details','co-details'],
+['goto','Payment reminder script','com-payment']
+]},
+{id:'q-invoice',title:'Invoice checklist',kw:'invoice tax invoice vat number number date description',b:[
+['p','Every invoice should be clear and correct.'],
+['chk','c.invoice','Invoice checklist',['Name and address of APS','Customer name and address','Invoice number (in order) and date','Description of work and materials','Quantities, unit prices and totals','VAT shown separately (if VAT registered)','APS VAT number (if VAT registered)','Banking details and payment reference','Payment terms and due date','Warranty or guarantee wording (if any)']],
+['verify','A valid tax invoice has specific legal requirements (SARS). Check with your accountant.']
+]},
+{id:'q-sketch',title:'Using the Plumbing Sketch app',kw:'plumbing sketch app drawing quote materials share',b:[
+['ol',['Open the Plumbing Sketch app.','Draw the job: pipes, fittings, fixtures, walls.','Use **Menu > Quote** to build the quote from the materials list. Markup and VAT are included.','Share it to the customer as a PDF or WhatsApp text.','Keep the sketch with the job (photo overlay for tricky walls).']],
+['link','Open Plumbing Sketch','https://charlaps.github.io/plumbing-sketch/']
+]}
+]});
+
+SECTIONS.push({id:'proc',title:'Procedures & checklists',blurb:'Geyser, leaks, taps, WC, drains, rough-in, points, testing',icon:'clip',pages:[
+{id:'pr-geyser',title:'Geyser replacement',kw:'geyser water heater replace install drip tray safety valve t&p vacuum breaker drain pressure control valve certificate',b:[
+['warn','Isolate the electricity first. Wiring, element and thermostat work and the electrical certificate must be done by a registered electrical person.'],
+['sans','Follow SANS 10254 and the geyser maker’s instructions. Details in the SANS quick guide.'],
+['h','Steps'],
+['ol',['**Check the old geyser:** size (litres), pressure rating (kPa), type. Photograph the data plate. Check the supply pressure with a gauge.','**Switch off** the geyser breaker at the DB and the isolator. Label it. Test it is dead.','**Close** the cold feed isolating valve. Open a hot tap in the house to relieve pressure.','**Drain** the geyser through the drain cock or a hose to a safe place. The water may be scalding: let it cool first.','**Disconnect** the pipes and the safety valve drain. The electrical person disconnects the wiring. Lift the geyser out with two people.','**Check the drip tray** and its drain pipe. The tray must be larger than the geyser, sit level and drain with a fall to a visible, safe outside point. Replace if rusty or cracked.','**Set the new geyser** on a solid base or secure brackets that can carry the full weight.','**Fit the valves** in the order the maker shows: isolating valve, non-return valve, pressure control valve if supply pressure is above the geyser’s rating, vacuum breaker(s) above the top of the geyser, and the **temperature & pressure (T&P) safety valve** on the geyser’s safety port.','**Connect the safety valve drain pipe:** metal, at least the valve’s size, continuous fall, maximum 3 bends, discharging to a visible place outside.','**Connect** cold in and hot out to the correct ports with new connectors. Insulate the hot pipe and the geyser as required.','**Fill slowly** with a hot tap open until water runs without air. Close the tap. Check every joint for leaks.','**Only when the geyser is full:** have the electrical person reconnect and switch on. Set the thermostat (usually about 60 °C).','**Check** the safety valve drain: no drips on the pipe, discharge visible. Test the valve lever briefly (water must flow and stop).','Take photos. Complete the Certificate of Compliance if required (see PIRB basics).','Hand over: show the customer the isolating valve and the DB switch.']],
+['verify','Insurance companies usually ask for a plumber’s Certificate of Compliance when a geyser is replaced. Check the requirement for each job.'],
+['chk','c.geyser','Geyser replacement checklist',['Old geyser data plate photographed','Power isolated, labelled and tested dead','Water isolated and drained safely','Drip tray sound with a drain to a visible outside point','Geyser secured; supports can carry the full weight','Isolating valve and non-return valve fitted','Pressure control valve fitted if supply pressure is above rating','Vacuum breaker(s) fitted above the top of the geyser','T&P safety valve fitted','Safety valve drain: metal, ≥ valve size, continuous fall, ≤ 3 bends, visible outside','Hot pipe and geyser insulated as required','Filled with all air out; no leaks','Electrical reconnected by the registered person AFTER the geyser was full','Thermostat set; hot water at tap checked','After photos taken','Certificate of Compliance done (if required)','Customer shown valves and DB switch']]
+]},
+{id:'pr-leak',title:'Leak detection & repair',kw:'leak detect water meter pressure drop hidden leak damp burst pipe repair acoustic',b:[
+['h','Find the leak'],
+['ol',['**Ask:** where and when did you first notice? Any change in the water bill? Hear running water?','**Meter test:** close every tap and appliance. Check the water meter. If the dial or the small “low-flow” indicator is moving, water is going somewhere.','**Isolate sections:** close the isolating valves one by one (geyser, garden, house) and watch the meter again. The meter stops when you close the section with the leak.','**Check the usual suspects:** running toilets (put food colouring in the cistern: colour in the bowl without flushing means a leaking flush valve), dripping taps, geyser safety valve drain, outside taps and irrigation.','**Pressure test** the isolated section with a gauge and look for a drop.','**Pinpoint:** look for damp, stains, warm patches on a floor (hot pipe), listen with a listening device, use a moisture meter or a thermal camera.','**Open up** as little as possible. Take photos.']],
+['h','Repair'],
+['ol',['Cut out the damaged section. Use the correct fitting for the pipe type. No tape-and-hope.','Check the nearby pipe for corrosion – replace if it is poor.','Support the pipe properly.','Refill, bleed air, and **test** under pressure for at least 15 minutes.','Re-check the meter with all taps closed.','Make good or tell the customer who must do it (tiler, plasterer).','Photos before closing up.']],
+['chk','c.leak','Leak repair checklist',['Meter test done and result noted','Leak located and photographed','Isolating valves closed, power isolated if near electrics','Correct repair fitting used','Pipe supported','Pressure tested after repair','Meter checked again, no movement','Wall/floor opening explained and made safe','Customer told about damp drying time and who does making good']]
+]},
+{id:'pr-tap',title:'Tap & mixer replacement',kw:'tap mixer replace basin sink bath shower flexi hose angle valve cartridge',b:[
+['ol',['Close the **angle valves** under the basin or sink. If there are none, close the room or main valve and **fit angle valves** (recommended).','Open the old tap to release water and pressure.','Place a bucket and towel. Disconnect the flexi hoses. Undo the fixing nut with a basin spanner.','Remove the old tap. Clean the surface.','Check that the new tap suits the hole size and thickness, and the water system: **low-pressure taps** for gravity/low-pressure geysers, high-pressure taps for mains-pressure systems.','Fit the new tap with its washers/seals. Do not over-tighten the fixing nut – ceramic can crack.','Fit **new** flexi hoses. Hot is normally on the left, cold on the right.','**Flush the line:** with the aerator off and the hose not yet connected, open the angle valve into a bucket to clear debris.','Connect hoses. Open valves slowly. Check for leaks at every joint, wipe dry and check again after 10 minutes.','Test the hot and cold: correct side, no mixing at the other tap. Fit the aerator.']],
+['chk','c.tap','Tap replacement checklist',['Water off at angle valve or main','New tap matches the basin/sink and the pressure system','New flexi hoses fitted','Hot/cold the right way round','Line flushed before connecting','No leaks at joints (wiped dry and re-checked)','Waste and trap not leaking','Aerator fitted, tap works, basin clean']]
+]},
+{id:'pr-basinwc',title:'Basin & WC installation',kw:'basin wc toilet pedestal cistern pan trap waste p-trap s-trap close coupled connector rawl',b:[
+['h','Basin'],
+['ol',['Mark the height and position (usually the rim about 800–850 mm above the floor) and check the wall: solid fixing needed.','Fit the wall bracket or hangers with correct plugs and screws. Basins are heavy: do not trust drywall without a solid board.','Fit the tap and waste on the basin **before** mounting it.','Mount the basin level. Connect the trap and waste pipe with a fall to the waste outlet.','Fit isolating valves and flexi hoses. Run both hot and cold water to flush and test.','Fill the basin and let it run out: check the trap and joints for leaks.']],
+['h','WC (toilet)'],
+['ol',['Check the outlet type: **P-trap** (to the wall) or **S-trap** (to the floor) and the distance from wall to the centre of the outlet.','Fit the **WC connector** or push-fit soil connection to the drain (110 mm). Clean the pipe end and lubricate the seal.','Set the pan, mark and drill the floor fixing holes. Use plugs/anchors appropriate to the floor.','Fix the pan with the correct bolts and rubber/plastic washers. **Do not over-tighten** – porcelain cracks.','Fit the cistern (close-coupled: seal and bolts; wall-hung: bracket and flush pipe).','Connect the water supply: an **angle valve** and a flexi hose to the cistern inlet.','Flush several times. Check the water level, fill valve cutoff, flush volume and every joint for leaks.','Seal around the base with sanitary silicone if the customer wants it, leaving the back or sides as the maker advises.','Test the trap water seal: the trap must hold water in the bowl (see SANS notes).']],
+['chk','c.basinwc','Basin & WC checklist',['Wall/floor solid for fixings','Fixtures level and secure; not over-tightened','Waste and trap with correct fall and no leaks','Push-fit seals clean and lubricated','Isolating valves and flexi hoses fitted','Water supply tested; no leaks after 10 minutes','Cistern fills and cuts off at the right level; flush works','Basin and WC wiped clean; protective plastic removed','Customer shown the isolating valves']]
+]},
+{id:'pr-drain',title:'Blocked drain & gully',kw:'blocked drain gully clear rod jetter plunger rodding eye manhole sewer blockage grease hair',b:[
+['ol',['Ask which fixtures are blocked. **One fixture** = blockage in its trap or branch. **Several fixtures** or the gully overflowing = blockage in the main drain.','Wear waterproof gloves and glasses. Protect floors.','**Basin or sink:** put a bucket under, unscrew the trap and clean it. Reassemble with sound seals.','**WC:** try a plunger first. If it does not clear, use a closet auger. Do not use harsh chemicals.','**Gully or main drain:** lift the gully grid, remove silt and rubbish. Open the nearest **rodding eye** or inspection chamber (open slowly, keep your face away).','Find where the water stops: flow before the blockage point, dry after.','Use drain rods or an electric drain machine from the open point toward the blockage. Work gently, do not force the rods in a bend.','Flush with plenty of water to check the line is free.','If it blocks again, or the pipe is cracked, collapsed or full of roots: inspect with a drain camera and quote the repair.','Disinfect the area and tools. Photograph the pipe or what was found.','Advise the customer: no grease, wipes, nappies or sanitary products down the drain; use hair catchers in showers; clean gullies regularly.']],
+['warn','Never enter a manhole or sewer chamber (gas). Do not mix drain-cleaning chemicals.'],
+['chk','c.drain','Blocked drain checklist',['Which fixtures are affected? (branch or main?)','PPE on (gloves, glasses)','Blockage cleared and flow tested with water','Gully, trap and rodding eyes checked and refitted','Cause found (hair, grease, roots, collapse) and photographed','Customer advised how to prevent it','Area cleaned and disinfected','Further inspection/repair quoted if needed']]
+]},
+{id:'pr-bathroom',title:'Bathroom rough-in',kw:'bathroom rough in rough-in new build walls shower bath basin wc pipes before tiling concealed',b:[
+['p','“Rough-in” is the pipework in walls and floors **before** tiling and fixtures. Mistakes here are expensive to fix.'],
+['ol',['Get the final **layout and fixture positions** from the customer or builder. Draw them in Plumbing Sketch. Check dimensions on site.','Mark all positions on the walls: basin, bath, shower mixer, WC, towel rail. Check mixer depth and heights against the fixtures’ instructions.','Run the **water supply** (hot and cold) to each fixture with the right pipe and size. Keep hot and cold apart, and insulate the hot pipes.','Fix the pipes firmly with clips so they cannot move when tiled.','Run the **waste and soil pipes** with a continuous fall to the drain. Use two 45° bends rather than a 90° where possible. Keep every trap close to a vent or a ventilated stack. Typical waste sizes: basin 40 mm, bath/shower 50 mm, WC 110 mm.','Leave all isolating valves and any joints **accessible** (access panels).','Cap the ends. Close off drains with test plugs.','**Pressure test** the water pipes (see Pressure testing) and **water test** the drains before walls are closed.','Take photos with a tape measure of every concealed pipe and valve. Send them to Charl and the customer.','Protect the pipes and tell others (builders, tilers) not to drive nails or screws near them.']],
+['chk','c.bathroom','Bathroom rough-in checklist',['Layout and heights confirmed in writing/on sketch','Water pipes sized and run with hot insulated','Pipes clipped and fixed','Waste and soil pipes with a continuous fall','Venting checked','Valves/joints accessible','Water pipes pressure tested','Drains water tested','Photos taken with measurements','All ends capped/plugged and protected']]
+]},
+{id:'pr-points',title:'Kitchen sink, dishwasher & washing machine points',kw:'kitchen sink dishwasher washing machine point standpipe waste tap hose non-return',b:[
+['h','Kitchen sink'],
+['ul',['Waste is normally 40 mm (50 mm if the sink also takes a dishwasher and washing machine) with a trap.','Fit isolating angle valves on hot and cold.','Fit the sink waste, the trap and a correct fall.']],
+['h','Dishwasher'],
+['ol',['Cold (and hot if the machine allows) supply from a tee with an isolating valve. Use a valve with a hose connection (¾″ BSP) for the inlet hose.','The drain hose goes to a **sink-trap spigot** or a standpipe with an air gap. A non-return connection stops dirty water running back into the machine.','Raise the drain hose loop as the maker shows, to prevent back-siphoning.']],
+['h','Washing machine'],
+['ol',['Supply: an isolating valve with a hose connection (¾″ BSP), fixed to the wall at an accessible height. Provide both hot and cold if the machine takes them.','Drain: a **standpipe** with a trap, or a wall-box. The drain hose must **not be pushed in tightly** – leave an air gap.','Standpipe height and size: follow the maker’s instructions and SANS 10252-2.','Check the hose does not kink and is not pinched behind the machine.']],
+['sans','Standpipe, trap and air-gap dimensions are set in the drainage standard. Check them for each job.'],
+['chk','c.points','Appliance points checklist',['Isolating valves fitted and accessible','Waste size and trap correct; fall to the drain','Standpipe/trap or spigot with non-return fitted','Drain hose air gap/loop done','Supply hoses connected and leak-free','Machine run through a full cycle with no leaks','Customer shown the isolating valves']]
+]},
+{id:'pr-outside',title:'Outside taps & backflow',kw:'outside tap garden tap irrigation hose backflow vacuum breaker borehole frost',b:[
+['ol',['Pick a position that suits the customer and is easy to reach.','Run the pipe from the cold supply. Fit an **isolating valve** inside the house or at an accessible point so the tap can be isolated for repairs.','Fix the pipe with clips. Pass through the wall with a sleeve, seal the hole on both sides.','Fit the tap on a wall plate firmly. Fit a **hose union vacuum breaker** or a tap with built-in backflow protection where a hose is used.','Turn on slowly, check for leaks, and flush debris out first.','On the Highveld, **frost** can burst exposed pipes: insulate exposed pipes and tell the customer to close and drain the tap in winter.']],
+['h','Backflow'],
+['p','Backflow is when dirty water flows backwards into the clean water supply. It can happen if the mains pressure drops while a hose is in a pool, a bucket, a pesticide tank or a borehole tank.'],
+['ul',['Fit the correct backflow prevention (vacuum breaker, double check valve) wherever there is a cross-connection risk: irrigation, pool filling, hoses, boreholes, tanks.','Never connect a borehole or tank directly to the municipal mains without an approved arrangement.']],
+['sans','Backflow prevention is required under the water supply standard. Check the requirements and the municipal by-laws.'],
+['chk','c.outside','Outside tap checklist',['Isolating valve fitted and accessible','Pipe fixed and sleeved through the wall','Wall seal made weatherproof','Tap fixed firmly; vacuum breaker/backflow protection fitted','No leaks; flow tested','Exposed pipe insulated against frost','Customer told about winter care']]
+]},
+{id:'pr-sewer',title:'Septic tank & sewer connection',kw:'septic tank sewer connection soakaway manhole inspection chamber junction trench uPVC 110 municipal',b:[
+['warn','Most sewer and septic work needs municipal approval, plans or inspections. Never connect to a sewer without permission. Excavations: see Trenches.'],
+['ol',['Find out: is the property on the **municipal sewer** or a **septic tank**? Get the sewer plan from the owner or municipality.','Locate the connection point, inspection chamber or manhole. Check **levels**: the new drain must have a fall to the connection.','Plan the route. Keep it straight with as few bends as possible. Use rodding eyes or inspection chambers at changes of direction.','Check for other services before you dig.','Dig the trench with the sides safe. Make a firm, level **bed** of sand or fine gravel.','Lay uPVC 110 mm sewer pipe with socket upstream (pointing up the slope) and the correct **fall** (see SANS quick guide). Check with a spirit level or laser.','Connect to the sewer with a **45° junction** (Y) at the top half of the main pipe. Seal properly. Use an approved saddle or chamber as required.','Fit access (rodding eyes or inspection chambers) as required.','**Test** the drain with water or air before covering it (see Pressure testing).','**Photograph** the pipes and measure the depths and distances from fixed points. Have the municipality inspect it if required.','Surround with bedding, then backfill in layers.']],
+['h','Septic tank'],
+['ul',['The tank must be the right size and approved, with an outlet to a soakaway or other approved disposal.','The tank must be vented. Do not drain stormwater into it.','Needs regular de-sludging by a licensed service.']],
+['verify','Check the requirements with the local municipality (Krugersdorp, Pretoria, Edenvale each differ) and the plan approval.'],
+['chk','c.sewer','Sewer / septic connection checklist',['Permission and plans confirmed','Services located; trench safe','Bed level with correct fall','Correct pipe, junction and fittings','Access points installed','Water/air test passed','Photos with measurements','Municipal inspection arranged (if required)','Backfill in layers; surface made good']]
+]},
+{id:'pr-testing',title:'Pressure testing',kw:'pressure test gauge hydrostatic drain test water test air test hold leak 1.5 times',b:[
+['h','Water supply pipes'],
+['ol',['Flush the pipes with clean water to remove debris.','Close all taps and valves. Isolate fittings that must not see test pressure: geysers, pressure control valves, taps.','Fill the system slowly from one end. Open a high point to bleed all air.','Connect a **test pump and a calibrated pressure gauge** at the lowest practical point.','Raise the pressure to the **test pressure** for the pipe and standard. Do not exceed the lowest-rated component or the pipe maker’s limit.','Hold the pressure. Watch the gauge and look at every joint. A falling gauge needs a leak check. Plastic and multilayer pipes may need re-pumping – follow the maker’s instructions.','Record the pressure, time and result, photograph the gauge.','Release the pressure slowly. Reconnect the fittings.']],
+['sans','Test pressure and hold time: the common practice is about 1.5 times the working pressure, held for the time required. The exact figures are set in SANS 10252-1 and by the pipe/fittings maker.'],
+['h','Drains'],
+['ol',['Plug the lower open end with a test plug.','Fill the drain with water up to a safe level (for example up to the highest point the drain is going to be loaded, or as required by the standard/inspector).','Wait the required time. Level should not drop. Check joints for seepage.','Alternatively, do an **air test** with an approved test kit.','Release and remove plugs. Record the result.']],
+['verify','Confirm the test pressure, test time and procedure in the current standard before relying on these figures.'],
+['chk','c.test','Pressure test checklist',['Pipes flushed','Components not rated for test pressure isolated','Air bled from the system','Calibrated gauge fitted and photographed','Test pressure applied (per standard/maker)','Held for the required time, no drop','All joints inspected','Drains water tested before covering','Result recorded; pressure released safely']]
+]}
+]});
+
+SECTIONS.push({id:'ref',title:'Pipe & fitting reference',blurb:'Copper, uPVC, HDPE, PEX/multilayer, galvanised',icon:'pipe',pages:[
+{id:'ref-which',title:'Which pipe for which job',kw:'which pipe material choice hot cold waste soil underground',b:[
+['note','Quick guide only. Always check the customer’s existing system, the pipe maker’s ratings and the standard.'],
+['table',['Job','Usual pipe'],[['Hot water in the house','Copper, or PEX / multilayer rated for hot water'],['Cold water in the house','Copper, PEX / multilayer, or HDPE (indoors only if rated)'],['Underground cold water to the house','HDPE (rated for drinking water)'],['Basin, bath, shower, sink waste','uPVC waste pipe 32–50 mm'],['WC and sewer','uPVC soil pipe 110 mm'],['Geyser safety valve drain','Metal pipe (copper), at least the valve size'],['Old installations','Galvanised steel (repair or replace)'],['Gas','Not covered here – gas work needs a registered gas installer']]]
+]},
+{id:'ref-copper',title:'Copper',kw:'copper tube capillary solder compression end feed solder ring 15 22 28 flux',b:[
+['table',['Nominal size (outside diameter)','Typical use'],[['15 mm','Basins, taps, WC, appliance branches'],['22 mm','Branch lines, bath, geyser connections'],['28 mm','Main house supply, risers, geyser to manifold'],['35, 42, 54 mm','Larger supplies, commercial']]],
+['h','Joining'],
+['ul',['**Capillary (solder-ring or end-feed):** cut square, deburr, clean bright with a pad, flux, heat evenly and feed solder. Wipe off the excess flux while warm.','**Compression:** cut, deburr, slide on nut and olive, push in fully, tighten (do not overtighten).','**Press fit:** use the correct tool and check each jaw for full pressing.','Bend with a spring or bender – do not kink.']],
+['ul',['Use solder and flux that is approved for **drinking water** (lead-free).','Never put galvanised pipe after (downstream of) copper without a dielectric or brass fitting: the copper ions corrode the galvanised.','Support copper at the right spacing (see support spacing).','Copper tube is made to a SANS standard in different wall thicknesses (classes). Check the class for your job.']],
+['verify','Class and wall thickness: check the current SANS standard and the supplier’s data.']
+]},
+{id:'ref-upvc',title:'uPVC (waste & soil)',kw:'upvc pvc waste soil solvent cement push-fit rubber ring 32 40 50 75 110 bend junction vent',b:[
+['table',['Size','Typical use'],[['32 mm','Basin waste (short)'],['40 mm','Basin, bidet, kitchen sink, washing machine'],['50 mm','Bath, shower, sink, floor gully, vent branch'],['75 mm','Main waste stack, multiple fixtures'],['110 mm','WC, soil stack, sewer line'],['160 mm','Larger sewer lines']]],
+['note','Sizes above are typical site practice. The standard sets minimum pipe sizes for each fixture. Check SANS 10252-2.'],
+['h','Joining'],
+['ul',['**Solvent weld (glue):** cut square, deburr, bevel the end, clean, apply cement to both surfaces, push in fully with a slight twist, hold for 30 seconds. Allow it to cure before testing.','**Push-fit (rubber ring):** clean and lubricate with the maker’s lubricant. Mark the insertion depth. Leave a small expansion gap (usually 10 mm) in long runs.','Use correct fittings: long-radius bends, 45° junctions, access (rodding) points.','Keep away from heat (flue pipes, hot water pipe).','uPVC soil/waste products must carry the SANS mark (SANS 967).']],
+['verify','Check the mark and the SANS standard number on the pipe you buy.']
+]},
+{id:'ref-hdpe',title:'HDPE (polyethylene)',kw:'hdpe polyethylene poly pipe blue black underground compression electrofusion irrigation 20 25 32 40 50 63',b:[
+['table',['Size','Typical use'],[['20, 25 mm','Garden and small supply lines'],['32, 40 mm','House supply from the meter'],['50, 63 mm','Larger supply, boreholes, farm lines']]],
+['h','Joining'],
+['ul',['**Compression fittings** (most common on site): cut square, chamfer the end, insert the stiffener where the maker requires it, push in and tighten the nut.','**Electrofusion and butt-welding:** specialist tools and training required.','Use pipe and fittings rated for **potable water** and the working pressure (PN / class rating).']],
+['ul',['HDPE expands and moves with temperature: allow slack when laying.','Bury at the depth required, in a sand bed, and mark the route (warning tape).','Do not use for hot water.','Do not use outside in direct sunlight unless it is black UV-stabilised pipe.']]
+]},
+{id:'ref-pex',title:'PEX / multilayer',kw:'pex multilayer composite pex-al-pex aluminium press fitting hot cold manifold 16 20 26 32',b:[
+['table',['Size','Typical use'],[['16 mm','Basins, taps, appliances'],['20 mm','Showers, baths, branches'],['26 mm','Main lines and manifold feeds'],['32 mm','Large mains']]],
+['h','Joining'],
+['ul',['**Compression fittings:** cut square with the proper cutter, calibrate/ream the end with the maker’s tool, fit the insert and ferrule the way the maker shows, tighten.','**Press fittings:** use the correct jaws and press tool, and mark the insertion depth.','**Bend** with the correct spring or bending tool. Do not kink – multilayer holds its shape.']],
+['ul',['Use pipe and fittings **from the same system** (brand and size). Do not mix brands unless the maker says it is OK.','Check the temperature and pressure ratings for hot water.','Protect from UV and from nails and screws.','Keep pipe in conduit or sleeves in walls where required by the maker.']],
+['verify','Follow the maker’s instructions for each brand.']
+]},
+{id:'ref-galv',title:'Galvanised steel',kw:'galvanised galvanized steel threaded bsp thread hemp ptfe union nipple old pipes',b:[
+['table',['Nominal size','Typical use'],[['½″ (15 mm)','Branches'],['¾″ (20 mm)','Supply lines'],['1″ (25 mm)','Main supply'],['1¼″, 1½″, 2″','Larger mains']]],
+['h','Joining'],
+['ul',['Threaded (BSP) joints with PTFE tape or hemp and jointing paste.','Use pipe wrenches. Hold the fitting so you do not twist the old pipe.','Use unions so a section can be removed.']],
+['ul',['Galvanised pipe corrodes from the inside and restricts flow. When replacing sections, plan to replace more than just the leaking spot.','Do not join copper directly to galvanised. Use a brass or dielectric fitting.','Old pipe may be hard to unscrew. Try penetrating oil and heat only if it is safe (water drained).']]
+]},
+{id:'ref-fit',title:'Fittings & valves: names',kw:'fittings valves names elbow tee bend union reducer nipple trap gully rodding eye isolating valve gate valve ball valve non-return prv vacuum breaker flexi hose',b:[
+['table',['Name','What it does'],[['Elbow / bend','Changes pipe direction (45° or 90°)'],['Tee / junction (Y)','Branches off a pipe'],['Reducer','Joins two different pipe sizes'],['Coupling / socket','Joins two pipes of the same size'],['Union','Joint that can be undone without cutting'],['Nipple / barrel nipple','Short threaded pipe piece'],['Tank connector','Connects to a cistern or tank'],['Angle valve','Isolating valve under basin or WC'],['Ball valve','Quarter-turn isolating valve'],['Gate valve','Slow isolating valve, wheel handle'],['Non-return valve','Lets water flow one way only'],['Pressure reducing / control valve','Lowers high supply pressure to a safe level'],['T&P (temperature & pressure) valve','Safety valve on a geyser'],['Vacuum breaker','Lets air in to stop water being sucked back or the geyser collapsing'],['Flexi hose','Flexible connector to taps and cisterns'],['P-trap / bottle trap','Holds a water seal to block drain smells'],['Gully','Open drain trap with a grid, usually outside'],['Rodding eye / access point','Opening with a cap for rodding the drain']]]
+]}
+]});
+
+SECTIONS.push({id:'sans',title:'SANS quick guide',blurb:'Falls, venting, geyser drains, supports, PIRB (guide only)',icon:'book',pages:[
+{id:'sans-over',title:'The standards in short',kw:'sans 10252-1 10252-2 10254 10400-p standards overview regulations national building',b:[
+['warn','Guide only – check the current standard. This page is a memory aid for site, not the standard itself.'],
+['table',['Standard','Covers'],[['SANS 10252-1','Water supply installations for buildings: pipe sizing, valves, backflow, hot and cold water systems'],['SANS 10252-2','Drainage installations for buildings: pipe sizes, falls, traps, venting, access points'],['SANS 10254','Installation of fixed electric storage water heaters (geysers)'],['SANS 10400-P','Building regulations: drainage (deemed-to-satisfy)']]],
+['verify','The standards are updated from time to time. Check the edition and the municipal by-laws.']
+]},
+{id:'sans-falls',title:'Minimum waste falls',kw:'fall slope gradient 1:46 1:40 1:60 waste soil branch table 15 drain gradient',b:[
+['sans','Minimum falls from SANS 10252-2 Table 15:'],
+['table',['Pipe','Minimum fall'],[['Waste branches','1 : 46'],['Soil branches','1 : 40']],true],
+['sans','Common site practice of 1 : 40 for 50 mm pipes and 1 : 60 for 110 mm pipes is **not** the standard. Check the current standard before you rely on it.'],
+['p','1 : 46 means the pipe falls 1 unit for every 46 units of length. For 1 metre of pipe that is 1000 ÷ 46 = about **21.7 mm**. For 1 : 40 it is **25 mm** per metre.'],
+['goto','Open the pipe fall calculator','calc-fall']
+]},
+{id:'sans-vent',title:'Venting',kw:'vent venting trap 6 m 10 m stack ventilated air siphon',b:[
+['sans','A vent is needed where the outlet of a trap is **more than 6 m of pipe** from a ventilated stack or drain.'],
+['sans','For waste fixtures this can be extended up to **10 m** if the pipe is **one size larger**.'],
+['ul',['Vents let air into the drain so traps do not siphon empty, and let sewer gas out.','Long horizontal runs and wrong sizes can cause gurgling and smells.','Trap water seals must not be lost.']],
+['verify','Check the other rules (vent sizes, connection heights, anti-siphon valves) in SANS 10252-2.']
+]},
+{id:'sans-geyser',title:'Geyser safety valve drain',kw:'geyser safety valve drain t&p discharge pipe metal bends fall visible outside',b:[
+['sans','The geyser safety (T&P) valve drain must be **metal**.'],
+['sans','Its size must be **at least the size of the valve outlet**.'],
+['sans','It must have a **continuous fall** (no upward sections) to the outside.'],
+['sans','It must have **no more than 3 bends**.'],
+['sans','It must discharge in a place where the discharge can be **seen** outside, clear of people.'],
+['ul',['Never fit a valve, cap or plug in the drain pipe.','If it drips all the time, find out why: high water pressure, a faulty valve, or an overheating geyser.','Fit a drip tray with its own drain pipe where a leak can cause damage.']],
+['goto','Geyser replacement procedure','pr-geyser']
+]},
+{id:'sans-support',title:'Pipe support spacing',kw:'support spacing clips brackets uPVC waste horizontal vertical 0.6 1.5',b:[
+['sans','uPVC waste pipe up to 50 mm: support every **0.6 m horizontal** and every **1.5 m vertical**.'],
+['p','Spacing for other pipe types is in the support spacing lookup. Larger uPVC sizes and plastic water pipes depend on the brand: use the maker’s table.'],
+['verify','The other spacing figures in the app are typical trade values, not from the standard. Check the maker or SANS 10252-1.'],
+['goto','Open the support spacing lookup','calc-support']
+]},
+{id:'sans-pirb',title:'PIRB & Certificate of Compliance',kw:'pirb certificate of compliance coc plumbing registered licensed plumber insurance',b:[
+['verify','Verify everything on this page with PIRB and your municipality.'],
+['ul',['**PIRB** is the Plumbing Industry Registration Board. It registers plumbers and licenses them.','Some work needs a **Plumbing Certificate of Compliance (CoC)**, which can be issued only by a **licensed** plumber. A geyser installation or replacement is the common one.','Insurers often require the plumbing CoC when a claim for a geyser is made or a new geyser is fitted.','The electrical part of a geyser job needs a separate **Electrical CoC** from a registered electrical person.','Keep a copy of every certificate with photos of the job.','Add your own PIRB registration number under Contacts & company details.']],
+['goto','Add PIRB number','co-details']
+]}
+]});
+
+SECTIONS.push({id:'tools',title:'Tools & equipment',blurb:'Hand tools, power tools, test gear, stock',icon:'tool',pages:[
+{id:'tl-hand',title:'Hand tools & measuring',kw:'hand tools spanner wrench pliers hacksaw pipe cutter measuring tape spirit level',b:[
+['chk','c.tl.hand','Hand tools',['Tape measure (5 m) and long tape','Spirit level (600 mm) and torpedo level','Adjustable spanners (150, 250, 300 mm)','Pipe wrenches (350 and 450 mm)','Basin spanner / tap spanner','Combination spanners and sockets','Water pump pliers, long-nose pliers, side cutters','Stillsons','Hacksaw, junior hacksaw and spare blades','Pipe cutters (copper, plastic) and deburring tool','Pipe bender and springs','Tube reamer / deburrer','Hammer, centre punch, cold chisels','Screwdrivers (flat, Phillips, Pozidriv)','Allen key set','Utility knife','Marker pen and pencil','Torch and head torch']]
+]},
+{id:'tl-power',title:'Power tools & access',kw:'power tools drill grinder chasing machine ladder extension cord batteries',b:[
+['chk','c.tl.power','Power tools & access',['Cordless drill/driver with batteries and charger','Hammer drill with masonry bits','Angle grinder and discs','Reciprocating saw and blades','Extension cord (on a reel) with earth leakage','Wet/dry vacuum','Work light','Step ladder','Extension ladder (checked, tied down)','Dust sheets and floor protection','Safety signs and tape']]
+]},
+{id:'tl-test',title:'Test, drain & leak gear',kw:'test pump pressure gauge drain rods machine jetter camera moisture meter thermal listening',b:[
+['chk','c.tl.test','Test & drain gear',['Pressure test pump and calibrated gauges','Test plugs and caps (various sizes)','Water pressure gauge with hose connection','Drain rods and attachments','Plunger and closet auger','Drain machine / jetter (if in the van)','Drain camera (if you have it)','Leak detection listening device','Moisture meter / thermal camera (if you have it)','Soldering gas torch, gas bottle, flame guard mat','Fire extinguisher','Gas leak test spray (soapy water)']]
+]},
+{id:'tl-stock',title:'Consumables & stock',kw:'consumables stock ptfe tape solder flux silicone glue valves washers flexi hoses clips',b:[
+['chk','c.tl.stock','Van stock',['PTFE tape, hemp and jointing paste','Solder, flux and wire wool/pads','Solvent cement and cleaner for uPVC','Sanitary silicone and a caulking gun','Pipe clips (various sizes)','Rawl plugs and screws','Isolating valves (15, 22 mm)','Flexi hoses (various lengths)','Tap washers and seals','Compression fittings (15, 22 mm)','Copper fittings (elbows, tees, couplings)','uPVC waste fittings (32, 40, 50, 110 mm)','Push-fit repair couplings','Spare T&P safety valves and vacuum breakers','Cable ties and tape','Rubber gloves, rags, bags']]
+]}
+]});
+
+SECTIONS.push({id:'comms',title:'Customer communication',blurb:'Ready-made WhatsApp scripts: greeting, quote, delay, aftercare',icon:'chat',pages:[
+{id:'com-intro',title:'How to use these scripts',kw:'script scripts whatsapp message template customer',b:[
+['p','Each script is plain text you can edit, copy or share. If you filled in your company name and phone number under Contacts, they are inserted for you. Anything in [square brackets] you fill in.'],
+['goto','Contacts & company details','co-details']
+]},
+{id:'com-arrive',title:'Booking & on my way',kw:'booking confirm on my way eta arrival script',b:[
+['tpl','t.book','Booking confirmation','Hi [Customer name], this is {{co.name}}. This is to confirm your booking for [day] at [time] at [address]. We will be there to [job]. Please make sure someone is home to give us access. If anything changes, call or WhatsApp {{co.phone}}. Thank you!'],
+['tpl','t.omw','On my way','Hi [Customer name], {{co.name}} here. We are on our way. ETA is about [time]. See you soon.']
+]},
+{id:'com-quote',title:'Explaining the problem & quote',kw:'quote explain price estimate approval script',b:[
+['tpl','t.quote','Quote message','Hi [Customer name]. Thank you for having us today. We found [problem]. To fix it we will [work to do]. The price is R[amount] including VAT. This includes [materials and labour]. The quote is valid for {{rate.valid}} days. If you are happy, reply YES and we will book a date. – {{co.name}}'],
+['tpl','t.extra','Extra work needed','Hi [Customer name], while working we found [issue]. We recommend [fix]. The extra cost is R[amount]. We will not do it unless you approve. Please reply YES or NO. – {{co.name}}']
+]},
+{id:'com-late',title:'Running late',kw:'running late delay apology script',b:[
+['tpl','t.late','Running late','Hi [Customer name], {{co.name}} here. We are running late and expect to reach you at [time]. Sorry for the delay and thank you for your patience. Phone me on {{co.phone}} if that does not work for you.']
+]},
+{id:'com-done',title:'Hand-over & aftercare',kw:'handover aftercare guarantee thank you review referral script',b:[
+['tpl','t.done','Job done','Hi [Customer name], thank you for trusting {{co.name}} today. The work is complete: [what was done]. Please keep the isolating valve location in mind: [where]. If you have any problems in the next [guarantee period], call or WhatsApp {{co.phone}}.'],
+['tpl','t.review','Review request','Hi [Customer name], thank you again. If you were happy with our work, a short review or telling a friend or neighbour about {{co.name}} would help us a lot. Thank you!']
+]},
+{id:'com-payment',title:'Payment reminder',kw:'payment reminder overdue invoice follow up eft script',b:[
+['tpl','t.pay','Friendly payment reminder','Hi [Customer name], this is a friendly reminder that invoice [number] for R[amount] is due. Banking details: {{co.bank}}. Please use [reference] as reference and send the proof of payment to {{co.email}}. Thank you. – {{co.name}}']
+]},
+{id:'com-complaint',title:'When something goes wrong',kw:'complaint problem callback apology angry customer script',b:[
+['ol',['**Listen** to the whole problem without interrupting.','**Say sorry** that the customer is upset. You do not need to admit fault yet.','**Take photos** and notes. Ask questions.','**Tell** them what you will do and by when. Then do it.','**Phone Charl** straight away. Do not argue on site.']],
+['tpl','t.complaint','Response to a complaint','Hi [Customer name], thank you for telling us. I am sorry about [problem]. We will [action] on [day/time]. If you want to speak to me directly, call {{co.phone}}. – {{co.name}}']
+]}
+]});
+
+SECTIONS.push({id:'forms',title:'Forms',blurb:'Job card, snag list, incident report: fill in and share',icon:'form',pages:[
+{id:'fm-job',title:'Job card',kw:'job card form customer address work done materials sign',b:[
+['p','Fill in during or after the job. Share to WhatsApp or copy to send by email. Blank lines are skipped.'],
+['form','f.job','Job card',[['date','Date','date'],['cust','Customer name','text'],['phone','Phone','tel'],['addr','Address','text'],['job','Job / problem reported','textarea'],['work','Work done','textarea'],['mats','Materials used','textarea'],['start','Start time','time'],['end','End time','time'],['extras','Extra work agreed (with approval)','textarea'],['price','Price / amount (R)','text'],['paid','Payment (deposit / paid / owing)','text'],['cert','Certificate of Compliance? (yes / no / number)','text'],['by','Done by','text']]]
+]},
+{id:'fm-snag',title:'Snag list',kw:'snag list defects unfinished items punch list completion',b:[
+['p','A snag is a small defect or an unfinished item to fix before the job is signed off. Write one per line.'],
+['form','f.snag','Snag list',[['date','Date','date'],['site','Site / address','text'],['by','Inspected by','text'],['snags','Snags (one per line)','textarea','1. Tap drips at …'],['who','Who fixes / by when','textarea'],['done','Snags closed (date)','text']]]
+]},
+{id:'fm-incident',title:'Incident report',kw:'incident accident report injury near miss damage witness',b:[
+['warn','Make sure the person is safe and has help first. Then write the report while it is fresh.'],
+['form','f.inc','Incident report',[['date','Date','date'],['time','Time','time'],['site','Site / address','text'],['who','Person(s) involved','text'],['what','What happened','textarea'],['injury','Injuries or damage','textarea'],['aid','First aid / treatment given','textarea'],['wit','Witnesses','text'],['cause','Cause (what went wrong?)','textarea'],['action','Action taken and to prevent it happening again','textarea'],['rep','Reported to / by','text']]]
+]}
+]});
+
+SECTIONS.push({id:'trouble',title:'Troubleshooting',blurb:'No hot water, low pressure, leaks, slow drains, noise, damp',icon:'warn',pages:[
+{id:'tr-hot',title:'No hot water',kw:'no hot water geyser cold element thermostat tripped breaker timer',b:[
+['warn','Electrical faults (breaker, thermostat, element) must be dealt with by a registered electrical person. Plumbers check the water side.'],
+['table',['Check','Likely cause','What to do'],[['Is the water cold everywhere?','Geyser has no power or has failed','Check the DB breaker and isolator. Reset a tripped breaker once only. Call the electrician if it trips again.'],['Is the geyser warm but low on hot?','Small geyser, scale on the element, thermostat too low','Check size vs demand. Flush the geyser. Electrician checks element/thermostat.'],['Cold only at one tap?','Mixer/cartridge fault or crossed hot/cold','Check the tap and flexi hoses.'],['Hot water runs out quickly?','Failing element, thermostat or timer, pipes losing heat','Electrician tests. Check the timer, insulate the pipes.'],['Is the geyser full of water?','Isolating valve closed, supply off','Open the isolating valve. Do not switch on a dry geyser.'],['Water not hot enough or too hot?','Thermostat set wrong or faulty','Set to about 60 °C. Electrician replaces a faulty thermostat. Check the safety valve.']]]
+]},
+{id:'tr-pressure',title:'Low water pressure',kw:'low pressure weak flow trickle slow isolating valve blocked aerator pressure reducing valve',b:[
+['table',['Check','Likely cause','What to do'],[['Low at all taps?','Municipal supply problem, partly closed main valve, faulty pressure valve','Check the outside tap and the street meter. Open the valves fully. Check the pressure control valve.'],['Low at one tap?','Blocked aerator or flexi hose, partly closed angle valve','Remove and clean the aerator. Replace the hose.'],['Low hot only?','Geyser valves or hot pipe restricted, or the geyser’s low-pressure system','Check the non-return valve, valve strainer and pipe size.'],['Gets worse over time?','Corroded galvanised pipe, scale','Check inside pipe. Quote replacement.'],['Low only at certain times?','Peak demand in the area, neighbours','Check with a gauge morning and evening. Consider a tank and pump.'],['Pressure good but flow poor?','Pipe too small, restricted valve','Check pipe size and any strainers.']]]
+]},
+{id:'tr-geyserleak',title:'Leaking geyser',kw:'leaking geyser leak drip tray safety valve dripping overflow corrosion',b:[
+['table',['Where is it leaking?','Likely cause','What to do'],[['From the safety valve drain pipe, constantly','Supply pressure too high, faulty valve, thermostat/overheating','Check pressure with a gauge. Fit or adjust the pressure control valve. Replace the valve. Electrician checks the thermostat.'],['From the safety valve drain pipe, small drips only while heating','Thermal expansion in a closed system (non-return valve fitted)','A little is common. If it is more than a small drip, check the pressure and the expansion arrangement the maker requires.'],['From pipe connections','Loose or old joints','Isolate, drain, remake with new seals.'],['From the element flange or thermostat cover','Perished seal or loose bolts','Isolate power and water, replace the seal (electrician).'],['From the geyser body or in the drip tray','Corroded cylinder','The geyser is finished. Replace it. Turn off the water to limit damage.'],['Ceiling stain under the geyser','Any of the above','Check the drip tray and the tray’s drain pipe.']]]
+]},
+{id:'tr-drain',title:'Slow drain',kw:'slow drain gurgling smell blockage trap vent fall roots',b:[
+['table',['Check','Likely cause','What to do'],[['One fixture slow?','Trap or branch blocked (hair, soap, grease)','Clean the trap, plunge, rod the branch.'],['Several fixtures slow?','Main drain partly blocked','Rod or jet from the rodding eye. Camera inspection.'],['Gurgling noises?','Partial blockage or blocked or missing vent','Clear the drain. Check the vent. Check trap size and distance.'],['Smell from drain?','Dry trap or lost water seal, no vent, cracked pipe','Refill the trap. Check venting and the pipe.'],['Gully overflows?','Silt or blockage downstream','Clean the gully and rod the line.'],['Keeps blocking?','Roots, collapsed or bellied pipe, insufficient fall','Camera inspection and quote for repair.']]]
+]},
+{id:'tr-toilet',title:'Running toilet',kw:'running toilet cistern float valve flush valve inlet leaking wc overflow',b:[
+['table',['Check','Likely cause','What to do'],[['Water trickles into the bowl all the time?','Flush valve seal perished or dirty','Clean or replace the seal or valve. Dye test: colour in the bowl without a flush.'],['Water runs into the overflow?','Fill valve / float set too high or faulty','Adjust the float. Replace the fill valve.'],['Cistern fills very slowly?','Blocked inlet filter or low supply','Clean the filter. Check the angle valve is fully open.'],['Toilet “phantom flushes”?','Slow flush leak','Replace the flush valve seal.'],['Noise when filling?','Worn fill valve','Replace the fill valve.'],['Water on the floor?','Leaking cistern connection, cracked cistern, loose flexi hose','Check the joints, wipe dry and watch.']]]
+]},
+{id:'tr-noise',title:'Noisy pipes',kw:'noisy pipes water hammer banging clicking whistle vibrating hammer arrester',b:[
+['table',['Noise','Likely cause','What to do'],[['Bang when a tap closes (water hammer)','High pressure, fast-closing valves, loose pipes','Check pressure. Fit a pressure control valve. Fix pipes with clips. Fit a water hammer arrester.'],['Clicking when the geyser heats','Pipes expanding in clips and sleeves','Loosen or pad the clips; add sleeves.'],['Whistling or squealing','Partly closed valve, worn washer, high flow','Open valves fully, replace washers or cartridges.'],['Rattle or vibration','Pipes touching walls or each other','Add clips and pads.'],['Banging when a cistern fills','Faulty fill valve','Replace the fill valve.'],['Noise from a pump','Air in the pump, bad mountings','Bleed and check the mounting and pump.']]]
+]},
+{id:'tr-damp',title:'Damp patches',kw:'damp patch wall ceiling stain mould leak rising damp condensation roof',b:[
+['table',['Check','Likely cause','What to do'],[['Do a meter test with all taps closed','Hidden pressure leak if the meter moves','Isolate sections and find the leak.'],['Damp near a bathroom or shower wall','Failing seals or grout, leaking shower tray, or waste','Check the shower, sealant and traps with a water test.'],['Ceiling stain under a bath or geyser','Pipe, trap, overflow or drip tray leak','Check the traps and the geyser tray.'],['Damp at the bottom of walls outside','Rising damp or a leaking gutter, gully or garden tap','Check drainage, gutters, outside taps.'],['Wet floor in a kitchen','Leaking sink trap, hose or dishwasher connection','Check and dry the joints.'],['Damp only after rain','Roof, flashing or gutter leak','Not plumbing: advise a roofer.'],['Misty windows and surface damp','Condensation','Advise ventilation.']]],
+['note','Take photos and note the date. Let the customer know drying can take weeks and that we do not repair paint or plaster unless it is quoted.']
+]}
+]});
+
+SECTIONS.push({id:'contacts',title:'Contacts & company details',blurb:'Fill in APS details, crew, suppliers and emergency numbers',icon:'user',pages:[
+{id:'co-details',title:'Company details',kw:'company details name vat number registration pirb address bank account email website phone fill in',b:[
+['note','Blank on purpose. Charl fills these in. They are saved on this phone only and used in the scripts and forms.'],
+['fields','co','APS company details',[['co.name','Company name','text','APS'],['co.reg','Registration number','text'],['co.vat','VAT number','text'],['co.pirb','PIRB registration number','text'],['co.addr','Address','textarea'],['co.phone','Office / main phone','tel'],['co.wa','WhatsApp number','tel'],['co.email','Email','email'],['co.web','Website','text'],['co.bank','Banking details (bank, account holder, account no., branch code)','textarea'],['co.areas','Areas we cover','text','Krugersdorp, Pretoria, Edenvale']]]
+]},
+{id:'co-crew',title:'Crew & key people',kw:'crew team staff phone numbers victor charl contacts',b:[
+['fields','crew','Crew',[['cr.1n','Owner / manager – name','text','Charl Knoetze'],['cr.1p','Phone','tel'],['cr.2n','Crew member 2 – name','text','Victor'],['cr.2p','Phone','tel'],['cr.3n','Crew member 3 – name','text'],['cr.3p','Phone','tel'],['cr.4n','Crew member 4 – name','text'],['cr.4p','Phone','tel'],['cr.5n','Electrician (registered) – name','text'],['cr.5p','Phone','tel'],['cr.6n','Tiler / builder – name','text'],['cr.6p','Phone','tel']]]
+]},
+{id:'co-suppliers',title:'Suppliers',kw:'suppliers plumbing wholesaler account number hardware merchant',b:[
+['fields','sup','Suppliers',[['su.1n','Supplier 1 – name / branch','text'],['su.1p','Phone','tel'],['su.1a','Account number','text'],['su.2n','Supplier 2 – name / branch','text'],['su.2p','Phone','tel'],['su.2a','Account number','text'],['su.3n','Supplier 3 – name / branch','text'],['su.3p','Phone','tel'],['su.3a','Account number','text'],['su.4n','Other: drain / specialist hire','text'],['su.4p','Phone','tel']]]
+]},
+{id:'co-emergency',title:'Emergency contacts',kw:'emergency contacts ambulance police doctor hospital municipality water outage insurance',b:[
+['p','South Africa: **112** (cell), **10177** (ambulance), **10111** (police). Add your local numbers here.'],
+['fields','em','Emergency contacts',[['em.doc','Doctor / clinic','text'],['em.docp','Phone','tel'],['em.hosp','Nearest hospital','text'],['em.hospp','Phone','tel'],['em.mun1','Municipal water faults – Krugersdorp','text'],['em.mun1p','Phone','tel'],['em.mun2','Municipal water faults – Pretoria (Tshwane)','text'],['em.mun2p','Phone','tel'],['em.mun3','Municipal water faults – Edenvale (Ekurhuleni)','text'],['em.mun3p','Phone','tel'],['em.ins','Insurance contact','text'],['em.insp','Phone / policy no.','text']]]
+]}
+]});
+
+SECTIONS.push({id:'calc',title:'Calculators',blurb:'Price with markup + VAT, pipe fall, support spacing',icon:'calc',pages:[
+{id:'calc-price',title:'Price calculator (markup + VAT)',kw:'calculator price markup 30 vat 15 selling price cost margin quote',b:[['calc','price']]},
+{id:'calc-fall',title:'Pipe fall calculator',kw:'calculator pipe fall drop mm slope 1:46 1:40 1:60 length gradient',b:[['calc','fall']]},
+{id:'calc-support',title:'Pipe support spacing',kw:'calculator support spacing clips lookup copper upvc galvanised horizontal vertical',b:[['calc','support']]}
+]});
+
+</script>
+<script>
+(function(){
+'use strict';
+var VERSION='1.0',CACHE='aps-manual-v1',SKETCH='https://charlaps.github.io/plumbing-sketch/';
+var FILES=['./','index.html','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png'];
+/* ---------- storage ---------- */
+var mem={};
+function lsGet(k,d){try{var v=localStorage.getItem('apsm.'+k);return v==null?d:JSON.parse(v)}catch(e){return k in mem?mem[k]:d}}
+function lsSet(k,v){try{localStorage.setItem('apsm.'+k,JSON.stringify(v))}catch(e){mem[k]=v}}
+var S={chk:lsGet('chk',{}),fld:lsGet('fld',{}),fav:lsGet('fav',[]),pref:lsGet('pref',{theme:'auto',size:'m'})};
+function save(k){lsSet(k,S[k])}
+/* ---------- data index ---------- */
+var PAGES={},SEC={},ORDER=[];
+SECTIONS.forEach(function(s,i){s.n=i+1;SEC[s.id]=s;s.pages.forEach(function(p,j){p.sec=s;p.idx=j;PAGES[p.id]=p;ORDER.push(p)})});
+var HOME_SECS=SECTIONS.filter(function(s){return s.id!=='calc'});
+var ICONS={
+info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/>',
+sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8v5M12 16v.01"/>',
+doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/>',
+clip:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12l2 2 4-4M9 18h6"/>',
+pipe:'<path d="M5 3v11a6 6 0 0 0 6 6h9"/><path d="M3 3h4M18 17v6M20 17v6"/>',
+book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h6"/>',
+tool:'<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V5h8v3M3 13h18M11 13v3h2v-3"/>',
+chat:'<path d="M4 4h16v12H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
+form:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+warn:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/>',
+calc:'<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 19h2M12 19h2"/>',
+home:'<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/>',
+star:'<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/>',
+cog:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+back:'<path d="M15 5l-7 7 7 7"/>',
+chev:'<path d="M9 5l7 7-7 7"/>',
+share:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/>',
+copy:'<rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/>',
+ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+reset:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/>'};
+function svg(n,extra){return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"'+(extra||'')+'>'+(ICONS[n]||'')+'</svg>'}
+/* ---------- helpers ---------- */
+function h(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){var v=attrs[k];if(v==null||v===false)continue;if(k==='class')e.className=v;else if(k==='html')e.innerHTML=v;else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),v);else e.setAttribute(k,v===true?'':v)}
+ add(e,kids);return e}
+function add(e,kids){if(kids==null)return;if(!Array.isArray(kids))kids=[kids];kids.forEach(function(c){if(c==null||c===false)return;if(Array.isArray(c))add(e,c);else e.appendChild(typeof c==='object'?c:document.createTextNode(String(c)))})}
+function rich(t){var f=document.createDocumentFragment();String(t).split('**').forEach(function(s,i){if(!s)return;if(i%2){var b=document.createElement('strong');b.textContent=s;f.appendChild(b)}else f.appendChild(document.createTextNode(s))});return f}
+function plain(t){return String(t).replace(/\*\*/g,'')}
+function wa(t){return String(t).replace(/\*\*(.+?)\*\*/g,'*$1*')}
+function esc(s){return s.replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var toastT;function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},2600)}
+function num(s){var n=parseFloat(String(s==null?'':s).replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:NaN}
+function money(n){var neg=n<0;n=Math.abs(n);var p=n.toFixed(2).split('.');p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'\u00A0');return (neg?'-':'')+'R'+p[0]+'.'+p[1]}
+function r2(n){return Math.round((n+Number.EPSILON)*100)/100}
+function today(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+/* ---------- share / copy ---------- */
+function copyText(t){
+ if(navigator.clipboard&&navigator.clipboard.writeText){return navigator.clipboard.writeText(t).then(function(){return true},function(){return legacyCopy(t)})}
+ return Promise.resolve(legacyCopy(t))}
+function legacyCopy(t){try{var a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(a);a.select();var ok=document.execCommand('copy');a.remove();return ok}catch(e){return false}}
+function doCopy(t){copyText(t).then(function(ok){toast(ok?'Copied. Paste it anywhere.':'Could not copy. Press and hold the text to copy.')})}
+function waLink(t){return 'https://wa.me/?text='+encodeURIComponent(t)}
+function waFallback(t){
+ var u=waLink(t);
+ if(u.length>6000){copyText(t).then(function(){toast('Text is long: copied. Paste it into WhatsApp.')});window.open('https://wa.me/','_blank','noopener');return}
+ window.open(u,'_blank','noopener')}
+function shareText(t,title){
+ if(navigator.share){try{var p=navigator.share({title:title||'APS Field Service Manual',text:t});if(p&&p.catch)p.catch(function(e){if(e&&e.name==='AbortError')return;waFallback(t)});return}catch(e){}}
+ waFallback(t)}
+/* ---------- field helpers ---------- */
+var FB={'co.name':'APS','co.phone':'[our phone number]','co.email':'[our email]','co.bank':'[our banking details]','rate.valid':'[number of]'};
+function fv(k){var v=S.fld[k];return v==null?'':String(v)}
+function fillTpl(t){return t.replace(/\{\{([\w.]+)\}\}/g,function(m,k){var v=fv(k).trim();return v||FB[k]||'['+k+']'})}
+function co(){return fv('co.name').trim()||'APS'}
+/* ---------- text builders ---------- */
+function chkText(id,title,items){var st=S.chk[id]||[];return '*'+title+'*\n'+items.map(function(it,i){return (st.indexOf(i)>=0?'\u2611 ':'\u2610 ')+plain(it)}).join('\n')}
+function formText(id,title,flds){
+ var lines=[],any=false;
+ flds.forEach(function(f){var v=fv(id+'.'+f[0]).trim();if(v){any=true;lines.push((f[2]==='textarea'&&v.indexOf('\n')>=0?'*'+f[1]+'*:\n'+v:f[1]+': '+v))}});
+ if(!any){lines=flds.map(function(f){return f[1]+': '})}
+ return '*'+co()+' \u2013 '+title+'*\n'+lines.join('\n')}
+function blockText(b,pg){
+ var t=b[0];
+ switch(t){
+ case 'h':return '\n*'+b[1]+'*';
+ case 'p':return wa(b[1]);
+ case 'ul':return b[1].map(function(x){return '\u2022 '+wa(x)}).join('\n');
+ case 'ol':return b[1].map(function(x,i){return (i+1)+'. '+wa(x)}).join('\n');
+ case 'note':return 'Note: '+wa(b[1]);
+ case 'warn':return '\u26A0 '+wa(b[1]);
+ case 'sans':return '\u2022 '+wa(b[1])+' _(Guide only \u2013 check the current standard)_';
+ case 'verify':return '_Verify: '+plain(b[1])+'_';
+ case 'chk':return chkText(b[1],b[2],b[3]);
+ case 'table':return b[2].map(function(r){return '\u2022 *'+plain(r[0])+'*'+(r.length>1?': '+r.slice(1).map(function(c,i){return (b[1].length>2?b[1][i+1]+' \u2013 ':'')+plain(c)}).join('; '):'')}).join('\n');
+ case 'fields':return b[3].map(function(f){var v=fv(f[0]).trim();return v?f[1]+': '+v:''}).filter(Boolean).join('\n');
+ case 'form':return formText(b[1],b[2],b[3]);
+ case 'tpl':return '*'+b[2]+'*\n'+fillTpl(b[3]);
+ case 'link':return b[1]+': '+b[2];
+ case 'calc':return calcText(b[1]);
+ }
+ return ''}
+function pageText(p){
+ var out=['*'+plain(p.title)+'*  (APS Field Service Manual)'];
+ p.b.forEach(function(b){var x=blockText(b,p);if(x)out.push(x)});
+ return out.join('\n\n')}
+function secText(s){return '*'+s.title+'*\n\n'+s.pages.map(function(p){return pageText(p)}).join('\n\n\u2014\u2014\u2014\n\n')}
+/* ---------- block renderers ---------- */
+var BR={};
+BR.h=function(b){return h('h3',{class:'bh'},plain(b[1]))};
+BR.p=function(b){return h('p',{class:'bp'},[rich(b[1])])};
+BR.ul=function(b){return h('ul',{class:'bl'},b[1].map(function(x){return h('li',null,[rich(x)])}))};
+BR.ol=function(b){return h('ol',{class:'bl'},b[1].map(function(x){return h('li',null,[rich(x)])}))};
+BR.note=function(b){return h('div',{class:'note'},[rich(b[1])])};
+BR.warn=function(b){return h('div',{class:'warn'},[rich(b[1])])};
+BR.sans=function(b){return h('div',{class:'sans'},[rich(b[1]),h('span',{class:'badge'},'Guide only \u2013 check the current standard')])};
+BR.verify=function(b){return h('div',{class:'verify'},[rich(b[1]),h('span',{class:'badge'},'Verify')])};
+BR.link=function(b){return h('a',{class:'btn pri',href:b[2],rel:'noopener'},[b[1]])};
+BR.goto=function(b){var p=PAGES[b[2]];return h('a',{class:'btn',href:'#/p/'+b[2],'data-go':1},[b[1]])};
+BR.table=function(b){
+ var hd=b[1],rows=b[2];
+ if(b[3]||hd.length===2&&rows.every(function(r){return plain(r[1]).length<24})){
+  var t=h('table',{class:'ct'});t.appendChild(h('thead',null,h('tr',null,hd.map(function(x){return h('th',null,x)}))));
+  var tb=h('tbody');rows.forEach(function(r){tb.appendChild(h('tr',null,r.map(function(c){return h('td',null,[rich(c)])})))});t.appendChild(tb);return t}
+ var w=h('div');rows.forEach(function(r){var c=h('div',{class:'tc'});c.appendChild(h('div',{class:'th'},[rich(r[0])]));
+  for(var i=1;i<r.length;i++)c.appendChild(h('div',{class:'tr'},[h('small',null,hd[i]),rich(r[i])]));w.appendChild(c)});return w};
+BR.chk=function(b){
+ var id=b[1],items=b[3];
+ var box=h('div',{class:'chk'}),cnt=h('span',{class:'cnt'}),bar=h('i'),prog=h('div',{class:'prog'},bar);
+ box.appendChild(h('div',{class:'ch'},[h('b',null,b[2]),cnt]));box.appendChild(prog);
+ var boxes=[];
+ function upd(){var st=S.chk[id]||[];cnt.textContent=st.length+' / '+items.length;bar.style.width=(items.length?100*st.length/items.length:0)+'%'}
+ items.forEach(function(it,i){
+  var cb=h('input',{type:'checkbox','data-chk':id+':'+i});cb.checked=(S.chk[id]||[]).indexOf(i)>=0;boxes.push(cb);
+  cb.addEventListener('change',function(){var st=(S.chk[id]||[]).slice();var k=st.indexOf(i);if(cb.checked&&k<0)st.push(i);if(!cb.checked&&k>=0)st.splice(k,1);if(st.length)S.chk[id]=st;else delete S.chk[id];save('chk');upd()});
+  box.appendChild(h('label',{class:'ci'},[cb,h('span',null,[rich(it)])]))});
+ var rb=h('button',{class:'btn dng sm','data-reset':id,type:'button'},'Reset');var armed=false,at;
+ rb.addEventListener('click',function(){if(!armed){armed=true;rb.textContent='Tap again to reset';clearTimeout(at);at=setTimeout(function(){armed=false;rb.textContent='Reset'},3000);return}
+  armed=false;rb.textContent='Reset';delete S.chk[id];save('chk');boxes.forEach(function(c){c.checked=false});upd();toast('Checklist reset')});
+ box.appendChild(h('div',{class:'cf'},[
+  h('button',{class:'btn wa sm',type:'button','data-share':'chk',onclick:function(){shareText(chkText(id,b[2],items),b[2])}},'Share to WhatsApp'),
+  h('button',{class:'btn sm',type:'button',onclick:function(){doCopy(chkText(id,b[2],items))}},'Copy'),rb]));
+ upd();return box};
+function fieldEl(key,f,inputAttrs){
+ var type=f[2]||'text',ph=f[3]||'';var inp;
+ if(type==='textarea')inp=h('textarea',{rows:3,placeholder:ph,'data-fld':key,autocapitalize:'sentences'});
+ else inp=h('input',{type:type==='number'?'text':type,inputmode:type==='number'?'decimal':(type==='tel'?'tel':null),placeholder:ph,'data-fld':key,autocomplete:'off'});
+ inp.value=fv(key);
+ inp.addEventListener('input',function(){if(inp.value)S.fld[key]=inp.value;else delete S.fld[key];save('fld');if(key==='rate.markup'||key==='rate.vat'){delete calcState.price.mk;delete calcState.price.vat}});
+ return h('label',{class:'fl'},[h('span',null,f[1]),inp])}
+BR.fields=function(b){
+ var c=h('div',{class:'fcard'});c.appendChild(h('h3',null,b[2]));
+ b[3].forEach(function(f){c.appendChild(fieldEl(f[0],f))});
+ c.appendChild(h('div',{class:'btns'},[h('button',{class:'btn wa sm',type:'button',onclick:function(){var t=blockText(b);if(!t)toast('Nothing filled in yet');else shareText('*'+b[2]+'*\n'+t,b[2])}},'Share to WhatsApp'),
+  h('button',{class:'btn sm',type:'button',onclick:function(){var t=blockText(b);if(!t)toast('Nothing filled in yet');else doCopy(t)}},'Copy')]));
+ c.appendChild(h('p',{class:'foot'},'Saved on this phone only.'));return c};
+BR.form=function(b){
+ var id=b[1],title=b[2],flds=b[3];
+ var c=h('div',{class:'fcard'});c.appendChild(h('h3',null,title));
+ flds.forEach(function(f){c.appendChild(fieldEl(id+'.'+f[0],f))});
+ var cl=h('button',{class:'btn dng sm',type:'button','data-clear':id},'Clear form'),armed=false,at;
+ cl.addEventListener('click',function(){if(!armed){armed=true;cl.textContent='Tap again to clear';clearTimeout(at);at=setTimeout(function(){armed=false;cl.textContent='Clear form'},3000);return}
+  flds.forEach(function(f){delete S.fld[id+'.'+f[0]]});save('fld');route(true);toast('Form cleared')});
+ c.appendChild(h('div',{class:'btns'},[
+  h('button',{class:'btn wa',type:'button','data-share':'form',onclick:function(){shareText(formText(id,title,flds),title)}},'Share to WhatsApp'),
+  h('button',{class:'btn sm',type:'button',onclick:function(){doCopy(formText(id,title,flds))}},'Copy'),cl]));
+ c.appendChild(h('p',{class:'foot'},'Saved on this phone as you type.'));return c};
+BR.tpl=function(b){
+ var c=h('div',{class:'fcard tpl'});c.appendChild(h('h3',null,b[2]));
+ var ta=h('textarea',{rows:7,'data-tpl':b[1]});ta.value=fillTpl(b[3]);
+ c.appendChild(h('label',{class:'fl'},[h('span',null,'Edit the text, then share or copy'),ta]));
+ c.appendChild(h('div',{class:'btns'},[h('button',{class:'btn wa sm',type:'button','data-share':'tpl',onclick:function(){shareText(ta.value,b[2])}},'Share to WhatsApp'),h('button',{class:'btn sm',type:'button',onclick:function(){doCopy(ta.value)}},'Copy')]));return c};
+BR.calc=function(b){return CALC[b[1]].render()};
+/* ---------- calculators ---------- */
+function priceCalc(o){
+ var mk=isFinite(o.mk)?o.mk:30,vat=isFinite(o.vat)?o.vat:15,cost=isFinite(o.cost)?o.cost:0,lab=isFinite(o.lab)?o.lab:0;
+ var costEx=o.incl?cost/(1+vat/100):cost;costEx=r2(costEx);
+ var mkAmt=r2(costEx*mk/100),mat=r2(costEx+mkAmt),sub=r2(mat+lab),vatAmt=r2(sub*vat/100),total=r2(sub+vatAmt);
+ return {costEx:costEx,mk:mk,vat:vat,mkAmt:mkAmt,mat:mat,lab:lab,sub:sub,vatAmt:vatAmt,total:total,margin:mat?mkAmt/mat*100:0}}
+function fallCalc(len,ratio){return len*1000/ratio}
+var RATIOS=[[46,'1 : 46','SANS min. waste branch'],[40,'1 : 40','SANS min. soil branch'],[60,'1 : 60','site practice \u2013 not the standard']];
+var SUPPORT={
+ upvc:{label:'uPVC waste / soil',rows:[['32 mm',0.6,1.5,'std'],['40 mm',0.6,1.5,'std'],['50 mm',0.6,1.5,'std'],['75 mm',null,null,'mk'],['110 mm',null,null,'mk']]},
+ cu:{label:'Copper',rows:[['15 mm',1.2,1.8,'typ'],['22 mm',1.8,2.4,'typ'],['28 mm',1.8,2.4,'typ'],['35 mm',2.4,3.0,'typ'],['42 mm',2.4,3.0,'typ'],['54 mm',2.7,3.0,'typ']]},
+ gal:{label:'Galvanised steel',rows:[['15 mm (\u00BD\u2033)',1.8,2.4,'typ'],['20 mm (\u00BE\u2033)',2.4,3.0,'typ'],['25 mm (1\u2033)',2.4,3.0,'typ'],['32 mm (1\u00BC\u2033)',2.7,3.0,'typ'],['40 mm (1\u00BD\u2033)',3.0,3.6,'typ'],['50 mm (2\u2033)',3.0,3.6,'typ']]},
+ pex:{label:'PEX / multilayer',rows:[['16 mm',null,null,'mk'],['20 mm',null,null,'mk'],['26 mm',null,null,'mk'],['32 mm',null,null,'mk']]},
+ hdpe:{label:'HDPE (polyethylene)',rows:[['20 \u2013 63 mm',null,null,'mk']]}};
+var SUPTAG={std:'From the standard (SANS 10252-2). Guide only \u2013 check the current standard.',typ:'Typical trade value, not from the standard. Verify with the maker or SANS 10252-1.',mk:'Not given here. Use the pipe maker\u2019s table (it depends on the brand and temperature).'};
+function mm(v){return v+' m ('+Math.round(v*1000)+' mm)'}
+var calcState={price:{cost:'',incl:false,lab:''},fall:{len:'',ratio:46,custom:''},sup:{mat:'upvc',size:0}};
+function priceInputs(){var mk=num(calcState.price.mk!=null?calcState.price.mk:(fv('rate.markup')||'30'));var vat=num(calcState.price.vat!=null?calcState.price.vat:(fv('rate.vat')===''?'15':fv('rate.vat')));return {cost:num(calcState.price.cost),incl:calcState.price.incl,lab:num(calcState.price.lab),mk:mk,vat:vat}}
+function priceText(){var r=priceCalc(priceInputs());return '*Price calculation*\nCost excl. VAT: '+money(r.costEx)+'\nMarkup '+r.mk+'%: '+money(r.mkAmt)+'\nMaterials selling price: '+money(r.mat)+'\nLabour: '+money(r.lab)+'\nSubtotal excl. VAT: '+money(r.sub)+'\nVAT '+r.vat+'%: '+money(r.vatAmt)+'\n*Total incl. VAT: '+money(r.total)+'*'}
+function fallRatio(){var s=calcState.fall;return s.ratio==='c'?num(s.custom):s.ratio}
+function fallText(){var l=num(calcState.fall.len);if(!isFinite(l))return '';return '*Pipe fall for '+l+' m*\n'+RATIOS.map(function(r){return '1:'+r[0]+' \u2013 '+fallCalc(l,r[0]).toFixed(1)+' mm'}).join('\n')+'\nGuide only \u2013 check the current standard.'}
+function supText(){var m=SUPPORT[calcState.sup.mat],r=m.rows[calcState.sup.size];if(!r)return '';return '*Support spacing \u2013 '+m.label+' '+r[0]+'*\n'+(r[1]!=null?'Horizontal: '+mm(r[1])+'\nVertical: '+mm(r[2])+'\n':'')+SUPTAG[r[3]]}
+function calcText(k){return k==='price'?priceText():k==='fall'?fallText():supText()}
+function mkField(label,attrs,val,onin){var i=h('input',attrs);i.value=val==null?'':val;i.addEventListener('input',function(){onin(i.value)});return h('label',{class:'fl'},[h('span',null,label),i])}
+var CALC={};
+CALC.price={render:function(){
+ var s=calcState.price,wrap=h('div'),out=h('div',{class:'res','aria-live':'polite','data-out':'price'});
+ function draw(){var r=priceCalc(priceInputs());
+  out.innerHTML='';
+  out.appendChild(h('div',{class:'rrow'},[h('span',null,'Materials cost excl. VAT'),h('b',null,money(r.costEx))]));
+  out.appendChild(h('div',{class:'rrow'},[h('span',null,'+ Markup '+r.mk+'%'),h('b',null,money(r.mkAmt))]));
+  out.appendChild(h('div',{class:'rrow'},[h('span',null,'Materials selling price'),h('b',null,money(r.mat))]));
+  out.appendChild(h('div',{class:'rrow'},[h('span',null,'+ Labour / call-out'),h('b',null,money(r.lab))]));
+  out.appendChild(h('div',{class:'rrow'},[h('span',null,'Subtotal excl. VAT'),h('b',null,money(r.sub))]));
+  out.appendChild(h('div',{class:'rrow'},[h('span',null,'+ VAT '+r.vat+'%'),h('b',null,money(r.vatAmt))]));
+  out.appendChild(h('div',{class:'rrow tot'},[h('span',null,'Total incl. VAT'),h('b',{'data-total':1},money(r.total))]));
+  out.appendChild(h('small',null,'Profit on materials: '+money(r.mkAmt)+' (margin '+r.margin.toFixed(1)+'% of selling price)'))}
+ var d={inputmode:'decimal',autocomplete:'off'};
+ wrap.appendChild(h('p',{class:'bp'},'Enter the supplier price. The markup is added to the materials. Labour is added at your selling price. VAT is added last.'));
+ wrap.appendChild(mkField('Materials cost (R)',Object.assign({type:'text','data-c':'cost',placeholder:'0.00'},d),s.cost,function(v){s.cost=v;draw()}));
+ var sw=h('label',{class:'sw'});var cb=h('input',{type:'checkbox','data-c':'incl'});cb.checked=!!s.incl;cb.addEventListener('change',function(){s.incl=cb.checked;draw()});sw.appendChild(cb);sw.appendChild(h('span',null,'The cost above already includes VAT'));wrap.appendChild(sw);
+ wrap.appendChild(mkField('Labour / call-out (R, excl. VAT, no markup)',Object.assign({type:'text','data-c':'lab',placeholder:'0.00'},d),s.lab,function(v){s.lab=v;draw()}));
+ wrap.appendChild(mkField('Markup on materials (%)',Object.assign({type:'text','data-c':'mk'},d),s.mk!=null?s.mk:(fv('rate.markup')||'30'),function(v){s.mk=v;draw()}));
+ wrap.appendChild(mkField('VAT (%) \u2013 use 0 if not VAT registered',Object.assign({type:'text','data-c':'vat'},d),s.vat!=null?s.vat:(fv('rate.vat')===''?'15':fv('rate.vat')),function(v){s.vat=v;draw()}));
+ wrap.appendChild(out);
+ wrap.appendChild(h('div',{class:'btns'},[h('button',{class:'btn wa',type:'button',onclick:function(){shareText(priceText(),'Price calculation')}},'Share to WhatsApp'),h('button',{class:'btn',type:'button',onclick:function(){doCopy(priceText())}},'Copy')]));
+ wrap.appendChild(h('p',{class:'foot'},'Default markup and VAT come from Our rates. Change them there.'));
+ draw();return wrap}};
+CALC.fall={render:function(){
+ var s=calcState.fall,wrap=h('div'),out=h('div',{class:'res','aria-live':'polite','data-out':'fall'}),cu=null;
+ function draw(){var l=num(s.len),r=fallRatio();out.innerHTML='';
+  if(!isFinite(l)||l<=0){out.appendChild(h('div',null,'Enter the pipe length in metres.'));return}
+  if(isFinite(r)&&r>0){out.appendChild(h('small',null,'Drop over '+l+' m at 1 : '+r));out.appendChild(h('div',{class:'big','data-drop':1},fallCalc(l,r).toFixed(1)+' mm'));out.appendChild(h('small',null,(1000/r).toFixed(1)+' mm per metre'))}
+  else out.appendChild(h('div',null,'Enter the custom ratio.'));
+  out.appendChild(h('div',{style:'margin-top:10px'}));
+  RATIOS.forEach(function(x){out.appendChild(h('div',{class:'rrow'},[h('span',null,'1 : '+x[0]),h('b',{'data-r':x[0]},fallCalc(l,x[0]).toFixed(1)+' mm')]))})}
+ wrap.appendChild(mkField('Pipe length (metres)',{type:'text',inputmode:'decimal','data-c':'len',placeholder:'e.g. 3.5',autocomplete:'off'},s.len,function(v){s.len=v;draw()}));
+ var chips=h('div',{class:'chips'});
+ function chipsDraw(){chips.innerHTML='';RATIOS.forEach(function(x){chips.appendChild(h('button',{type:'button',class:'chip'+(s.ratio===x[0]?' on':''),'data-ratio':x[0],onclick:function(){s.ratio=x[0];chipsDraw();draw()}},[x[1],h('small',null,x[2])]))});
+  chips.appendChild(h('button',{type:'button',class:'chip'+(s.ratio==='c'?' on':''),'data-ratio':'c',onclick:function(){s.ratio='c';chipsDraw();draw()}},['Custom',h('small',null,'1 : your number')]));
+  if(cu)cu.style.display=s.ratio==='c'?'':'none'}
+ wrap.appendChild(h('div',{class:'fl'},[h('span',null,'Fall (ratio)')]));wrap.appendChild(chips);
+ cu=mkField('Custom ratio: 1 :',{type:'text',inputmode:'decimal','data-c':'custom',autocomplete:'off'},s.custom,function(v){s.custom=v;draw()});wrap.appendChild(cu);
+ chipsDraw();wrap.appendChild(out);
+ wrap.appendChild(h('div',{class:'sans'},[rich('SANS 10252-2 Table 15 minimum falls: **1 : 46** waste branches, **1 : 40** soil branches. The site practice of 1 : 40 for 50 mm and 1 : 60 for 110 mm is **not** the standard.'),h('span',{class:'badge'},'Guide only \u2013 check the current standard')]));
+ wrap.appendChild(h('div',{class:'btns'},[h('button',{class:'btn wa',type:'button',onclick:function(){var t=fallText();if(t)shareText(t,'Pipe fall');else toast('Enter the length first')}},'Share to WhatsApp'),h('button',{class:'btn',type:'button',onclick:function(){var t=fallText();if(t)doCopy(t);else toast('Enter the length first')}},'Copy')]));
+ draw();return wrap}};
+CALC.support={render:function(){
+ var s=calcState.sup,wrap=h('div'),out=h('div',{class:'res','aria-live':'polite','data-out':'support'}),sizeSel=h('select',{'data-c':'size'}),matSel=h('select',{'data-c':'mat'});
+ Object.keys(SUPPORT).forEach(function(k){matSel.appendChild(h('option',{value:k},SUPPORT[k].label))});matSel.value=s.mat;
+ function sizes(){sizeSel.innerHTML='';SUPPORT[s.mat].rows.forEach(function(r,i){sizeSel.appendChild(h('option',{value:i},r[0]))});sizeSel.value=s.size}
+ function draw(){var r=SUPPORT[s.mat].rows[s.size];out.innerHTML='';
+  if(r[1]!=null){out.appendChild(h('div',{class:'rrow'},[h('span',null,'Horizontal runs'),h('b',{'data-h':1},mm(r[1]))]));out.appendChild(h('div',{class:'rrow'},[h('span',null,'Vertical runs'),h('b',{'data-v':1},mm(r[2]))]))}
+  else out.appendChild(h('div',{class:'big','data-h':1,style:'font-size:1.3rem'},'Check the maker\u2019s table'));
+  out.appendChild(h('small',null,SUPTAG[r[3]]))}
+ matSel.addEventListener('change',function(){s.mat=matSel.value;s.size=0;sizes();draw()});
+ sizeSel.addEventListener('change',function(){s.size=+sizeSel.value;draw()});
+ wrap.appendChild(h('label',{class:'fl'},[h('span',null,'Pipe material'),matSel]));
+ wrap.appendChild(h('label',{class:'fl'},[h('span',null,'Size'),sizeSel]));
+ sizes();wrap.appendChild(out);
+ wrap.appendChild(h('div',{class:'verify'},[rich('Only uPVC waste up to 50 mm comes from the standard (0.6 m horizontal, 1.5 m vertical). Copper and galvanised figures are **typical trade values**. For plastic pressure pipes follow the maker.'),h('span',{class:'badge'},'Verify')]));
+ wrap.appendChild(h('div',{class:'btns'},[h('button',{class:'btn wa',type:'button',onclick:function(){shareText(supText(),'Support spacing')}},'Share to WhatsApp'),h('button',{class:'btn',type:'button',onclick:function(){doCopy(supText())}},'Copy')]));
+ draw();return wrap}};
+/* ---------- search ---------- */
+var IDX=[];
+function buildIndex(){
+ ORDER.forEach(function(p){
+  var parts=[];
+  p.b.forEach(function(b){
+   switch(b[0]){
+    case 'h':case 'p':case 'note':case 'warn':case 'sans':case 'verify':parts.push(plain(b[1]));break;
+    case 'ul':case 'ol':b[1].forEach(function(x){parts.push(plain(x))});break;
+    case 'chk':parts.push(b[2]);b[3].forEach(function(x){parts.push(plain(x))});break;
+    case 'table':b[1].forEach(function(x){parts.push(x)});b[2].forEach(function(r){r.forEach(function(c){parts.push(plain(c))})});break;
+    case 'fields':case 'form':parts.push(b[2]);b[3].forEach(function(f){parts.push(f[1])});break;
+    case 'tpl':parts.push(b[2]);parts.push(b[3].replace(/\{\{[\w.]+\}\}/g,''));break;
+    case 'link':case 'goto':parts.push(b[1]);break;
+    case 'calc':parts.push(p.title);break}});
+  var text=parts.join(' \u2022 ');
+  IDX.push({p:p,title:p.title.toLowerCase(),sec:p.sec.title.toLowerCase(),kw:(p.kw||'').toLowerCase(),text:text,low:text.toLowerCase()})})}
+function search(q){
+ var toks=q.toLowerCase().split(/\s+/).filter(Boolean);if(!toks.length)return [];
+ var res=[];
+ IDX.forEach(function(e){
+  var score=0,ok=true;
+  toks.forEach(function(t){var inT=e.title.indexOf(t)>=0,inK=e.kw.indexOf(t)>=0,inS=e.sec.indexOf(t)>=0,inB=e.low.indexOf(t)>=0;
+   if(!(inT||inK||inS||inB)){ok=false;return}
+   score+=(inT?20:0)+(inK?8:0)+(inS?3:0)+(inB?Math.min(6,e.low.split(t).length-1):0)});
+  if(ok)res.push({e:e,score:score})});
+ res.sort(function(a,b){return b.score-a.score});return res}
+function snippet(e,toks){
+ var pos=-1;for(var i=0;i<toks.length&&pos<0;i++)pos=e.low.indexOf(toks[i]);
+ if(pos<0)return '';var s=Math.max(0,pos-45),en=Math.min(e.text.length,pos+90);
+ var t=(s>0?'\u2026':'')+e.text.slice(s,en)+(en<e.text.length?'\u2026':'');
+ var out=esc(t);toks.forEach(function(k){if(!k)return;out=out.replace(new RegExp('('+esc(k).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig'),'<mark>$1</mark>')});return out}
+/* ---------- routing ---------- */
+var view,titleEl,backBtn,starBtn,navEl,curRoute='',scrollMem={};
+function parse(){var hsh=location.hash.replace(/^#/,'')||'/';var m=hsh.split('/');return {name:m[1]||'',arg:decodeURIComponent(m.slice(2).join('/')||'')}}
+function go(href,replace){
+ scrollMem[curRoute]=window.scrollY;
+ var st={n:((history.state&&history.state.n)||0)+(replace?0:1)};
+ try{if(replace)history.replaceState(st,'',href);else history.pushState(st,'',href)}catch(e){location.hash=href.replace(/^[^#]*/,'')}
+ route();window.scrollTo(0,0)}
+function isFav(id){return S.fav.indexOf(id)>=0}
+function toggleFav(id){var i=S.fav.indexOf(id);if(i>=0)S.fav.splice(i,1);else S.fav.push(id);save('fav');return i<0}
+function setBar(title,o){o=o||{};titleEl.textContent=title;backBtn.hidden=!!o.home;starBtn.hidden=!o.star;
+ if(o.star){var on=isFav(o.star);starBtn.classList.toggle('on',on);starBtn.setAttribute('aria-pressed',on);starBtn.setAttribute('aria-label',on?'Unpin this page':'Pin this page');starBtn.onclick=function(){var n=toggleFav(o.star);starBtn.classList.toggle('on',n);starBtn.setAttribute('aria-pressed',n);toast(n?'Pinned to your favourites':'Removed from favourites')}}
+ document.title=(o.home?'':title+' \u2013 ')+'APS Field Manual'}
+function setNav(c){[].forEach.call(navEl.children,function(a){a.classList.toggle('cur',a.getAttribute('data-nav')===c)})}
+function route(keepScroll){
+ var r=parse(),key=location.hash||'#/';curRoute=key;view.innerHTML='';
+ var f=({'':vHome,'s':vSection,'p':vPage,'q':vSearch,'fav':vFav,'settings':vSettings})[r.name]||vHome;
+ f(r.arg);if(!keepScroll)window.scrollTo(0,0)}
+function pageRow(p,showSec){
+ return h('a',{class:'row',href:'#/p/'+p.id,'data-go':1},[h('span',{class:'t'},[plain(p.title),showSec?h('small',null,p.sec.n+'. '+p.sec.title):null]),isFav(p.id)?h('span',{class:'pin',html:svg('star',' style="fill:currentColor"')}):null,h('span',{class:'chev',html:svg('chev')})])}
+var deferredInstall=null;
+function vHome(){
+ setBar('APS Field Manual',{home:1});setNav('home');
+ view.appendChild(h('div',{class:'hero'},[h('img',{class:'logo',src:'icon-192.png',alt:'',width:56,height:56}),h('div',null,[h('h2',null,'APS Field Service Manual'),h('p',null,'Krugersdorp \u00B7 Pretoria \u00B7 Edenvale')])]));
+ if(deferredInstall)view.appendChild(h('div',{class:'inst'},[h('span',null,'Install this manual on your phone so it works offline.'),h('button',{class:'btn pri sm',type:'button',onclick:doInstall},'Install')]));
+ view.appendChild(h('button',{class:'searchbtn',type:'button','data-open-search':1,onclick:function(){go('#/q')}},[h('span',{html:svg('search')}),'Search the manual\u2026']));
+ view.appendChild(h('div',{class:'quick'},[h('a',{class:'qbtn',href:'#/s/calc','data-go':1},[h('span',{html:svg('calc')}),'Calculators']),h('a',{class:'qbtn alt',href:SKETCH,rel:'noopener','data-sketch':1},[h('span',{html:svg('ext')}),'Plumbing Sketch app'])]));
+ if(S.fav.length){view.appendChild(h('div',{class:'sechd'},'Pinned'));var l=h('div',{class:'list'});S.fav.filter(function(id){return PAGES[id]}).slice(0,6).forEach(function(id){l.appendChild(pageRow(PAGES[id],true))});view.appendChild(l);if(S.fav.length>6)view.appendChild(h('div',{class:'btns'},h('a',{class:'btn sm',href:'#/fav','data-go':1},'All pinned ('+S.fav.length+')')))}
+ view.appendChild(h('div',{class:'sechd'},'Sections'));
+ var g=h('div',{class:'tiles'});HOME_SECS.forEach(function(s){g.appendChild(h('a',{class:'tile'+(s.id==='safety'?' red':''),href:'#/s/'+s.id,'data-go':1,'data-sec':s.id},[h('span',{class:'ti',html:svg(s.icon)}),h('span',{class:'tn'},String(s.n)),h('b',null,s.title),h('small',null,s.blurb)]))});
+ view.appendChild(g);
+ view.appendChild(h('p',{class:'foot'},'Guide only \u2013 check the current standard. Version '+VERSION+'. Your entries are saved on this phone only.'))}
+function vSection(id){
+ var s=SEC[id];if(!s)return vHome();
+ setBar(s.title);setNav(s.id==='calc'?'calc':'');
+ view.appendChild(h('p',{class:'crumb'},(s.id==='calc'?'':'Section '+s.n+' \u00B7 ')+s.blurb));
+ if(s.id==='sans')view.appendChild(h('div',{class:'note'},'Every item here is a memory aid. Guide only \u2013 check the current standard.'));
+ var l=h('div',{class:'list'});s.pages.forEach(function(p){l.appendChild(pageRow(p))});view.appendChild(l);
+ if(s.id!=='calc')view.appendChild(h('div',{class:'btns'},[h('button',{class:'btn wa',type:'button','data-share':'section',onclick:function(){shareText(secText(s),s.title)}},'Share whole section to WhatsApp'),h('button',{class:'btn',type:'button',onclick:function(){doCopy(secText(s))}},'Copy section')]))}
+function vPage(id){
+ var p=PAGES[id];if(!p)return vHome();
+ var s=p.sec;setBar(p.title,{star:p.id});setNav(s.id==='calc'?'calc':'');
+ view.appendChild(h('div',{class:'crumb'},[h('a',{href:'#/s/'+s.id,'data-go':1},(s.id==='calc'?'':s.n+'. ')+s.title)]));
+ view.appendChild(h('h2',{class:'pt'},p.title));
+ if(p.sec.id==='sans')view.appendChild(h('div',{class:'note'},'Guide only \u2013 check the current standard.'));
+ var isForm=p.b.some(function(b){return b[0]==='form'||b[0]==='calc'||b[0]==='tpl'});
+ p.b.forEach(function(b){var f=BR[b[0]];if(f)view.appendChild(h('div',{class:'blk'},[f(b)]))});
+ if(!isForm)view.appendChild(h('div',{class:'btns'},[h('button',{class:'btn wa','data-share':'page',type:'button',onclick:function(){shareText(pageText(p),p.title)}},'Share page to WhatsApp'),h('button',{class:'btn',type:'button',onclick:function(){doCopy(pageText(p))}},'Copy')]));
+ var nav=h('div',{class:'pn'});
+ if(p.idx>0)nav.appendChild(h('a',{class:'btn',href:'#/p/'+s.pages[p.idx-1].id,'data-go':1},'\u2039 '+plain(s.pages[p.idx-1].title)));
+ if(p.idx<s.pages.length-1)nav.appendChild(h('a',{class:'btn',href:'#/p/'+s.pages[p.idx+1].id,'data-go':1},plain(s.pages[p.idx+1].title)+' \u203A'));
+ if(nav.children.length)view.appendChild(nav)}
+function vFav(){
+ setBar('Pinned');setNav('fav');
+ var ids=S.fav.filter(function(id){return PAGES[id]});
+ if(!ids.length){view.appendChild(h('div',{class:'card'},'Nothing pinned yet. Open any page and tap the star at the top to pin it here.'));return}
+ var l=h('div',{class:'list'});ids.forEach(function(id){l.appendChild(pageRow(PAGES[id],true))});view.appendChild(l)}
+function vSearch(q){
+ setBar('Search');setNav('search');
+ var inp=h('input',{id:'q',type:'search',placeholder:'Search: geyser, 1:46, scalding\u2026',autocomplete:'off',autocapitalize:'off',enterkeyhint:'search','aria-label':'Search the manual'});inp.value=q||'';
+ var out=h('div');view.appendChild(inp);view.appendChild(out);
+ function draw(){
+  var v=inp.value.trim();out.innerHTML='';
+  if(!v){out.appendChild(h('p',{class:'crumb'},'Type a word. It searches every section, checklist, table and script.'));var l=h('div',{class:'list'});['pr-geyser','saf-hot','sans-falls','calc-price','tr-hot'].forEach(function(id){l.appendChild(pageRow(PAGES[id],true))});out.appendChild(h('div',{class:'sechd'},'Popular'));out.appendChild(l);return}
+  var res=search(v),toks=v.toLowerCase().split(/\s+/).filter(Boolean);
+  out.appendChild(h('p',{class:'crumb','data-count':res.length},res.length+(res.length===1?' result':' results')));
+  if(!res.length){out.appendChild(h('div',{class:'card'},'Nothing found for \u201C'+v+'\u201D. Try a shorter word, or another name (for example \u201Ctoilet\u201D, \u201Cgeyser\u201D, \u201Cleak\u201D).'));return}
+  var l=h('div',{class:'list'});
+  res.slice(0,40).forEach(function(r){var p=r.e.p;var a=h('a',{class:'row',href:'#/p/'+p.id,'data-go':1,'data-result':p.id},[h('span',{class:'t'},[plain(p.title),h('small',null,p.sec.n+'. '+p.sec.title),h('span',{class:'snip',html:snippet(r.e,toks)})]),h('span',{class:'chev',html:svg('chev')})]);l.appendChild(a)});
+  out.appendChild(l)}
+ var t;inp.addEventListener('input',function(){clearTimeout(t);t=setTimeout(function(){draw();try{history.replaceState(history.state,'',inp.value.trim()?'#/q/'+encodeURIComponent(inp.value.trim()):'#/q');curRoute=location.hash}catch(e){}},120)});
+ draw();setTimeout(function(){inp.focus()},0);inp.focus()}
+function exportData(){return JSON.stringify({app:'aps-manual',v:1,saved:new Date().toISOString(),chk:S.chk,fld:S.fld,fav:S.fav,pref:S.pref})}
+function importData(txt){try{var d=JSON.parse(txt);if(!d||d.app!=='aps-manual')throw 0;if(d.chk)S.chk=d.chk;if(d.fld)S.fld=d.fld;if(d.fav)S.fav=d.fav;if(d.pref)S.pref=d.pref;['chk','fld','fav','pref'].forEach(save);applyPrefs();return true}catch(e){return false}}
+function vSettings(){
+ setBar('Settings');setNav('settings');
+ var c=h('div',{class:'fcard'});c.appendChild(h('h3',null,'Look'));
+ function seg(label,key,opts){var d=h('div',{class:'seg'});opts.forEach(function(o){var b=h('button',{type:'button',class:S.pref[key]===o[0]?'on':'','data-pref':key+':'+o[0],onclick:function(){S.pref[key]=o[0];save('pref');applyPrefs();[].forEach.call(d.children,function(x){x.classList.toggle('on',x===b)})}},o[1]);d.appendChild(b)});c.appendChild(h('div',{class:'fl'},[h('span',null,label)]));c.appendChild(d)}
+ seg('Colour','theme',[['auto','Auto'],['light','Light'],['dark','Dark']]);
+ seg('Text size','size',[['m','Normal'],['l','Large'],['xl','Extra large']]);
+ view.appendChild(c);
+ var st=h('div',{class:'fcard'});st.appendChild(h('h3',null,'Offline'));var line=h('p',{class:'bp','data-offline':1},'Checking\u2026');st.appendChild(line);
+ offlineStatus().then(function(t){line.textContent=t});
+ st.appendChild(h('div',{class:'btns'},[deferredInstall?h('button',{class:'btn pri',type:'button',onclick:doInstall},'Install app'):null,h('button',{class:'btn',type:'button',onclick:function(){checkUpdate()}},'Check for update')]));
+ st.appendChild(h('p',{class:'foot'},'Version '+VERSION+' \u00B7 cache '+CACHE));view.appendChild(st);
+ var b=h('div',{class:'fcard'});b.appendChild(h('h3',null,'Back up your entries'));
+ b.appendChild(h('p',{class:'bp'},'Contacts, rates, forms and ticked checklists live only on this phone. Copy a backup and keep it somewhere safe (WhatsApp it to yourself).'));
+ b.appendChild(h('div',{class:'btns'},[h('button',{class:'btn wa',type:'button','data-share':'backup',onclick:function(){shareText(exportData(),'APS manual backup')}},'Share backup'),h('button',{class:'btn',type:'button',onclick:function(){doCopy(exportData())}},'Copy backup')]));
+ var ta=h('textarea',{rows:3,placeholder:'Paste a backup here to restore it','data-restore':1});b.appendChild(h('label',{class:'fl'},[h('span',null,'Restore'),ta]));
+ b.appendChild(h('div',{class:'btns'},h('button',{class:'btn',type:'button',onclick:function(){if(importData(ta.value.trim())){toast('Restored');route(true)}else toast('That is not a valid backup')}},'Restore from pasted backup')));
+ var er=h('button',{class:'btn dng',type:'button','data-erase':1},'Erase all my entries'),armed=false,at;
+ er.addEventListener('click',function(){if(!armed){armed=true;er.textContent='Tap again to erase everything';clearTimeout(at);at=setTimeout(function(){armed=false;er.textContent='Erase all my entries'},3500);return}
+  S.chk={};S.fld={};S.fav=[];['chk','fld','fav'].forEach(save);armed=false;er.textContent='Erase all my entries';toast('All entries erased');route(true)});
+ b.appendChild(h('div',{class:'btns'},er));view.appendChild(b);
+ view.appendChild(h('div',{class:'card'},[h('b',null,'About'),h('p',{class:'bp'},'APS Field Service Manual: a quick guide for the APS crew. It is a memory aid, not a legal document. Guide only \u2013 check the current standard, the maker’s instructions and the municipal by-laws.'),h('a',{class:'btn',href:SKETCH,rel:'noopener'},'Open Plumbing Sketch app')]))}
+function applyPrefs(){var d=document.documentElement;d.setAttribute('data-theme',S.pref.theme||'auto');d.setAttribute('data-size',S.pref.size||'m');
+ var dark=S.pref.theme==='dark'||(S.pref.theme!=='light'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);
+ var m=document.getElementById('themeMeta');if(m)m.setAttribute('content',dark?'#08182a':'#0b2a4a')}
+/* ---------- offline / sw ---------- */
+function offlineStatus(){
+ if(!('caches' in window))return Promise.resolve('Offline storage is not available in this browser.');
+ return caches.open(CACHE).then(function(c){return c.match('index.html')}).then(function(r){return r?'Ready: the manual works without internet.':'Not saved for offline yet. Open it once while online.'},function(){return 'Could not check.'})}
+function ensureCache(){
+ if(!('caches' in window)||navigator.onLine===false)return;
+ caches.open(CACHE).then(function(c){return c.keys().then(function(k){if(k.length<FILES.length-1)return c.addAll(FILES.map(function(f){return new Request(f,{cache:'reload'})})).catch(function(){})})}).catch(function(){})}
+function checkUpdate(){
+ if(!navigator.serviceWorker){toast('Updates not available here');return}
+ navigator.serviceWorker.getRegistration().then(function(r){if(r)return r.update().then(function(){toast('Checked. If a new version was found, close and reopen the app.')});toast('No service worker yet. Reload once while online.')}).catch(function(){toast('Could not check. Are you online?')})}
+function doInstall(){if(!deferredInstall)return;deferredInstall.prompt();deferredInstall.userChoice.then(function(){deferredInstall=null;route(true)})}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredInstall=e;if(parse().name==='')route(true)});
+window.addEventListener('appinstalled',function(){deferredInstall=null});
+function regSW(){
+ if(!('serviceWorker' in navigator)||!/^https?:$/.test(location.protocol))return;
+ var had=!!navigator.serviceWorker.controller;
+ navigator.serviceWorker.register('sw.js',{scope:'./'}).catch(function(){});
+ navigator.serviceWorker.addEventListener('controllerchange',function(){if(had)toast('Updated. Close and reopen the app for the newest version.');had=true})}
+/* ---------- init ---------- */
+function init(){
+ view=document.getElementById('view');titleEl=document.getElementById('title');backBtn=document.getElementById('back');starBtn=document.getElementById('star');navEl=document.getElementById('nav');
+ applyPrefs();buildIndex();
+ backBtn.addEventListener('click',function(){if(history.state&&history.state.n>0)history.back();else{var r=parse();var p=r.name==='p'&&PAGES[r.arg];go(p?'#/s/'+p.sec.id:'#/',true)}});
+ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-go],a[data-nav]');if(!a||e.defaultPrevented||e.button||e.metaKey||e.ctrlKey)return;e.preventDefault();go(a.getAttribute('href'))});
+ window.addEventListener('popstate',function(){route(true);var y=scrollMem[curRoute];window.scrollTo(0,y||0)});
+ if(!history.state)try{history.replaceState({n:0},'',location.href)}catch(e){}
+ route();regSW();ensureCache();
+ if(window.matchMedia)try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyPrefs)}catch(e){}}
+window.APS={priceCalc:priceCalc,fallCalc:fallCalc,SECTIONS:SECTIONS,search:function(q){return search(q).map(function(r){return r.e.p.id})},pageText:function(id){return pageText(PAGES[id])},S:S,money:money};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+
+</script>
+</body>
+</html>
