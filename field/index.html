@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en-ZA" data-theme="auto" data-size="m" data-gloves="0">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="APS Field">
+<meta name="theme-color" content="#004AAD" id="themeMeta">
+<meta name="description" content="APS Field App: Plumblink parts search, plumbing handbook scenarios and a SANS photo check for the APS crew. Works offline.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>APS Field App</title>
+<script>try{var p=JSON.parse(localStorage.getItem('apsf.pref')||'{}');var d=document.documentElement;if(p.theme)d.setAttribute('data-theme',p.theme);if(p.size)d.setAttribute('data-size',p.size);if(p.gloves==='1')d.setAttribute('data-gloves','1')}catch(e){}</script>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header id="bar">
+<button class="ib" id="back" type="button" aria-label="Back" hidden></button>
+<img class="blogo" id="blogo" src="logo-white.png" alt="APS" hidden>
+<h1 id="title">APS Field App</h1>
+<span id="barx"></span>
+<a class="ib" id="homeb" href="#/" aria-label="Home" hidden></a>
+</header>
+<main id="view" tabindex="-1"></main>
+<div id="toast" role="status" aria-live="polite"></div>
+<noscript><p style="padding:16px">APS Field App needs JavaScript.</p></noscript>
+<script src="app.js"></script>
+<script src="handbook-data.js"></script>
+<script src="handbook.js"></script>
+<script src="sans.js"></script>
+<script>APSF.start()</script>
+</body>
+</html>
