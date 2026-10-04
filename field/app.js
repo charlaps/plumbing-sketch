@@ -1,7 +1,7 @@
 /* APS Field App – core, Parts (Plumblink search), Settings. No secrets in this file. */
 var APSF=(function(){
 'use strict';
-var VERSION='1.0';
+var VERSION='1.1';var CACHE_NAME='aps-field-v1.1';
 var SNAP_FALLBACK='2026-10-04';
 var $=function(s,r){return (r||document).querySelector(s)};
 var view,barTitle;
@@ -28,7 +28,7 @@ var ICONS={
  gear:'M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6',check:'M5 13l4 4 10-10',copy:'M9 9h11v11H9zM5 15V4h10',
  ext:'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',chat:'M4 20l1.5-4.5A8 8 0 1 1 9 18.5z',edit:'M4 20l4-1 11-11-3-3L5 16z',
  warn:'M12 3l10 18H2zM12 10v5M12 18h.01',lock:'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3',download:'M12 4v12M7 11l5 5 5-5M4 20h16',x:'M6 6l12 12M18 6L6 18',
- img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01',bolt:'M13 3L5 14h6l-1 7 8-11h-6z',pin:'M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11zM12 7v6M9 10h6',refresh:'M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7'};
+ img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01',bolt:'M13 3L5 14h6l-1 7 8-11h-6z',pin:'M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11zM12 7v6M9 10h6',refresh:'M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7',star:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'};
 function svg(n){return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="'+ICONS[n]+'"/></svg>'}
 function ic(n){return h('span',{html:svg(n),style:'display:inline-flex'})}
 var toastT;function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},2600)}
@@ -105,7 +105,7 @@ function route(keep){
  fn(r.args,r.q,view);
  if(!keep)window.scrollTo(0,0);
  view.focus({preventScroll:true})}
-var PARENT={parts:'#/',book:'#/',sans:'#/',settings:'#/'};
+var PARENT={parts:'#/',book:'#/',sans:'#/',settings:'#/',tips:'#/book'};
 function setBar(o){
  var back=$('#back'),homeb=$('#homeb'),logo=$('#blogo'),x=$('#barx');
  $('#title').textContent=o.title||'';
@@ -124,12 +124,23 @@ A.routes.home=function(a,q,v){
  setBar({title:'APS Field App',home:true});
  v.className='home';
  var tiles=[['#/parts','search','PARTS','Plumblink search, prices and photos'],['#/book','book','HANDBOOK','Scenarios: diagnose, repair, install'],['#/sans','camera','SANS PHOTO CHECK','Photo, mark-up and checklist']];
- v.appendChild(h('div',{class:'homebtns'},tiles.map(function(t){
-  return h('a',{class:'hbig',href:t[0],'data-home':t[2]},[h('span',{class:'hi',html:svg(t[1])}),h('span',null,[h('b',{text:t[2]}),h('small',{text:t[3]})])])})));
+ var tilesEl=h('div',{class:'homebtns'},tiles.map(function(t){
+  return h('a',{class:'hbig',href:t[0],'data-home':t[2]},[h('span',{class:'hi',html:svg(t[1])}),h('span',null,[h('b',{text:t[2]}),h('small',{text:t[3]})])])}));
+ v.appendChild(tilesEl);
+ if(A.gs)A.gs.homeBox(v,tilesEl);
  v.appendChild(h('div',{class:'foot'},[h('span',{text:'APS Field App v'+VERSION}),h('a',{href:'#/settings','data-home':'settings'},[ic('gear'),'Settings'])]))};
 
 /* ---------------- Plumblink data & search ---------------- */
 var D={rows:null,loading:null,snap:SNAP_FALLBACK,cats:[],slugs:[],base:'',packs:0,byCode:{},c1:[],c2:{}};
+var BC={},GENERIC={},VOC={};'GALVANISED PVC UPVC HDPE BATHROOM CAST DRAIN LIQUID NYLON SPLIT FIRE CLEAR DUCTILE COPPER GV DRILLBIT STAINLESS BRASS SINK SET KIT PIPE TAP VALVE BASIN TOILET SHOWER WALL FLOOR STEEL MIXER BATH WASTE TRAP GEYSER CONCRETE PLASTIC RUBBER SPARE UNIVERSAL STANDARD SOLAR WATER SINGLE DOUBLE ROUND SQUARE CHROME BLACK WHITE GREY BRONZE GOLD ASSORTED COMPRESSION'.split(' ').forEach(function(k){GENERIC[k]=1});
+var SZ_NOM=[15,20,22,25,28,32,40,50,75,110];
+function sizesOf(n){
+ var out=[],m,re=/(\d+(?:\.\d+)?(?:\s*[xX]\s*\d+(?:\.\d+)?)*)\s*mm\b/gi;
+ while((m=re.exec(n))){m[1].split(/\s*[xX]\s*/).forEach(function(x){var v=parseFloat(x);if(SZ_NOM.indexOf(v)>=0&&out.indexOf(v)<0)out.push(v)})}
+ var m2=/\b(\d+)\s*[xX]\s*\d+(?:\.\d+)?\s*m\b/.exec(n);if(m2){var v2=parseFloat(m2[1]);if(SZ_NOM.indexOf(v2)>=0&&out.indexOf(v2)<0)out.push(v2)}
+ return out}
+var MATS=[['copper','Copper',function(it){return it.c1==='COPPER'||/\bcopper\b|\bcu\b/i.test(it.name)}],['pvc','PVC / uPVC',function(it){return it.c1==='PVC'||/\bu?pvc\b/i.test(it.name)}],['pex','PEX / multilayer',function(it){return /pex|multilayer|m\/layer|mlayer|alupex/i.test(it.name)}],['brass','Brass',function(it){return /\bbrass\b/i.test(it.name)}],['dzr','DZR',function(it){return /\bdzr\b/i.test(it.name)}],['ss','Stainless steel',function(it){return /stainless|\bs\/s\b|\bss\b|s\.steel/i.test(it.name)}],['hdpe','HDPE',function(it){return it.c1==='HDPE'||/\bhdpe\b/i.test(it.name)}],['galv','Galvanised',function(it){return it.c1==='GALVANISED'||/galvani[sz]ed|\bgalv\b/i.test(it.name)}]];
+function matMask(it){var m=0;for(var i=0;i<MATS.length;i++)if(MATS[i][2](it))m|=(1<<i);return m}
 function loadData(){
  if(D.rows)return Promise.resolve(D);
  if(D.loading)return D.loading;
@@ -145,9 +156,12 @@ function loadData(){
    it.dt=it.desc?uniq(tokens(it.desc)).filter(function(t){return it.nt.indexOf(t)<0}):[];
    it.cz=it.code.replace(/^0+/,'');
    it.hi=isHigh(it);
-   D.byCode[it.code]=it;
+   it.sz=sizesOf(it.name);it.mt=matMask(it);
+   var w1=/^[A-Za-z]{3,}/.exec(it.name);it.w1=w1?w1[0].toUpperCase():'';BC[it.w1]=(BC[it.w1]||0)+1;
+   D.byCode[it.code]=it;it.nt.forEach(function(t){VOC[t]=(VOC[t]||0)+1});
    c1[it.c1]=(c1[it.c1]||0)+1;if(it.c2){var k=it.c1+'|'+it.c2;c2[k]=1}
    return it});
+  D.brands=Object.keys(BC).filter(function(k){return k&&BC[k]>=20&&!GENERIC[k]}).sort();var bset={};D.brands.forEach(function(k){bset[k]=1});D.rows.forEach(function(it){it.br=bset[it.w1]?it.w1:''});
   D.c1=Object.keys(c1).sort();
   D.c2={};Object.keys(c2).forEach(function(k){var p=k.split('|');(D.c2[p[0]]=D.c2[p[0]]||[]).push(p[1])});Object.keys(D.c2).forEach(function(k){D.c2[k].sort()});
   return D},function(e){D.loading=null;throw e});
@@ -167,7 +181,11 @@ function sellOf(it){var c=costOf(it);return round2(c*(1+markupFor(it,c).pct/100)
 function itemUrl(it){return D.base+D.slugs[it.slug]+'/'+slugName(it.name)+'-'+it.code+'/'+it.code}
 function slugName(n){return n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')}
 A.D=D;A.sellOf=sellOf;A.costOf=costOf;A.itemUrl=itemUrl;A.loadData=loadData;A.tokens=tokens;
-var SYN={elbow:['elb','bend'],bend:['elbow','bnd'],toilet:['wc','pan','cistern'],wc:['toilet','pan'],geyser:['heater'],tap:['bibcock'],mixer:['mix'],nonreturn:['check'],tee:['t'],valve:['vlv'],heater:['geyser']};
+var SYN={elbow:['elb','bend'],bend:['elbow','bnd'],toilet:['wc','pan','cistern'],wc:['toilet','pan'],geyser:['heater'],tap:['bibcock'],mixer:['mix'],nonreturn:['check'],tee:['t'],valve:['vlv'],heater:['geyser'],
+ geiser:['geyser','heater'],kraan:['tap','mixer'],kraane:['tap','mixer'],pyp:['pipe'],klep:['valve'],wasbak:['basin'],stort:['shower'],pomp:['pump'],sifon:['trap'],faucet:['tap','mixer'],pushfit:['speedfit'],prv:['pcv'],gully:['gulley'],gulley:['gully'],loo:['toilet','wc'],lagging:['insulation'],glue:['cement'],boiler:['geyser'],plunge:['plunger']};
+/* phrase rules: an extra search is made with the rewritten words and merged after the normal results */
+var PHR=[[/\bpressure (?:reducing|control|reduction|regulating) valves?\b|\bpressure regulators?\b|\bprv\b/g,'pcv'],[/\bpush[ -]?fit\b/g,'speedfit'],[/\bsolvent (?:cement|glue|weld)\b|\bpvc (?:glue|gum|cement)\b/g,'cement'],[/\b(?:pipe |saddle )?saddles?\b/g,'clip'],[/\bpipe (?:lagging|insulation)\b/g,'lagging'],[/\bfrench drain\b/g,'nextube'],[/\bsubsoil drain\b/g,'nextube'],[/\bwater pressure gauge\b/g,'pressure gauge'],[/\bhot water cylinder\b/g,'geyser'],[/\bhose ?pipe\b/g,'hose']];
+function normQ(q){var x=String(q).toLowerCase();PHR.forEach(function(r){x=x.replace(r[0],r[1])});return x}
 var STOP={and:1,the:1,for:1,of:1,a:1,to:1,with:1};
 function lev(a,b,max){
  var al=a.length,bl=b.length;if(Math.abs(al-bl)>max)return max+1;
@@ -206,6 +224,16 @@ function scoreItem(qt,it,fuzzy){
  if(allName)tot+=1.5;
  return tot}
 function search(q,c1,c2,fuzzy){
+ var base=searchBase(q,c1,c2,fuzzy),q2=normQ(q);
+ if(q2===String(q).toLowerCase())return base;
+ var alt=searchBase(q2,c1,c2,fuzzy);
+ if(!alt.length)return base;
+ if(!base.length)return alt;
+ var seen={},out=base.slice();base.forEach(function(r){seen[r.it.code]=1});
+ alt.forEach(function(r){if(!seen[r.it.code]){seen[r.it.code]=1;out.push({it:r.it,s:r.s*0.9})}});
+ out.sort(function(a,b){return b.s-a.s||(a.it.name<b.it.name?-1:1)});
+ return out}
+function searchBase(q,c1,c2,fuzzy){
  var rows=D.rows,out=[];
  if(c1)rows=rows.filter(function(r){return r.c1===c1&&(!c2||r.c2===c2)});
  var toks=tokens(q).filter(function(t){return !STOP[t]});
@@ -222,9 +250,16 @@ function search(q,c1,c2,fuzzy){
    s-=it.name.length*0.004;if(it.low)s-=0.3;
    out.push({it:it,s:s})}}
  out.sort(function(a,b){return b.s-a.s||(a.it.name<b.it.name?-1:1)});
- if(!out.length&&!fuzzy)return search(q,c1,c2,true);
+ if(!out.length&&fuzzy===undefined)return searchBase(q,c1,c2,true);
  return out}
-A.search=search;
+function fixTypos(q){
+ return tokens(q).map(function(t){
+  if(t.length<4||isNum(t)||VOC[t]||SYN[t])return t;
+  for(var k in VOC)if(k.indexOf(t)===0)return t;
+  var mx=t.length>=10?2:1,best=null,bc=0;
+  for(var w in VOC){if(Math.abs(w.length-t.length)>mx)continue;if(lev(t,w,mx)<=mx&&VOC[w]>bc){best=w;bc=VOC[w]}}
+  return best||t}).join(' ')}
+A.search=search;A.normQ=normQ;A.fixTypos=fixTypos;
 
 /* ---------------- photo packs ---------------- */
 var PH={idxP:null,packs:{},urls:{}};
@@ -244,7 +279,7 @@ function lazyThumb(box,it){
  box._ld=load;io.observe(box)}
 function cachedPacks(){
  if(!window.caches)return Promise.resolve(0);
- return caches.open('aps-field-v1').then(function(c){var n=0,ps=[];for(var i=0;i<D.packs;i++)ps.push(c.match(packName(i)).then(function(r){if(r)n++}));return Promise.all(ps).then(function(){return n})}).catch(function(){return 0})}
+ return caches.open(CACHE_NAME).then(function(c){var n=0,ps=[];for(var i=0;i<D.packs;i++)ps.push(c.match(packName(i)).then(function(r){if(r)n++}));return Promise.all(ps).then(function(){return n})}).catch(function(){return 0})}
 var dlRun=false;
 function downloadAll(onp){
  if(dlRun)return Promise.resolve();dlRun=true;
@@ -258,7 +293,16 @@ A.PH={url:phUrl,cached:cachedPacks,downloadAll:downloadAll};
 A.lazyThumb=lazyThumb;
 
 /* ---------------- Parts: state ---------------- */
-var P={q:'',c1:'',c2:'',shown:50,scroll:0};
+var P={q:'',c1:'',c2:'',shown:50,scroll:0,size:0,mat:'',brand:'',sort:'rel',stock:0,fav:0};
+var FAV=lsGet('fav',[]);if(!Array.isArray(FAV))FAV=[];
+var RECENT=lsGet('recent',[]);if(!Array.isArray(RECENT))RECENT=[];
+function isFav(code){return FAV.indexOf(code)>=0}
+function toggleFav(code){var i=FAV.indexOf(code);if(i>=0)FAV.splice(i,1);else FAV.unshift(code);lsSet('fav',FAV);return i<0}
+function pushRecent(q){q=String(q||'').trim();if(q.length<2)return;RECENT=RECENT.filter(function(x){return x!==q});RECENT.unshift(q);RECENT=RECENT.slice(0,8);lsSet('recent',RECENT)}
+A.isFav=isFav;A.toggleFav=toggleFav;
+var QUICK=['22mm elbow','geyser element','110 bend','basin mixer','angle valve','ptfe tape'];
+var POP=[['Elbows','elbow'],['Tees','tee'],['Couplings','coupling'],['Valves','valve'],['Geyser parts','geyser'],['Taps & mixers','mixer'],['Cistern parts','cistern'],['Traps & wastes','trap'],['Flexi hoses','flexi'],['Copper pipe','copper pipe'],['PVC pipe','pvc pipe'],['Clips & fixings','clip'],['Tools','pipe cutter'],['Gutters','gutter']];
+A.POP=POP;A.QUICK=QUICK;
 var LIST=lsGet('list',{title:'',items:[]});
 if(!LIST||!Array.isArray(LIST.items))LIST={title:'',items:[]};
 function saveList(){lsSet('list',LIST)}
@@ -273,50 +317,94 @@ A.routes.parts=function(args,q,v){
  var sub=args[0];
  if(sub==='item'){return partItem(args[1],v)}
  if(sub==='list'){return partList(v)}
- if(q.q!==undefined){P.q=q.q;P.c1=q.c1||'';P.c2='';P.shown=50;P.scroll=0;if(q.q||q.c1)history.replaceState(history.state,'','#/parts');if(stack.length)stack[stack.length-1]='#/parts'}
+ if(q.q!==undefined){P.q=q.q;P.c1=q.c1||'';P.c2='';P.shown=50;P.scroll=0;P.size=0;P.mat='';P.brand='';P.stock=0;P.sort='rel';P.fav=0;if(q.q||q.c1)history.replaceState(history.state,'','#/parts');if(stack.length)stack[stack.length-1]='#/parts'}
  partSearch(v)};
+function filterCount(){return (P.size?1:0)+(P.mat?1:0)+(P.brand?1:0)+(P.stock?1:0)+(P.sort!=='rel'?1:0)}
+function anyFilter(){return !!(P.size||P.mat||P.brand||P.stock||P.fav)}
+function passes(it){
+ if(P.size&&it.sz.indexOf(P.size)<0)return false;
+ if(P.mat){var ix=0;for(var i=0;i<MATS.length;i++)if(MATS[i][0]===P.mat)ix=i;if(!(it.mt&(1<<ix)))return false}
+ if(P.brand&&it.br!==P.brand)return false;
+ if(P.stock&&it.low)return false;
+ if(P.fav&&!isFav(it.code))return false;
+ return true}
 function partSearch(v){
- setBar({title:'Parts',right:[listBtn()],back:'#/'});
+ var favB=h('button',{type:'button',class:'ib'+(P.fav?' on':''),'data-act':'favs','aria-label':'Favourites','aria-pressed':P.fav?'true':'false',html:svg('star')});
+ setBar({title:'Parts',right:[favB,listBtn()],back:'#/'});
  var inp=h('input',{id:'q',type:'search',class:'search',placeholder:'Search: 22mm elbow, geyser element, 039453',autocomplete:'off',autocapitalize:'off',spellcheck:'false',enterkeyhint:'search','aria-label':'Search parts',value:P.q});
  var c1=h('select',{'aria-label':'Category','data-f':'c1'}),c2=h('select',{'aria-label':'Sub-category','data-f':'c2'});
+ var szS=h('select',{'aria-label':'Size','data-f':'size'}),mtS=h('select',{'aria-label':'Material','data-f':'mat'}),brS=h('select',{'aria-label':'Brand','data-f':'brand'}),soS=h('select',{'aria-label':'Sort','data-f':'sort'});
+ var stk=h('input',{type:'checkbox','data-f':'stock'});stk.checked=!!P.stock;
  var out=h('div',{class:'list',id:'res'}),info=h('div',{class:'snap',id:'snap'}),chips=h('div',{class:'chips',id:'chips'}),status=h('div');
- v.appendChild(inp);v.appendChild(h('div',{class:'filters'},[c1,c2]));v.appendChild(chips);v.appendChild(status);v.appendChild(out);v.appendChild(info);
- function fillC1(){c1.innerHTML='';c1.appendChild(h('option',{value:'',text:'All categories'}));D.c1.forEach(function(x){c1.appendChild(h('option',{value:x,text:x.toLowerCase().replace(/(^|[\s&(-])([a-z])/g,function(m,a,b){return a+b.toUpperCase()})}))});c1.value=P.c1;fillC2()}
+ var mf=h('details',{class:'mf',id:'mf'});var sum=h('summary',{id:'mfsum'});
+ var reset=btn('Clear filters','sm',function(){P.size=0;P.mat='';P.brand='';P.stock=0;P.sort='rel';P.c1='';P.c2='';P.fav=0;P.shown=50;syncF();run()},{'data-act':'clrf'});
+ mf.appendChild(sum);
+ mf.appendChild(h('div',{class:'mfg'},[fld('Size',szS),fld('Material',mtS),fld('Brand',brS),fld('Sort by',soS)]));
+ mf.appendChild(h('label',{class:'sw'},[stk,'Hide low-stock items']));
+ mf.appendChild(h('div',{class:'btns'},reset));
+ v.appendChild(inp);v.appendChild(h('div',{class:'filters'},[c1,c2]));v.appendChild(mf);v.appendChild(chips);v.appendChild(status);v.appendChild(out);v.appendChild(info);
+ function opt(sel,list,val){sel.innerHTML='';list.forEach(function(o){sel.appendChild(h('option',{value:o[0],text:o[1]}))});sel.value=String(val)}
+ function fillC1(){c1.innerHTML='';c1.appendChild(h('option',{value:'',text:'All categories'}));D.c1.forEach(function(x){c1.appendChild(h('option',{value:x,text:x.toLowerCase().replace(/(^|[\s&(-])([a-z])/g,function(m,a,b){return a+b.toUpperCase()})}))});c1.value=P.c1;fillC2();
+  opt(szS,[['0','Any size']].concat(SZ_NOM.map(function(n){return [String(n),n+' mm']})),P.size||0);
+  opt(mtS,[['','Any material']].concat(MATS.map(function(m){return [m[0],m[1]]})),P.mat);
+  opt(brS,[['','Any brand']].concat(D.brands.map(function(b){return [b,b.charAt(0)+b.slice(1).toLowerCase()]})),P.brand);
+  opt(soS,[['rel','Best match'],['pa','Price: low to high'],['pd','Price: high to low'],['nm','Name A to Z']],P.sort)}
  function fillC2(){c2.innerHTML='';c2.appendChild(h('option',{value:'',text:'All types'}));var l=D.c2[P.c1]||[];l.forEach(function(x){c2.appendChild(h('option',{value:x,text:x.length>34?x.slice(0,33)+'\u2026':x}))});c2.value=P.c2;c2.hidden=!P.c1||!l.length}
+ function syncF(){if(D.rows){c1.value=P.c1;fillC2();szS.value=String(P.size||0);mtS.value=P.mat;brS.value=P.brand;soS.value=P.sort}stk.checked=!!P.stock;favB.classList.toggle('on',!!P.fav);favB.setAttribute('aria-pressed',P.fav?'true':'false')}
+ function sumTxt(){var n=filterCount();sum.textContent='More filters: size, material, brand, sort'+(n?' ('+n+' on)':'');mf.classList.toggle('has',n>0)}
  var timer=null;
+ function chip(label,q,attr,cls){var a={type:'button',class:'chip'+(cls?' '+cls:''),text:label,onclick:function(){P.q=q;inp.value=q;P.shown=50;if(attr==='data-recent')pushRecent(q);run()}};a[attr]=q;return h('button',a)}
  function run(){
   var t0=performance.now();
-  out.innerHTML='';chips.innerHTML='';
-  var res=search(P.q,P.c1,P.c2);
-  if(!P.q.trim()&&!P.c1){
-   [['22mm elbow'],['geyser element'],['110 bend'],['basin mixer'],['angle valve'],['ptfe tape']].forEach(function(c){chips.appendChild(h('button',{type:'button',class:'chip','data-chip':c[0],text:c[0],onclick:function(){P.q=c[0];inp.value=c[0];P.shown=50;run()}}))});
-   status.innerHTML='';status.appendChild(h('p',{class:'hint',text:'Type a size, name or Plumblink code. Prices shown are APS prices incl VAT.'}));
+  out.innerHTML='';chips.innerHTML='';sumTxt();
+  var hasQ=!!P.q.trim(),empty=!hasQ&&!P.c1;
+  if(empty&&!anyFilter()){
+   var r1=h('div',{class:'chiprow hs'});QUICK.forEach(function(c){r1.appendChild(chip(c,c,'data-chip'))});POP.forEach(function(c){r1.appendChild(chip(c[0],c[1],'data-pop','pop'))});
+   chips.appendChild(h('div',{class:'sechd',text:'Popular'}));chips.appendChild(r1);
+   if(RECENT.length){chips.appendChild(h('div',{class:'sechd rec'},['Recent searches ',h('button',{type:'button',class:'lnk','data-act':'clrrecent',text:'clear',onclick:function(){RECENT=[];lsSet('recent',RECENT);run()}})]));
+    var r2=h('div',{class:'chiprow hs',id:'recent'});RECENT.forEach(function(c){r2.appendChild(chip(c,c,'data-recent','rc'))});chips.appendChild(r2)}
+   status.innerHTML='';status.appendChild(h('p',{class:'hint',text:'Type a size, name or Plumblink code, or tap a popular search. Prices shown are APS prices incl VAT.'}));
    info.textContent='Prices as of '+fmtDate(D.snap)+' (Plumblink snapshot)';return}
   status.innerHTML='';
+  var res=(!hasQ&&!P.c1)?D.rows.map(function(r){return {it:r,s:0}}):search(P.q,P.c1,P.c2);
+  if(anyFilter())res=res.filter(function(r){return passes(r.it)});
+  if(P.sort==='pa')res=res.slice().sort(function(a,b){return sellOf(a.it)-sellOf(b.it)||(a.it.name<b.it.name?-1:1)});
+  else if(P.sort==='pd')res=res.slice().sort(function(a,b){return sellOf(b.it)-sellOf(a.it)||(a.it.name<b.it.name?-1:1)});
+  else if(P.sort==='nm'||(!hasQ&&!P.c1))res=res.slice().sort(function(a,b){return a.it.name<b.it.name?-1:1});
   var shown=res.slice(0,P.shown);
   shown.forEach(function(r){out.appendChild(partRow(r.it))});
-  if(!res.length)status.appendChild(h('p',{class:'hint',id:'nores',text:'Nothing found. Try fewer words, or a size like 22 or 110.'}));
-  else status.appendChild(h('p',{class:'hint',id:'rescount','data-ms':Math.round(performance.now()-t0),text:res.length+(res.length===1?' item':' items')+(res.length>P.shown?' (showing '+P.shown+')':'')}));
+  if(!res.length)status.appendChild(h('p',{class:'hint',id:'nores',text:P.fav?'No favourites yet. Open a part and tap "Add to favourites".':(anyFilter()?'Nothing matches these filters. Try clearing some filters.':'Nothing found. Try fewer words, or a size like 22 or 110.')}));
+  else status.appendChild(h('p',{class:'hint',id:'rescount','data-ms':Math.round(performance.now()-t0),text:res.length+(res.length===1?' item':' items')+(P.fav?' in favourites':'')+(res.length>P.shown?' (showing '+P.shown+')':'')}));
   if(res.length>P.shown)out.appendChild(h('button',{type:'button',class:'btn more',id:'more',text:'Show 50 more',onclick:function(){P.shown+=50;run()}}));
   info.textContent='Prices as of '+fmtDate(D.snap)+' (Plumblink snapshot). Photos from Plumblink.'}
  inp.addEventListener('input',function(){P.q=inp.value;P.shown=50;clearTimeout(timer);timer=setTimeout(run,60)});
+ inp.addEventListener('keydown',function(e){if(e.key==='Enter'){pushRecent(inp.value);inp.blur()}});
+ out.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('.prow')&&!e.target.closest('.addb'))pushRecent(P.q)});
  c1.addEventListener('change',function(){P.c1=c1.value;P.c2='';P.shown=50;fillC2();run()});
  c2.addEventListener('change',function(){P.c2=c2.value;P.shown=50;run()});
+ szS.addEventListener('change',function(){P.size=+szS.value||0;P.shown=50;run()});
+ mtS.addEventListener('change',function(){P.mat=mtS.value;P.shown=50;run()});
+ brS.addEventListener('change',function(){P.brand=brS.value;P.shown=50;run()});
+ soS.addEventListener('change',function(){P.sort=soS.value;P.shown=50;run()});
+ stk.addEventListener('change',function(){P.stock=stk.checked?1:0;P.shown=50;run()});
+ favB.addEventListener('click',function(){P.fav=P.fav?0:1;P.shown=50;syncF();run()});
+ sumTxt();
  status.appendChild(h('p',{class:'hint',text:'Loading parts\u2026'}));
  loadData().then(function(){if(cur.name!=='parts')return;fillC1();run();if(P.scroll)window.scrollTo(0,P.scroll);if(!P.q&&!P.c1&&!P.scroll&&!/Mobi|Android/i.test(navigator.userAgent))inp.focus()},function(){status.innerHTML='';status.appendChild(note('Could not load the parts data. Open the app once while online.','warn'))});
- A.cleanup=function(){P.scroll=window.scrollY};
+ A.cleanup=function(){P.scroll=window.scrollY;if(P.q.trim().length>=3)pushRecent(P.q)};
 }
 function partRow(it){
  var th=h('div',{class:'th',html:svg('img')});lazyThumb(th,it);
  var live=!!liveOf(it);
  var row=h('a',{class:'prow',href:'#/parts/item/'+it.code,'data-code':it.code},[th,
-  h('div',{class:'pinfo'},[h('div',{class:'pname',text:it.name}),h('div',{class:'pmeta',text:it.code+(it.low?' \u00B7 Low stock':'')})]),
+  h('div',{class:'pinfo'},[h('div',{class:'pname',text:it.name}),h('div',{class:'pmeta',text:it.code+(it.low?' \u00B7 Low stock':'')+(isFav(it.code)?' \u00B7 \u2605':'')})]),
   h('div',{class:'pprice'},[money(sellOf(it)),h('small',{text:live?'live':'incl VAT'})])]);
  var q=listQty(it.code);
  var ab=h('button',{type:'button',class:'addb','aria-label':'Add '+it.name+' to list','data-add':it.code,html:svg('plus')});
  if(q)ab.appendChild(h('span',{class:'q',text:q}));
  ab.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();listAdd(it.code,1);var n=listQty(it.code);var o=ab.querySelector('.q');if(o)o.textContent=n;else ab.appendChild(h('span',{class:'q',text:n}));toast('Added: '+it.name.slice(0,40));var b=$('.ib[data-act=list]');if(b){var g=b.querySelector('.bdg');if(g)g.textContent=listCount();else b.appendChild(h('span',{class:'bdg',text:listCount()}))}});
  row.appendChild(ab);return row}
+A.partRow=partRow;
 
 /* ---------------- Parts: item detail ---------------- */
 function partItem(code,v){
@@ -358,8 +446,9 @@ function partItem(code,v){
   if(S.proxy.trim()){
    var lb=btn('Check live price','',function(){
     lb.disabled=true;lb.textContent='Checking\u2026';
-    liveLookup(it).then(function(r){LIVE[it.code]=r;lsSet('live',pruneLive(LIVE));drawPrice();liveMsg.textContent='Live price found.';lb.disabled=false;lb.textContent='Check live price'},function(){liveMsg.textContent='Live check not available. Showing the snapshot price.';lb.disabled=false;lb.textContent='Check live price'})},{'data-act':'live'},'refresh');
+    liveLookup(it).then(function(r){LIVE[it.code]=r;lsSet('live',pruneLive(LIVE));drawPrice();liveMsg.textContent='Live price found.';lb.disabled=false;lb.textContent='Check live price'},function(e){liveMsg.textContent=e&&e.saved?'The price Worker could only give its saved price, not a live one. Showing the snapshot price.':'Live check not available. Showing the snapshot price.';lb.disabled=false;lb.textContent='Check live price'})},{'data-act':'live'},'refresh');
    bs.appendChild(lb)}
+  var fb=btn(isFav(it.code)?'\u2605 In favourites (tap to remove)':'\u2606 Add to favourites','',function(){var on=toggleFav(it.code);fb.textContent=on?'\u2605 In favourites (tap to remove)':'\u2606 Add to favourites';toast(on?'Added to favourites':'Removed from favourites')},{'data-act':'fav'});bs.appendChild(fb);
   v.appendChild(bs);v.appendChild(liveMsg);
   v.appendChild(h('a',{class:'btn',href:itemUrl(it),target:'_blank',rel:'noopener',id:'plink','data-act':'plink'},[ic('ext'),'Open on Plumblink']));
   if(it.desc)v.appendChild(card('Details',[h('p',{text:it.desc})]));
@@ -374,12 +463,46 @@ function partItem(code,v){
   v.appendChild(h('div',{class:'snap',text:'Prices as of '+fmtDate(D.snap)+' (Plumblink snapshot). Check live or on Plumblink before quoting.'}));
  },function(){v.innerHTML='';v.appendChild(note('Could not load the parts data. Open the app once while online.','warn'))})}
 function pruneLive(m){var ks=Object.keys(m).sort(function(a,b){return m[b].ts-m[a].ts}).slice(0,150),o={};ks.forEach(function(k){o[k]=m[k]});LIVE=o;return o}
-function liveLookup(it){
- var base=S.proxy.trim().replace(/\/+$/,'');
+/* Live prices. The app understands BOTH price Workers (auto-detected from the answer):
+   - Sourcing Worker (recommended): GET /price?code=  and  GET /prices?codes=a,b,c (max 20). Answer: {code,name,price_inc_vat,price_markup_30,in_stock,stock_status,source:'live'|'snapshot',...}
+   - Original Worker (worker/worker.js): GET /price?code=&url=  Answer: {code,price,stock,url,fetched}
+   source:'snapshot' means the Worker only had its saved price, so it is NOT treated as live. */
+function liveParse(j){
+ if(!j||typeof j!=='object')throw new Error('bad answer');
+ if(j.source&&j.source!=='live'){var e0=new Error('saved price only');e0.saved=1;throw e0}
+ var p=j.price_inc_vat!=null?+j.price_inc_vat:+j.price;
+ if(!(p>0)||!isFinite(p))throw new Error('bad price');
+ var st='';if(typeof j.stock_status==='string')st=j.stock_status;else if(typeof j.stock==='string')st=j.stock;else if(j.in_stock===false)st='Out of stock';
+ return {price:p,stock:st.slice(0,30),ts:Date.now(),kind:j.price_inc_vat!=null?'sourcing':'basic'}}
+function liveFetch(url){
  var ctl=window.AbortController?new AbortController():null,t=setTimeout(function(){ctl&&ctl.abort()},9000);
- return fetch(base+'/price?code='+encodeURIComponent(it.code)+'&url='+encodeURIComponent(itemUrl(it)),ctl?{signal:ctl.signal}:{}).then(function(r){clearTimeout(t);if(!r.ok)throw new Error('http '+r.status);return r.json()}).then(function(j){
-  var p=+j.price;if(!(p>0)||!isFinite(p))throw new Error('bad price');return {price:p,stock:typeof j.stock==='string'?j.stock.slice(0,30):'',ts:Date.now()}})}
-A.liveLookup=liveLookup;
+ return fetch(url,ctl?{signal:ctl.signal}:{}).then(function(r){clearTimeout(t);if(!r.ok){var e=new Error('http '+r.status);e.http=r.status;throw e}return r.json()},function(e){clearTimeout(t);throw e})}
+function liveBase(){return S.proxy.trim().replace(/\/+$/,'')}
+function liveLookup(it){
+ return liveFetch(liveBase()+'/price?code='+encodeURIComponent(it.code)+'&url='+encodeURIComponent(itemUrl(it))).then(liveParse)}
+/* Many items at once: /prices in chunks of 20; if the Worker has no /prices (original Worker) falls back to one /price call per item (4 at a time). */
+function liveBatch(items,onp){
+ var res={ok:0,saved:0,fail:0,total:items.length,batch:false},done=0;
+ function tick(){done++;onp&&onp(done,items.length)}
+ function one(it){return liveLookup(it).then(function(r){LIVE[it.code]=r;res.ok++},function(e){if(e&&e.saved)res.saved++;else res.fail++}).then(tick)}
+ function seq(list){var i=0;function lane(){if(i>=list.length)return Promise.resolve();return one(list[i++]).then(lane)}return Promise.all([lane(),lane(),lane(),lane()])}
+ var chunks=[];for(var i=0;i<items.length;i+=20)chunks.push(items.slice(i,i+20));
+ var useBatch=true,netDown=false;
+ return chunks.reduce(function(p,ch){return p.then(function(){
+  if(netDown){res.fail+=ch.length;ch.forEach(tick);return}
+  if(!useBatch)return seq(ch);
+  return liveFetch(liveBase()+'/prices?codes='+ch.map(function(x){return encodeURIComponent(x.code)}).join(',')).then(function(j){
+   if(!j||!Array.isArray(j.results))throw new Error('no results');
+   res.batch=true;var by={};j.results.forEach(function(r){if(r&&r.code)by[r.code]=r});
+   ch.forEach(function(it){var r=by[it.code];if(!r){res.fail++;tick();return}try{LIVE[it.code]=liveParse(r);res.ok++}catch(e){if(e&&e.saved)res.saved++;else res.fail++}tick()})
+  }).catch(function(){
+   /* batch not available: probe one item before doing the rest one by one, so a dead connection does not wait 9 s per item */
+   useBatch=false;
+   return liveLookup(ch[0]).then(function(r){LIVE[ch[0].code]=r;res.ok++;tick();return seq(ch.slice(1))},function(e){
+    if(e&&e.saved){res.saved++;tick();return seq(ch.slice(1))}
+    if(e&&e.http){res.fail++;tick();return seq(ch.slice(1))}
+    netDown=true;res.fail+=ch.length;ch.forEach(tick)})})})},Promise.resolve()).then(function(){lsSet('live',pruneLive(LIVE));return res})}
+A.liveLookup=liveLookup;A.liveBatch=liveBatch;A.liveParse=liveParse;
 
 /* ---------------- Parts: materials list ---------------- */
 function listText(withPrices){
@@ -400,7 +523,7 @@ function partList(v){
   title.addEventListener('input',function(){LIST.title=title.value;saveList()});
   v.appendChild(fld('List name',title));
   var box=h('section',{class:'card','data-list':1});v.appendChild(box);
-  var tail=h('div');v.appendChild(tail);
+  var tail=h('div');v.appendChild(tail);var lastLive='';
   function draw(){
    box.innerHTML='';var tot=0;
    LIST.items.forEach(function(x){
@@ -408,13 +531,28 @@ function partList(v){
     var th=h('div',{class:'th',html:svg('img'),style:'width:48px;height:48px'});lazyThumb(th,it);
     var dec=h('button',{type:'button','aria-label':'One less','data-dec':it.code,html:svg(x.q>1?'minus':'trash')}),inc=h('button',{type:'button','aria-label':'One more','data-inc':it.code,html:svg('plus')});
     dec.addEventListener('click',function(){listAdd(it.code,-1);draw()});inc.addEventListener('click',function(){listAdd(it.code,1);draw()});
-    box.appendChild(h('div',{class:'lrow','data-lcode':it.code},[th,h('div',{class:'li'},[h('a',{class:'pname',href:'#/parts/item/'+it.code,text:it.name,style:'color:inherit;text-decoration:none'}),h('div',{class:'pmeta',text:it.code+(S.waPrices?' \u00B7 '+money(u)+' each':'')})]),h('div',{class:'qty'},[dec,h('b',{text:x.q}),inc])]))});
+    box.appendChild(h('div',{class:'lrow','data-lcode':it.code},[th,h('div',{class:'li'},[h('a',{class:'pname',href:'#/parts/item/'+it.code,text:it.name,style:'color:inherit;text-decoration:none'}),h('div',{class:'pmeta',text:it.code+(S.waPrices?' \u00B7 '+money(u)+' each':'')+(liveOf(it)?' \u00B7 live':'')})]),h('div',{class:'qty'},[dec,h('b',{text:x.q}),inc])]))});
    if(!LIST.items.length){route(true);return}
    tail.innerHTML='';
    tail.appendChild(h('div',{class:'total'},[h('span',{text:'Total (incl VAT)'}),h('span',{id:'ltotal',text:money(round2(tot))})]));
    var sw=h('label',{class:'sw'},[h('input',{type:'checkbox','data-f':'waprices',checked:S.waPrices?'':null}),'Include prices when I copy or share']);
    sw.querySelector('input').addEventListener('change',function(e){S.waPrices=e.target.checked?1:0;saveS();draw()});
    tail.appendChild(sw);
+   if(S.proxy.trim()){
+    var lr=btn('Refresh live prices','',function(){
+     lr.disabled=true;lm.textContent='Checking live prices\u2026';
+     var its=LIST.items.map(function(x){return D.byCode[x.c]}).filter(Boolean);
+     liveBatch(its,function(d,n){lm.textContent='Checking live prices\u2026 '+d+' of '+n}).then(function(r){
+      lr.disabled=false;
+      var parts=[];
+      if(r.ok)parts.push('Live prices updated for '+r.ok+' of '+r.total+'.');
+      if(r.saved)parts.push(r.saved+(r.saved===1?' item':' items')+' showed the saved price only.');
+      if(r.fail)parts.push(r.fail+(r.fail===1?' item':' items')+' could not be checked.');
+      if(!parts.length)parts.push('Nothing to check.');
+      lastLive=parts.join(' ');draw();
+     },function(){lr.disabled=false;lm.textContent='Live check not available. Showing saved prices.'})},{'data-act':'liverefresh'},'refresh');
+    var lm=h('p',{class:'hint',id:'listlive',role:'status',text:lastLive});
+    tail.appendChild(h('div',{class:'btns'},lr));tail.appendChild(lm)}
    tail.appendChild(h('div',{class:'btns'},[btn('Share on WhatsApp','wa',function(){doWA(listText(!!S.waPrices))},{'data-act':'lwa'},'chat'),btn('Copy list','',function(){doCopy(listText(!!S.waPrices))},{'data-act':'lcopy'},'copy')]));
    var clr=btn('Clear list','dng',null,{'data-act':'lclear'},'trash');var armed=false;
    clr.addEventListener('click',function(){if(!armed){armed=true;clr.lastChild.textContent='Tap again to clear';setTimeout(function(){armed=false;clr.lastChild.textContent='Clear list'},3000);return}LIST.items=[];LIST.title='';saveList();route(true)});
@@ -486,9 +624,9 @@ A.routes.settings=function(a,q,v){
  var pmsg=h('p',{class:'hint',id:'pxmsg'});
  px.addEventListener('change',function(){S.proxy=px.value.trim().replace(/\/+$/,'');px.value=S.proxy;saveS();toast('Saved')});
  v.appendChild(card('Live Plumblink price (optional)',[
-  h('p',{class:'hint',text:'Leave empty to use the price snapshot only. To get live prices, deploy the small price Worker (see worker/README.md) and paste its address here.'}),
+  h('p',{class:'hint',text:'Leave empty to use the price snapshot only. To get live prices, deploy a price Worker (see worker/README.md; the Sourcing Worker is recommended) and paste its address here. Either Worker works: the app detects which one it is.'}),
   fld('Price Worker address',px),
-  btn('Test it','sm',function(){if(!S.proxy){pmsg.textContent='Nothing set. The app uses the snapshot prices.';return}pmsg.textContent='Testing\u2026';loadData().then(function(){return liveLookup(D.rows[0])}).then(function(r){pmsg.textContent='Works. Live price for the first item: '+money(r.price)+' (cost).'},function(){pmsg.textContent='Could not reach it. The app will keep using snapshot prices.'})},{'data-act':'pxtest'}),pmsg]));
+  btn('Test it','sm',function(){if(!S.proxy){pmsg.textContent='Nothing set. The app uses the snapshot prices.';return}pmsg.textContent='Testing\u2026';loadData().then(function(){return liveLookup(D.rows[0])}).then(function(r){pmsg.textContent='Works ('+(r.kind==='sourcing'?'Sourcing Worker: /price and /prices batch':'original Worker: /price only')+'). Live price for the first item: '+money(r.price)+' (Plumblink cost incl VAT).'},function(e){pmsg.textContent=(e&&e.saved)?'It answered, but with a saved price only (not live). The app will keep using snapshot prices.':'Could not reach it. The app will keep using snapshot prices.'})},{'data-act':'pxtest'}),pmsg]));
  /* AI */
  var ai=h('input',{type:'url',inputmode:'url',placeholder:'https://your-ai-worker.workers.dev','data-f':'ai',value:S.ai,autocapitalize:'off',spellcheck:'false'});
  var tk=h('input',{type:'password',autocomplete:'off',placeholder:'Shared token (same as APP_TOKEN)','data-f':'tok',value:S.tok});

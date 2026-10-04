@@ -3,11 +3,17 @@
    - Shell, data and index: network-first (3 s timeout) so updates show up, cache fallback when offline.
    - Photo packs (pack-NN.bin): cache-first, filled on first use / background download.
    - Only deletes caches that start with "aps-field-" – never other apps' caches on this origin. */
-var CACHE='aps-field-v1';
-var SHELL=['./','index.html','app.css','app.js','handbook-data.js','handbook.js','sans.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png','logo.png','logo-white.png','items.json','photos.idx'];
+var CACHE='aps-field-v1.1';
+var SHELL=['./','index.html','app.css','app.js','handbook-data.js','tips.js','gsearch.js','handbook.js','sans.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png','logo.png','logo-white.png','items.json','photos.idx'];
 self.addEventListener('install',function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){
-    return Promise.all(SHELL.map(function(f){return c.add(new Request(f,{cache:'reload'})).catch(function(){})}));
+    return Promise.all(SHELL.map(function(f){return c.add(new Request(f,{cache:'reload'})).catch(function(){})})).then(function(){
+      /* v1.1: reuse the big photo packs already saved by an older version, so they do not have to be downloaded again */
+      return caches.keys().then(function(ks){
+        var olds=ks.filter(function(k){return k.indexOf('aps-field-')===0&&k!==CACHE});
+        return Promise.all(olds.map(function(k){return caches.open(k).then(function(oc){return oc.keys().then(function(reqs){
+          return Promise.all(reqs.filter(function(rq){return isPack(new URL(rq.url))}).map(function(rq){
+            return c.match(rq).then(function(have){if(have)return;return oc.match(rq).then(function(resp){if(resp)return c.put(rq,resp)})})}))})})}))}).catch(function(){})});
   }).then(function(){return self.skipWaiting()}));
 });
 self.addEventListener('activate',function(e){

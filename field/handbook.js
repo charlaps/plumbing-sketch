@@ -4,6 +4,7 @@
 var A=APSF,h=A.h,GOF=APS_GOF;
 var DPATH={};
 var TABS=[['diagnose','Diagnose'],['repair','Repair'],['install','Install']];
+function tabLabel(s,x){return (s.labels&&s.labels[x[0]])||x[1]}
 function byId(id){for(var i=0;i<APS_SCENARIOS.length;i++)if(APS_SCENARIOS[i].id===id)return APS_SCENARIOS[i];return null}
 function partsHref(q){return '#/parts?q='+encodeURIComponent(q)}
 function gofBadge(){return h('span',{class:'gof',text:GOF})}
@@ -14,26 +15,39 @@ function partsRows(list,title){
   return h('a',{class:'pf',href:partsHref(p[1]),'data-find':p[1]},[A.ic('search'),h('span',{text:p[0]}),A.ic('ext')])})])}
 
 /* ---------- list ---------- */
+function catName(id){for(var i=0;i<APS_CATS.length;i++)if(APS_CATS[i][0]===id)return APS_CATS[i][1];return id}
+function inCat(s,c){return !c||(s.cat||'').split(',').indexOf(c)>=0}
+var BK={cat:'',q:''};
 A.routes.book=function(args,q,v){
  if(args[0]&&byId(args[0]))return scenario(byId(args[0]),args[1],v);
+ if(q.q!==undefined){BK.q=q.q;BK.cat=q.cat||'';A.replaceHash('#/book')}
  A.setBar({title:'Handbook'});
- var inp=h('input',{id:'q',type:'search',placeholder:'Search scenarios (e.g. geyser, leak, toilet)',autocomplete:'off',enterkeyhint:'search','aria-label':'Search scenarios'});
- var list=h('div',{class:'list',id:'bklist'});
+ var inp=h('input',{id:'q',type:'search',placeholder:'Search scenarios (e.g. geyser, leak, toilet won\u2019t flush)',autocomplete:'off',enterkeyhint:'search','aria-label':'Search scenarios',value:BK.q});
+ var chips=h('div',{class:'chips hs',id:'catchips'});
+ var list=h('div',{class:'list',id:'bklist'}),cnt=h('p',{class:'hint',id:'bkcount'});
  v.appendChild(h('div',{class:'search'},[inp]));
- v.appendChild(h('div',{class:'hint'},'Pick a situation. Each guide has Diagnose, Repair and Install tabs where they apply. '));
- v.appendChild(list);
+ v.appendChild(chips);
+ v.appendChild(h('a',{class:'row tipsrow',href:'#/tips','data-act':'tips'},[h('span',{class:'t'},['SANS quick tips',h('small',{text:APS_TIPS.length+' short reminders by topic. Searchable. Guide only.'})]),h('span',{class:'chev',html:A.svg('back').replace('M15 5l-7 7 7 7','M9 5l7 7-7 7')})]));
+ v.appendChild(cnt);v.appendChild(list);
  v.appendChild(h('div',{class:'hint'},[gofBadge(),' The app is a memory aid, not a standard. Work to the current SANS and the maker\u2019s instructions.']));
+ function drawChips(){
+  chips.innerHTML='';
+  [['','All ('+APS_SCENARIOS.length+')']].concat(APS_CATS.map(function(c){return [c[0],c[1]+' ('+APS_SCENARIOS.filter(function(s){return inCat(s,c[0])}).length+')']})).forEach(function(c){
+   chips.appendChild(h('button',{type:'button',class:'chip'+(BK.cat===c[0]?' on':''),'data-cat':c[0],text:c[1],onclick:function(){BK.cat=c[0];drawChips();draw()}}))})}
  function draw(){
-  var t=inp.value.toLowerCase().split(/\s+/).filter(Boolean);
-  list.innerHTML='';
-  var n=0;
-  APS_SCENARIOS.forEach(function(s){
-   var hay=(s.title+' '+s.kw+' '+s.sum).toLowerCase();
-   if(t.every(function(w){return hay.indexOf(w)>=0})){n++;
+  list.innerHTML='';var n=0,t0=performance.now();
+  if(BK.q.trim()){
+   var r=A.gs.search(BK.q,{types:['sc']});
+   r.scs.forEach(function(x){if(inCat(x.s,BK.cat)){n++;list.appendChild(A.gs.scRow(x,r.q))}})}
+  else{
+   APS_SCENARIOS.slice().sort(function(a,b){return a.title<b.title?-1:1}).forEach(function(s){
+    if(!inCat(s,BK.cat))return;n++;
     var tabs=TABS.filter(function(x){return s[x[0]]});
-    list.appendChild(h('a',{class:'row',href:'#/book/'+s.id,'data-sc':s.id},[h('span',{class:'t'},[s.title,h('small',{text:s.sum}),tabs.map(function(x){return h('span',{class:'pill',text:x[1]})})]),h('span',{class:'chev',html:A.svg('back').replace('M15 5l-7 7 7 7','M9 5l7 7-7 7')})]))}});
-  if(!n)list.appendChild(h('div',{class:'emptyph',id:'nosc',text:'No scenario matches. Try another word.'}))}
- inp.addEventListener('input',draw);draw()};
+    list.appendChild(h('a',{class:'row',href:'#/book/'+s.id,'data-sc':s.id},[h('span',{class:'t'},[s.title,h('small',{text:s.sum}),tabs.map(function(x){return h('span',{class:'pill',text:x[1]})})]),h('span',{class:'chev',html:A.svg('back').replace('M15 5l-7 7 7 7','M9 5l7 7-7 7')})]))})}
+  cnt.textContent=n+(n===1?' scenario':' scenarios')+(BK.cat?' in '+catName(BK.cat):'');cnt.setAttribute('data-ms',Math.round(performance.now()-t0));
+  if(!n)list.appendChild(h('div',{class:'emptyph',id:'nosc',text:'No scenario matches. Try another word, or choose All.'}))}
+ inp.addEventListener('input',function(){BK.q=inp.value;draw()});
+ drawChips();draw()};
 
 /* ---------- scenario ---------- */
 function scenario(s,tab,v){
@@ -43,12 +57,15 @@ function scenario(s,tab,v){
  A.setBar({title:s.title,back:'#/book'});
  v.appendChild(h('h2',{class:'pt',text:s.title}));
  v.appendChild(h('div',{class:'hint'},[s.sum+'  ',gofBadge()]));
+ v.appendChild(h('div',{class:'catpills'},(s.cat||'').split(',').map(function(c){return h('a',{class:'cp',href:'#/book?q=&cat='+c,'data-cat':c,text:catName(c)})})));
  if(avail.length>1){
   var tb=h('div',{class:'tabs',role:'tablist'});
-  avail.forEach(function(x){tb.appendChild(h('button',{type:'button',role:'tab','data-tab':x[0],class:x[0]===tab?'on':'','aria-selected':x[0]===tab?'true':'false',onclick:function(){A.replaceHash('#/book/'+s.id+'/'+x[0]);A.route(true)}},x[1]))});
+  avail.forEach(function(x){tb.appendChild(h('button',{type:'button',role:'tab','data-tab':x[0],class:x[0]===tab?'on':'','aria-selected':x[0]===tab?'true':'false',onclick:function(){A.replaceHash('#/book/'+s.id+'/'+x[0]);A.route(true)}},tabLabel(s,x)))});
   v.appendChild(tb)}
  var body=h('div',{id:'bkbody'});v.appendChild(body);
  if(tab==='diagnose')diag(s,body);else steps(s,tab,body);
+ var rel=(window.APS_TIPS||[]).filter(function(t){return t.sc===s.id}).slice(0,3);
+ if(rel.length){v.appendChild(h('div',{class:'sechd',text:'Related SANS tips'}));rel.forEach(function(t){v.appendChild(h('a',{class:'row gtip',href:'#/tips/'+t.id,'data-tip':t.id},[h('span',{class:'t'},[t.t,h('small',{text:t.ref}),t.chk?h('span',{class:'chk-flag',text:'Check the standard'}):null]),h('span',{class:'chev',html:A.svg('back').replace('M15 5l-7 7 7 7','M9 5l7 7-7 7')})]))})}
  v.appendChild(h('div',{class:'note',style:'margin-top:14px'},'This guide cannot certify any work as compliant. You are responsible for the job. Electrical work needs a registered electrician and gas work a registered gas installer.'))}
 
 function jump(s,tab,label){return A.btn(label,'sm',function(){A.go('#/book/'+s.id+'/'+tab,true)})}
@@ -113,7 +130,7 @@ function steps(s,tab,box){
  if(T.steps&&T.steps.length){
   var cnt=h('span',{class:'cnt'}),bar=h('i');
   var wrap=h('div',{class:'chk',id:'steps'});
-  wrap.appendChild(h('div',{class:'ch'},[h('b',{text:tab==='install'?'Install steps':'Repair steps'}),cnt]));
+  wrap.appendChild(h('div',{class:'ch'},[h('b',{text:T.head||(tab==='install'?'Install steps':'Repair steps')}),cnt]));
   wrap.appendChild(h('div',{class:'prog'},bar));
   function upd(){var n=0;T.steps.forEach(function(_,i){if(done[i])n++});cnt.textContent=n+' / '+T.steps.length;bar.style.width=Math.round(n/T.steps.length*100)+'%'}
   T.steps.forEach(function(st,i){

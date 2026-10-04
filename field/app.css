@@ -218,3 +218,50 @@ html[data-gloves="1"] .qty button,html[data-gloves="1"] .addb{width:56px;height:
 
 .lrow a.pname{display:flex;align-items:center;min-height:44px}
 .verify h4{color:var(--amber)}
+
+/* ---------- v1.1: global search, chips, filters, tips ---------- */
+#gq{margin:2px 0 10px}
+#view.home.gs-on .homebtns{display:none}
+.gres{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
+.gres:empty{display:none}
+.ghd{display:flex;align-items:baseline;justify-content:space-between;margin:12px 2px 0}
+.ghd h3{margin:0;font-size:.85rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ghd .gc{color:var(--muted);font-size:.85rem;font-weight:700}
+.more-link{display:flex;align-items:center;min-height:44px;color:var(--accent);font-weight:700;text-decoration:none;padding:0 4px}
+.gt{display:block}
+.row .snip{margin-top:2px;color:var(--text);opacity:.85}
+.row .pills{display:block}
+.row mark,.tip mark{background:#ffe27a;color:#1a1a1a}
+html[data-theme=dark] mark{background:#e0b800;color:#111}
+@media (prefers-color-scheme:dark){html[data-theme=auto] mark{background:#e0b800;color:#111}}
+.hs{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding-bottom:6px}
+.hs .chip{flex:none;white-space:nowrap}
+.chips.hs{margin:0 0 8px}
+.chiprow{display:flex;gap:8px;margin:0 0 6px}
+.chiprow .chip{min-height:44px;padding:4px 14px}
+.chip.rc{border-style:dashed}
+.sechd .lnk{background:none;border:0;color:var(--accent);font-weight:800;min-height:44px;padding:0 8px;text-transform:none;letter-spacing:0;font-size:.9rem}
+.mf{border:2px solid var(--line);border-radius:14px;background:var(--surface);margin:0 0 10px;padding:0 12px}
+.mf.has{border-color:var(--accent)}
+.mf summary{min-height:48px;display:flex;align-items:center;font-weight:700;cursor:pointer}
+.mf[open] summary{border-bottom:1px solid var(--line);margin-bottom:10px}
+.mfg{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.mfg .fl select{width:100%;min-width:0}
+.mf .btns{margin:6px 0 10px}
+.ib.on{background:rgba(255,211,77,.35);color:#ffd34d}
+.ib.on svg{fill:currentColor}
+.catpills{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+.cp{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.85rem;text-decoration:none}
+.tipsrow{margin:0 0 8px}
+.tips{display:flex;flex-direction:column;gap:10px}
+.tip{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.tip .tt{margin:4px 0 6px;font-size:1.05rem;line-height:1.25}
+.tip .tb{margin:0 0 8px;line-height:1.4}
+.tip .tmeta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tip .tp{font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.tip .tref{font-size:.82rem;color:var(--muted);margin:0 0 8px}
+.chk-flag{display:inline-block;font-size:.7rem;font-weight:800;color:var(--amber);background:var(--amber-soft);border:1px solid #d9a000;border-radius:99px;padding:0 8px;margin:2px 4px 0 0}
+.tip .btns .btn{min-height:44px}
+html[data-gloves="1"] .cp{min-height:48px}
+
+#barx{display:flex;align-items:center;gap:0;flex:none}
