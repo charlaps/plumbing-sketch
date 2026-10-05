@@ -1,4 +1,4 @@
-/* APS public website – v0.1 draft. Brand blue #004AAD (matches APS logo + Field App). */
+/* APS public website – v0.2 (Marketing review applied 5 Oct 2026). Brand blue #004AAD (matches APS logo + Field App). */
 @font-face{font-family:"Montserrat";src:url("fonts/montserrat-var.woff2") format("woff2");font-weight:100 900;font-display:swap}
 :root{
   --blue:#004AAD;--blue-d:#003A8C;--navy:#0B2A63;--ink:#0C1F3D;--muted:#4A5D7A;
@@ -62,7 +62,31 @@ p{margin:0 0 1em}
 .cta-row{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0 22px}
 .chips{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:8px 18px;font-weight:600;font-size:.92rem;color:#DCE8FA}
 .chips li::before{content:"✓";display:inline-block;margin-right:.45em;color:#7FE3A4;font-weight:800}
-.hero-photo{display:none}
+/* Hero: on mobile the copy flattens so the real job photo sits right under the CTAs (above the fold) */
+.hero-inner{display:flex;flex-direction:column}
+.hero-copy{display:contents}
+.hero .eyebrow{order:1;align-self:flex-start}
+.hero h1{order:2}
+.hero .lead{order:3}
+.hero .cta-row{order:4;margin:20px 0 16px}
+@media (max-width:479px){
+  .hero{padding-top:30px}
+  .hero .eyebrow{margin-bottom:14px}
+  .hero .cta-row{display:grid;grid-template-columns:1.25fr 1fr;gap:10px}
+  .hero .cta-row .btn-lg{font-size:.98rem;padding:.85em .7em;min-height:52px}
+  .hide-xs{display:none}
+}
+.hero-photo{order:5;margin:0 0 18px}
+.hero .chips{order:6}
+.hero-photo img{width:100%;aspect-ratio:16/10;max-height:220px;object-fit:cover;border-radius:14px;border:3px solid rgba(255,255,255,.9);box-shadow:0 10px 26px rgba(0,0,0,.3)}
+.hero-photo figcaption{display:none}
+
+/* Offer strip (links to #geyser-check) */
+.offer-strip{display:block;background:#FFD54A;color:var(--navy);text-decoration:none;font-size:.92rem;line-height:1.35;padding:10px 0;text-align:center}
+.offer-strip .wrap{display:block}
+.offer-strip strong{font-weight:800}
+.offer-strip .strip-cta{white-space:nowrap;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.offer-strip:hover .strip-cta{color:var(--blue)}
 .hero-wave{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:60px;fill:#fff}
 
 /* Sections */
@@ -83,6 +107,9 @@ p{margin:0 0 1em}
 .service p{color:var(--muted);margin:0}
 .service-cta{background:linear-gradient(160deg,#EAF2FD,#fff);border-style:dashed;display:flex;flex-direction:column;align-items:flex-start}
 .service-cta p{margin-bottom:16px}
+.svc-link{display:inline-block;margin-top:6px;font-weight:700;color:var(--blue);text-decoration:none}
+.svc-link:hover{text-decoration:underline}
+.svc-note{display:block;margin-top:6px;color:var(--navy);font-weight:700}
 
 /* Offer */
 .offer{background:var(--navy);color:#fff;padding:64px 0}
@@ -92,6 +119,7 @@ p{margin:0 0 1em}
 .ticks{list-style:none;padding:0;margin:0 0 24px;display:grid;gap:10px}
 .ticks li{padding-left:34px;position:relative;font-weight:600}
 .ticks li::before{content:"";position:absolute;left:0;top:.15em;width:22px;height:22px;border-radius:50%;background:var(--wa) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/14px no-repeat}
+.offer-extra{font-weight:600;color:#fff!important;margin:18px 0 0}
 .fine{font-size:.82rem;color:#A9BFE0!important;margin-top:12px}
 .offer-photo{margin:0}
 .offer-photo img{border-radius:var(--r);box-shadow:0 10px 30px rgba(0,0,0,.35)}
@@ -154,6 +182,7 @@ details p{color:var(--muted)}
 .footer-inner{display:grid;gap:26px}
 .footer-logo{width:200px;margin-bottom:14px}
 .site-footer h4{color:#fff;font-size:1rem;margin-bottom:.6em}
+.hours{font-size:.88rem;color:#C9D7EE}
 .footer-base{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;border-top:1px solid rgba(255,255,255,.12);margin-top:30px;padding-top:18px;font-size:.85rem}
 
 /* Mobile sticky bar */
@@ -172,6 +201,7 @@ details p{color:var(--muted)}
   .why{grid-template-columns:repeat(2,1fr)}
   .steps{grid-template-columns:repeat(2,1fr)}
   .footer-inner{grid-template-columns:1.4fr 1fr 1fr}
+  .area-cards{grid-template-columns:repeat(2,1fr)}
 }
 @media (min-width:960px){
   body{padding-bottom:0}
@@ -187,10 +217,12 @@ details p{color:var(--muted)}
   .service{display:block;padding:22px}
   .service .ico{width:56px;height:56px;margin-bottom:14px}
   .eyebrow{font-size:.82rem;letter-spacing:.14em}
-  .hero-inner{display:grid;grid-template-columns:1.35fr .8fr;gap:56px;align-items:center}
+  .hero-inner{display:grid;grid-template-columns:1.2fr 1fr;gap:56px;align-items:center}
+  .hero-copy{display:block}
+  .hero .cta-row{margin-bottom:22px}
   .hero-photo{display:block;margin:0;position:relative;transform:rotate(1.5deg)}
-  .hero-photo img{border-radius:20px;border:6px solid #fff;box-shadow:0 20px 50px rgba(0,0,0,.35);max-height:460px;width:100%;object-fit:cover}
-  .hero-photo figcaption{position:absolute;left:-24px;bottom:28px;background:#fff;color:var(--ink);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow);font-size:.85rem;line-height:1.35;transform:rotate(-1.5deg)}
+  .hero-photo img{border-radius:20px;border:6px solid #fff;box-shadow:0 20px 50px rgba(0,0,0,.35);max-height:none;aspect-ratio:1080/689;width:100%;object-fit:cover}
+  .hero-photo figcaption{display:block;position:absolute;left:-24px;bottom:-26px;background:#fff;color:var(--ink);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow);font-size:.85rem;line-height:1.35;transform:rotate(-1.5deg)}
   .hero-photo figcaption strong{display:block;color:var(--blue)}
   .why{grid-template-columns:repeat(4,1fr)}
   .steps{grid-template-columns:repeat(4,1fr)}

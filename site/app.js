@@ -39,7 +39,11 @@
         ".\nSuburb: " + f.suburb.value.trim() +
         "\nI need: " + f.service.value +
         (f.details.value.trim() ? "\nDetails: " + f.details.value.trim() : "");
-      window.open("https://wa.me/" + WA + "?text=" + encodeURIComponent(text), "_blank", "noopener");
+      var waUrl = "https://wa.me/" + WA + "?text=" + encodeURIComponent(text);
+      // Mobile (incl. Facebook/Instagram in-app browsers) blocks popups, so open WhatsApp in the same tab there.
+      var mobile = window.matchMedia && window.matchMedia("(max-width:959px)").matches;
+      if (mobile) { location.href = waUrl; }
+      else { window.open(waUrl, "_blank", "noopener"); }
     });
   }
 
