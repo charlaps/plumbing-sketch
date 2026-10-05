@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#004AAD" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="APS Quote Helper — client and internal plumbing quotes" />
+  <link rel="manifest" href="site.webmanifest" />
+  <title>APS Quote</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header no-print">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">APS</span>
+      <div>
+        <h1>APS Quote</h1>
+        <p class="tagline">Client · Internal · Offline</p>
+      </div>
+    </div>
+    <div class="mode-toggle" role="tablist" aria-label="Quote view">
+      <button type="button" class="mode-btn active" data-mode="client" role="tab" aria-selected="true">Client</button>
+      <button type="button" class="mode-btn" data-mode="internal" role="tab" aria-selected="false">Internal</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Package presets -->
+    <section class="card no-print" aria-labelledby="presets-heading">
+      <h2 id="presets-heading">Packages</h2>
+      <div class="preset-row">
+        <button type="button" class="preset-btn" data-preset="geyser">Geyser swap</button>
+        <button type="button" class="preset-btn" data-preset="basin">Basin / vanity</button>
+        <button type="button" class="preset-btn" data-preset="toilet">Toilet</button>
+        <button type="button" class="preset-btn" data-preset="filter">Whole-house filter</button>
+      </div>
+    </section>
+
+    <!-- Job details -->
+    <section class="card" aria-labelledby="details-heading">
+      <h2 id="details-heading" class="no-print">Job details</h2>
+      <div class="print-only print-header">
+        <div class="print-brand">APS Plumbing</div>
+        <div class="print-sub">Krugersdorp · Quote</div>
+      </div>
+      <div class="form-grid">
+        <label class="field">
+          <span>Client name</span>
+          <input type="text" id="clientName" autocomplete="name" placeholder="e.g. Johan van der Berg" />
+        </label>
+        <label class="field">
+          <span>Phone</span>
+          <input type="tel" id="clientPhone" autocomplete="tel" placeholder="072 000 0000" inputmode="tel" />
+        </label>
+        <label class="field">
+          <span>Suburb</span>
+          <input type="text" id="suburb" placeholder="e.g. Noordheuwel" />
+        </label>
+        <label class="field">
+          <span>Quote number</span>
+          <input type="text" id="quoteNumber" />
+        </label>
+        <label class="field full">
+          <span>Job type</span>
+          <select id="jobType">
+            <option value="">Select…</option>
+            <option value="Geyser">Geyser</option>
+            <option value="Basin / vanity">Basin / vanity</option>
+            <option value="Toilet">Toilet</option>
+            <option value="Filter">Filter</option>
+            <option value="Leak / repair">Leak / repair</option>
+            <option value="Bathroom">Bathroom</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+        <label class="field full">
+          <span>Short scope of work</span>
+          <textarea id="scope" rows="4" placeholder="Keep it short — no fitting brands or sizes that help competitors shop the quote."></textarea>
+        </label>
+      </div>
+    </section>
+
+    <!-- Materials -->
+    <section class="card" aria-labelledby="materials-heading">
+      <div class="section-head">
+        <h2 id="materials-heading">Materials</h2>
+        <button type="button" class="btn-sm no-print" id="addMaterial">+ Add line</button>
+      </div>
+      <p class="hint no-print client-only">Client view: descriptions &amp; qty only — no per-item prices. Totals below.</p>
+      <p class="hint no-print internal-only">Internal: unit cost &amp; line totals visible for you.</p>
+      <div class="materials-table-wrap">
+        <table class="materials-table" id="materialsTable">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th class="col-qty">Qty</th>
+              <th class="col-cost internal-col">Unit R</th>
+              <th class="col-line internal-col">Line R</th>
+              <th class="col-act no-print"></th>
+            </tr>
+          </thead>
+          <tbody id="materialsBody"></tbody>
+        </table>
+      </div>
+      <div class="materials-total-row">
+        <span>Materials total</span>
+        <strong id="materialsTotalDisplay">R 0.00</strong>
+      </div>
+    </section>
+
+    <!-- Labour & totals -->
+    <section class="card" aria-labelledby="totals-heading">
+      <h2 id="totals-heading" class="no-print">Labour &amp; totals</h2>
+      <label class="field labour-field no-print">
+        <span>Labour (R)</span>
+        <input type="number" id="labour" min="0" step="0.01" inputmode="decimal" placeholder="0.00" />
+      </label>
+      <div class="totals" id="totalsBlock">
+        <div class="total-line"><span>Materials</span><span id="tMaterials">R 0.00</span></div>
+        <div class="total-line"><span>Labour</span><span id="tLabour">R 0.00</span></div>
+        <div class="total-line"><span>Subtotal (ex VAT)</span><span id="tSubtotal">R 0.00</span></div>
+        <div class="total-line"><span>VAT (15%)</span><span id="tVat">R 0.00</span></div>
+        <div class="total-line grand"><span>Total incl. VAT</span><span id="tGrand">R 0.00</span></div>
+        <div class="total-line deposit"><span>Deposit to book (80%)</span><span id="tDeposit">R 0.00</span></div>
+      </div>
+      <p class="deposit-note">80% deposit required to book the job. Balance on completion.</p>
+    </section>
+
+    <!-- Actions -->
+    <section class="actions no-print">
+      <button type="button" class="btn primary" id="btnCopy">Copy client text</button>
+      <button type="button" class="btn primary outline" id="btnWhatsApp">Open WhatsApp</button>
+      <button type="button" class="btn" id="btnPrint">Print / Save PDF</button>
+      <button type="button" class="btn" id="btnSave">Save quote</button>
+      <button type="button" class="btn ghost" id="btnNew">New quote</button>
+    </section>
+
+    <!-- Saved quotes -->
+    <section class="card no-print" aria-labelledby="saved-heading">
+      <h2 id="saved-heading">Saved quotes</h2>
+      <p class="hint">Last 10 on this phone. Tap to reopen.</p>
+      <ul class="saved-list" id="savedList"></ul>
+    </section>
+  </main>
+
+  <footer class="app-footer no-print">
+    <p>APS Plumbing · Offline quote helper · Not a legal document</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

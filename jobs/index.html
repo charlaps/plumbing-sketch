@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>APS Jobs – Job Register</title>
+<meta name="description" content="APS job register: track every plumbing job from lead to paid. Works offline on your phone.">
+<meta name="theme-color" content="#004AAD">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="site.webmanifest">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <img src="img/logo-white.png" alt="APS" class="logo" width="88" height="36">
+    <h1>APS Jobs</h1>
+    <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-haspopup="true" aria-expanded="false">⋮</button>
+  </div>
+  <nav class="menu" id="menu" hidden>
+    <button data-act="export">⬇ Export CSV</button>
+    <label class="menu-file">⬆ Import CSV<input type="file" id="importFile" accept=".csv,text/csv"></label>
+    <button data-act="sample">➕ Add example job</button>
+    <button data-act="help">❓ How it works</button>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="summary" id="summary" aria-label="Money summary"></section>
+
+  <section class="filters" aria-label="Search and filter">
+    <input type="search" id="q" placeholder="Search name, phone, suburb, scope…" autocomplete="off">
+    <div class="chips-row" id="statusFilter" role="tablist" aria-label="Filter by status"></div>
+    <select id="suburbFilter" aria-label="Filter by suburb"><option value="">All suburbs</option></select>
+  </section>
+
+  <section id="list" class="list" aria-live="polite"></section>
+
+  <section id="empty" class="empty" hidden>
+    <div class="empty-icon" aria-hidden="true">🔧</div>
+    <h2>No jobs yet</h2>
+    <p>Tap the big blue <strong>+ New job</strong> button to add your first job.</p>
+    <ol>
+      <li>Fill in the client, suburb and a short scope.</li>
+      <li>Add materials and labour (excl. VAT) — the app works out VAT and the 80% deposit.</li>
+      <li>Tap the status chip to move the job along: Lead → Quoted → Booked → On site → Done → Invoiced → Paid.</li>
+      <li>Send the client a summary on WhatsApp with one tap.</li>
+    </ol>
+    <p class="small">Everything is saved on this phone only. Use <strong>⋮ → Export CSV</strong> to back up.</p>
+    <button class="btn btn-light" data-act="sample">Show me an example job</button>
+  </section>
+
+  <p class="nomatch" id="nomatch" hidden>No jobs match that search. <button class="link" id="clearFilters">Clear filters</button></p>
+</main>
+
+<button class="fab" id="addBtn" aria-label="New job">+ New job</button>
+
+<dialog id="jobDlg">
+  <form id="jobForm" method="dialog" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlgTitle">New job</h2>
+      <button type="button" class="icon-btn dark" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="dlg-body">
+      <label>Client name *<input name="client" required autocomplete="off"></label>
+      <label>Phone<input name="phone" type="tel" inputmode="tel" placeholder="072 123 4567" autocomplete="off"></label>
+      <div class="two">
+        <label>Suburb<input name="suburb" list="suburbList" autocomplete="off" placeholder="e.g. Krugersdorp"></label>
+        <label>Job type
+          <select name="type">
+            <option value="geyser">Geyser</option>
+            <option value="bathroom">Bathroom</option>
+            <option value="filter">Filter</option>
+            <option value="leak">Leak</option>
+            <option value="new">New install</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+      </div>
+      <datalist id="suburbList"></datalist>
+      <label>Address<input name="address" autocomplete="off"></label>
+      <label>Short scope (client sees this)
+        <textarea name="scope" rows="3" placeholder="e.g. Replace burst 150L geyser, new safety valve set, test and certify."></textarea>
+      </label>
+      <div class="two">
+        <label>Materials R (excl. VAT)<input name="materials" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></label>
+        <label>Labour R (excl. VAT)<input name="labour" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></label>
+      </div>
+      <div class="two">
+        <label>Deposit %<input name="depositPct" type="number" inputmode="numeric" min="0" max="100" step="1" value="80"></label>
+        <label>Status
+          <select name="status" id="statusSelect"></select>
+        </label>
+      </div>
+      <label class="check"><input type="checkbox" name="vat" checked> Add VAT 15%</label>
+      <div class="calc" id="calcPreview"></div>
+      <label>Notes (internal — not sent to client)<textarea name="notes" rows="2"></textarea></label>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn btn-danger" id="deleteBtn" hidden>Delete</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-light" data-close>Cancel</button>
+      <button type="submit" class="btn">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="helpDlg">
+  <div class="dlg-head"><h2>How APS Jobs works</h2><button type="button" class="icon-btn dark" data-close aria-label="Close">✕</button></div>
+  <div class="dlg-body help">
+    <p><strong>One list for every job</strong>, from first call to money in the bank.</p>
+    <ul>
+      <li><strong>Tap the status chip</strong> on a job to move it to the next step. Wrong tap? Hit <em>Undo</em>, or use Edit to pick any status.</li>
+      <li><strong>Totals:</strong> enter materials and labour <em>excl. VAT</em>. The card shows VAT 15%, total and the deposit (default 80%).</li>
+      <li><strong>WhatsApp:</strong> sends the scope and totals only — no fittings list.</li>
+      <li><strong>Notes</strong> stay private and are never sent.</li>
+      <li><strong>Saved on this phone only.</strong> Export CSV regularly as a backup, or to open in Excel. Import CSV to move jobs to another phone.</li>
+      <li><strong>Install:</strong> in Chrome tap ⋮ → <em>Add to Home screen</em>. It then works without signal.</li>
+    </ul>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>

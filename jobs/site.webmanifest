@@ -1,0 +1,15 @@
+{
+  "name": "APS Jobs – Job Register",
+  "short_name": "APS Jobs",
+  "description": "Track APS plumbing jobs from lead to paid. Works offline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F2F6FB",
+  "theme_color": "#004AAD",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

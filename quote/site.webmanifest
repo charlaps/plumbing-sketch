@@ -1,0 +1,11 @@
+{
+  "name": "APS Quote Helper",
+  "short_name": "APS Quote",
+  "description": "Offline client and internal plumbing quotes for APS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#004AAD",
+  "theme_color": "#004AAD",
+  "lang": "en-ZA",
+  "icons": []
+}
