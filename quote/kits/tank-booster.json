@@ -1,0 +1,1344 @@
+{
+  "supplier": "Plumblink Krugersdorp",
+  "checked": "6 Oct 2026 05:12",
+  "priceBasis": "Supplier shelf price including the supplier's VAT",
+  "items": [
+    {
+      "code": "036583",
+      "name": "ECO WATER TANK VERTICAL 950L GREEN SLIMLINE",
+      "cost": 2111.91
+    },
+    {
+      "code": "040536",
+      "name": "PLUMLINE PERIPHERAL VANE BOOSTER PUMP COMBO KIT QB60 0.37KW",
+      "cost": 2150
+    },
+    {
+      "code": "017895",
+      "name": "NYLON REDUCING BUSH 40x25mm BLACK",
+      "cost": 23.48
+    },
+    {
+      "code": "000296",
+      "name": "GALVANISED BARREL NIPPLE 25mm",
+      "cost": 11.14
+    },
+    {
+      "code": "029864",
+      "name": "GENEBRE LEVER BALL VALVE FXF PN25 (S/S LEVER) 25mm 3031 06",
+      "cost": 268.99
+    },
+    {
+      "code": "040542",
+      "name": "PLUMLINE PUMP / TANK SUCTION HOSE KIT ONLY GREEN 90011234",
+      "cost": 369
+    },
+    {
+      "code": "023788",
+      "name": "HOSE CLAMP UNIVERSAL GS20 19-44mm",
+      "cost": 10
+    },
+    {
+      "code": "041277",
+      "name": "VISCOSITY FILTER HOUSING & BODY SMALL 250mm LONG 20mm PORT",
+      "cost": 228.99
+    },
+    {
+      "code": "041281",
+      "name": "VISCOSITY FILTER CARTRIDGE ONLY 250mm LONG 20 MICRON SMALL FILTER",
+      "cost": 38.99
+    },
+    {
+      "code": "041289",
+      "name": "VISCOSITY FILTER BRACKET inc 4x SCREWS FOR SMALL SINGLE FILTER",
+      "cost": 38.99
+    },
+    {
+      "code": "000290",
+      "name": "GALVANISED CONE FACE UNION 25mm",
+      "cost": 54.19
+    },
+    {
+      "code": "029897",
+      "name": "GENEBRE BRASS SPRING TYPE CHECK VALVE FXF PN25 25mm 3121 06",
+      "cost": 188.99
+    },
+    {
+      "code": "040024",
+      "name": "HDPE COMPRESSION BALLVALVE 25mm PXP PN16",
+      "cost": 260.62
+    },
+    {
+      "code": "004382",
+      "name": "HDPE COMPRESSION ADAPTOR BSP MALE 25X1",
+      "cost": 28.95
+    },
+    {
+      "code": "030812",
+      "name": "BRASSMAN COMPRESSION EQUAL TEE 22mm CXCXC",
+      "cost": 100.67
+    },
+    {
+      "code": "035809",
+      "name": "PLUMLINE LEVER BALL VALVE CxC DZR 22mm",
+      "cost": 198.99
+    },
+    {
+      "code": "040381",
+      "name": "PLUMLINE SPRING LOADED NON RETURN VALVE CxC 22mm",
+      "cost": 125
+    },
+    {
+      "code": "030822",
+      "name": "BRASSMAN COMPRESSION STRAIGHT MALE COUPLER 22mm MIXC",
+      "cost": 48.56
+    },
+    {
+      "code": "000258",
+      "name": "HDPE COMPRESSION ADAPTOR BSP FEMALE 25X3/4",
+      "cost": 33
+    },
+    {
+      "code": "000311",
+      "name": "HDPE COMPRESSION COUPLING REDUCING 25X20 PXP",
+      "cost": 53.15
+    },
+    {
+      "code": "004396",
+      "name": "HDPE COMPRESSION ADAPTOR BSP FEMALE 20X3/4",
+      "cost": 29.78
+    },
+    {
+      "code": "041202",
+      "name": "WARTHOG WFK/001 20MM STANDARD TANK FLOAT VALVE KIT",
+      "cost": 296.01
+    },
+    {
+      "code": "041589",
+      "name": "NYLON REDUCING NIPPLE 50x40mm BLACK",
+      "cost": 51.61
+    },
+    {
+      "code": "000441",
+      "name": "PVC SV PIPE 40mm x6m PLAIN ENDED SABS NEW SPEC WHITE",
+      "cost": 138.12
+    },
+    {
+      "code": "002929",
+      "name": "PVC SV BEND 40x87 PLAIN NEW SPEC W40B",
+      "cost": 9.32
+    },
+    {
+      "code": "039784",
+      "name": "HDPE PRESSURE PIPE 25X6m CLASS 12 PE100 PN12.5",
+      "cost": 76.59
+    },
+    {
+      "code": "000317",
+      "name": "HDPE COMPRESSION ELBOW 25X90 PXP",
+      "cost": 53.15
+    },
+    {
+      "code": "041275",
+      "name": "WARTHOG WPC/R01 BOOSTER PUMP COVER GREY",
+      "cost": 660.33
+    },
+    {
+      "code": "022958",
+      "name": "PTFE LUX THREAD SEAL TAPE 12M X12mm (0.1mm)",
+      "cost": 8.57
+    },
+    {
+      "code": "041484",
+      "name": "ECO WATER TANK OUTLET / CONNECTOR ONLY 40mm",
+      "cost": 75
+    },
+    {
+      "code": "039425",
+      "name": "JOJO SLIMLINE RAINWATER TANK VERTICAL 1000L GREEN",
+      "cost": 2616.65
+    },
+    {
+      "code": "000432",
+      "name": "GALVANISED REDUCING BUSH 40X25mm",
+      "cost": 23.12
+    },
+    {
+      "code": "040537",
+      "name": "PLUMLINE PERIPHERAL VANE BOOSTER PUMP COMBO KIT QB80 0.75KW",
+      "cost": 3250
+    },
+    {
+      "code": "041278",
+      "name": "VISCOSITY FILTER HOUSING & BODY LARGE 500mm LONG 25mm PORT",
+      "cost": 798.99
+    },
+    {
+      "code": "041284",
+      "name": "VISCOSITY FILTER CARTRIDGE ONLY 500mm LONG 20 MICRON LARGE FILTER",
+      "cost": 178.99
+    },
+    {
+      "code": "041292",
+      "name": "VISCOSITY FILTER BRACKET inc 4x SCREWS FOR LARGE SINGLE FILTER",
+      "cost": 128.99
+    },
+    {
+      "code": "039789",
+      "name": "HDPE PRESSURE PIPE 25X25m CLASS 12 PE100 PN12.5",
+      "cost": 319.13
+    },
+    {
+      "code": "040047",
+      "name": "ECO WATER TANK VERTICAL 2750L GREEN",
+      "cost": 2523.67
+    },
+    {
+      "code": "005542",
+      "name": "JOJO WATER TANK VERTICAL 2500L / 2700L GREEN",
+      "cost": 4848.11
+    },
+    {
+      "code": "042467",
+      "name": "VISCOSITY VSD INTELLIGENT MULTISTAGE CENTRIFUGAL PUMP SSP100 0.75KW 2",
+      "cost": 4795
+    },
+    {
+      "code": "042133",
+      "name": "TANK BUDDY WATER LEVEL CONTROL VALVE 20mm",
+      "cost": 848.99
+    },
+    {
+      "code": "031270",
+      "name": "HDPE PRESSURE PIPE 25X50m CLASS 16 PE100 PN16",
+      "cost": 775.03
+    },
+    {
+      "code": "040048",
+      "name": "ECO WATER TANK VERTICAL 5050L GREEN",
+      "cost": 5577.32
+    },
+    {
+      "code": "005543",
+      "name": "JOJO WATER TANK VERTICAL 5000L / 5250L GREEN",
+      "cost": 7916.37
+    },
+    {
+      "code": "041561",
+      "name": "PLUMLINE CENTRIFUGAL BOOSTER PUMP AND CONTROLLER CPM170 1.1KW",
+      "cost": 4995
+    },
+    {
+      "code": "041562",
+      "name": "PLUMLINE CENTRIFUGAL BOOSTER PUMP AND CONTROLLER CPM190 1.5KW",
+      "cost": 5595
+    },
+    {
+      "code": "000272",
+      "name": "COPPER TUBE 22X5.5m 460/0 DOMESTIC",
+      "cost": 822.68
+    },
+    {
+      "code": "030823",
+      "name": "BRASSMAN COMPRESSION STRAIGHT COUPLER 22mm CXC",
+      "cost": 64.45
+    }
+  ],
+  "bigticket": [
+    "005542",
+    "005543",
+    "036583",
+    "039425",
+    "040047",
+    "040048",
+    "040536",
+    "040537",
+    "041561",
+    "041562",
+    "042467"
+  ],
+  "kits": {
+    "1000-low": [
+      {
+        "code": "036583",
+        "qty": 1
+      },
+      {
+        "code": "040536",
+        "qty": 1
+      },
+      {
+        "code": "017895",
+        "qty": 1
+      },
+      {
+        "code": "000296",
+        "qty": 2
+      },
+      {
+        "code": "029864",
+        "qty": 1
+      },
+      {
+        "code": "040542",
+        "qty": 1
+      },
+      {
+        "code": "023788",
+        "qty": 4
+      },
+      {
+        "code": "041277",
+        "qty": 1
+      },
+      {
+        "code": "041281",
+        "qty": 1
+      },
+      {
+        "code": "041289",
+        "qty": 1
+      },
+      {
+        "code": "000290",
+        "qty": 1
+      },
+      {
+        "code": "029897",
+        "qty": 1
+      },
+      {
+        "code": "040024",
+        "qty": 2
+      },
+      {
+        "code": "004382",
+        "qty": 2
+      },
+      {
+        "code": "030812",
+        "qty": 2
+      },
+      {
+        "code": "035809",
+        "qty": 1
+      },
+      {
+        "code": "040381",
+        "qty": 1
+      },
+      {
+        "code": "030822",
+        "qty": 2
+      },
+      {
+        "code": "000258",
+        "qty": 2
+      },
+      {
+        "code": "000311",
+        "qty": 1
+      },
+      {
+        "code": "004396",
+        "qty": 1
+      },
+      {
+        "code": "041202",
+        "qty": 1
+      },
+      {
+        "code": "041589",
+        "qty": 1
+      },
+      {
+        "code": "000441",
+        "qty": 1
+      },
+      {
+        "code": "002929",
+        "qty": 2
+      },
+      {
+        "code": "039784",
+        "qty": 2
+      },
+      {
+        "code": "000317",
+        "qty": 3
+      },
+      {
+        "code": "041275",
+        "qty": 1
+      },
+      {
+        "code": "022958",
+        "qty": 3
+      },
+      {
+        "code": "041484",
+        "qty": 1
+      }
+    ],
+    "1000-typ": [
+      {
+        "code": "039425",
+        "qty": 1
+      },
+      {
+        "code": "040536",
+        "qty": 1
+      },
+      {
+        "code": "000432",
+        "qty": 1
+      },
+      {
+        "code": "000296",
+        "qty": 3
+      },
+      {
+        "code": "029864",
+        "qty": 1
+      },
+      {
+        "code": "040542",
+        "qty": 1
+      },
+      {
+        "code": "023788",
+        "qty": 4
+      },
+      {
+        "code": "041277",
+        "qty": 1
+      },
+      {
+        "code": "041281",
+        "qty": 1
+      },
+      {
+        "code": "041289",
+        "qty": 1
+      },
+      {
+        "code": "000290",
+        "qty": 1
+      },
+      {
+        "code": "029897",
+        "qty": 1
+      },
+      {
+        "code": "040024",
+        "qty": 2
+      },
+      {
+        "code": "004382",
+        "qty": 2
+      },
+      {
+        "code": "030812",
+        "qty": 2
+      },
+      {
+        "code": "035809",
+        "qty": 1
+      },
+      {
+        "code": "040381",
+        "qty": 1
+      },
+      {
+        "code": "030822",
+        "qty": 2
+      },
+      {
+        "code": "000258",
+        "qty": 2
+      },
+      {
+        "code": "000311",
+        "qty": 1
+      },
+      {
+        "code": "004396",
+        "qty": 1
+      },
+      {
+        "code": "041202",
+        "qty": 1
+      },
+      {
+        "code": "041589",
+        "qty": 1
+      },
+      {
+        "code": "000441",
+        "qty": 1
+      },
+      {
+        "code": "002929",
+        "qty": 2
+      },
+      {
+        "code": "039784",
+        "qty": 2
+      },
+      {
+        "code": "000317",
+        "qty": 4
+      },
+      {
+        "code": "041275",
+        "qty": 1
+      },
+      {
+        "code": "022958",
+        "qty": 3
+      }
+    ],
+    "1000-high": [
+      {
+        "code": "039425",
+        "qty": 1
+      },
+      {
+        "code": "040537",
+        "qty": 1
+      },
+      {
+        "code": "000432",
+        "qty": 1
+      },
+      {
+        "code": "000296",
+        "qty": 3
+      },
+      {
+        "code": "029864",
+        "qty": 1
+      },
+      {
+        "code": "040542",
+        "qty": 1
+      },
+      {
+        "code": "023788",
+        "qty": 4
+      },
+      {
+        "code": "041278",
+        "qty": 1
+      },
+      {
+        "code": "041284",
+        "qty": 1
+      },
+      {
+        "code": "041292",
+        "qty": 1
+      },
+      {
+        "code": "000290",
+        "qty": 1
+      },
+      {
+        "code": "029897",
+        "qty": 1
+      },
+      {
+        "code": "040024",
+        "qty": 2
+      },
+      {
+        "code": "004382",
+        "qty": 2
+      },
+      {
+        "code": "030812",
+        "qty": 2
+      },
+      {
+        "code": "035809",
+        "qty": 1
+      },
+      {
+        "code": "040381",
+        "qty": 1
+      },
+      {
+        "code": "030822",
+        "qty": 2
+      },
+      {
+        "code": "000258",
+        "qty": 2
+      },
+      {
+        "code": "000311",
+        "qty": 1
+      },
+      {
+        "code": "004396",
+        "qty": 1
+      },
+      {
+        "code": "041202",
+        "qty": 1
+      },
+      {
+        "code": "041589",
+        "qty": 1
+      },
+      {
+        "code": "000441",
+        "qty": 1
+      },
+      {
+        "code": "002929",
+        "qty": 2
+      },
+      {
+        "code": "039789",
+        "qty": 1
+      },
+      {
+        "code": "000317",
+        "qty": 4
+      },
+      {
+        "code": "041275",
+        "qty": 1
+      },
+      {
+        "code": "022958",
+        "qty": 3
+      }
+    ],
+    "2500-low": [
+      {
+        "code": "040047",
+        "qty": 1
+      },
+      {
+        "code": "040536",
+        "qty": 1
+      },
+      {
+        "code": "017895",
+        "qty": 1
+      },
+      {
+        "code": "000296",
+        "qty": 2
+      },
+      {
+        "code": "029864",
+        "qty": 1
+      },
+      {
+        "code": "040542",
+        "qty": 1
+      },
+      {
+        "code": "023788",
+        "qty": 4
+      },
+      {
+        "code": "041277",
+        "qty": 1
+      },
+      {
+        "code": "041281",
+        "qty": 1
+      },
+      {
+        "code": "041289",
+        "qty": 1
+      },
+      {
+        "code": "000290",
+        "qty": 1
+      },
+      {
+        "code": "029897",
+        "qty": 1
+      },
+      {
+        "code": "040024",
+        "qty": 2
+      },
+      {
+        "code": "004382",
+        "qty": 2
+      },
+      {
+        "code": "030812",
+        "qty": 2
+      },
+      {
+        "code": "035809",
+        "qty": 1
+      },
+      {
+        "code": "040381",
+        "qty": 1
+      },
+      {
+        "code": "030822",
+        "qty": 2
+      },
+      {
+        "code": "000258",
+        "qty": 2
+      },
+      {
+        "code": "000311",
+        "qty": 1
+      },
+      {
+        "code": "004396",
+        "qty": 1
+      },
+      {
+        "code": "041202",
+        "qty": 1
+      },
+      {
+        "code": "041589",
+        "qty": 1
+      },
+      {
+        "code": "000441",
+        "qty": 1
+      },
+      {
+        "code": "002929",
+        "qty": 2
+      },
+      {
+        "code": "039784",
+        "qty": 2
+      },
+      {
+        "code": "000317",
+        "qty": 3
+      },
+      {
+        "code": "041275",
+        "qty": 1
+      },
+      {
+        "code": "022958",
+        "qty": 3
+      },
+      {
+        "code": "041484",
+        "qty": 1
+      }
+    ],
+    "2500-typ": [
+      {
+        "code": "005542",
+        "qty": 1
+      },
+      {
+        "code": "040537",
+        "qty": 1
+      },
+      {
+        "code": "000432",
+        "qty": 1
+      },
+      {
+        "code": "000296",
+        "qty": 3
+      },
+      {
+        "code": "029864",
+        "qty": 1
+      },
+      {
+        "code": "040542",
+        "qty": 1
+      },
+      {
+        "code": "023788",
+        "qty": 4
+      },
+      {
+        "code": "041278",
+        "qty": 1
+      },
+      {
+        "code": "041284",
+        "qty": 1
+      },
+      {
+        "code": "041292",
+        "qty": 1
+      },
+      {
+        "code": "000290",
+        "qty": 1
+      },
+      {
+        "code": "029897",
+        "qty": 1
+      },
+      {
+        "code": "040024",
+        "qty": 2
+      },
+      {
+        "code": "004382",
+        "qty": 2
+      },
+      {
+        "code": "030812",
+        "qty": 2
+      },
+      {
+        "code": "035809",
+        "qty": 1
+      },
+      {
+        "code": "040381",
+        "qty": 1
+      },
+      {
+        "code": "030822",
+        "qty": 2
+      },
+      {
+        "code": "000258",
+        "qty": 2
+      },
+      {
+        "code": "000311",
+        "qty": 1
+      },
+      {
+        "code": "004396",
+        "qty": 1
+      },
+      {
+        "code": "041202",
+        "qty": 1
+      },
+      {
+        "code": "041589",
+        "qty": 1
+      },
+      {
+        "code": "000441",
+        "qty": 1
+      },
+      {
+        "code": "002929",
+        "qty": 2
+      },
+      {
+        "code": "039789",
+        "qty": 1
+      },
+      {
+        "code": "000317",
+        "qty": 4
+      },
+      {
+        "code": "041275",
+        "qty": 1
+      },
+      {
+        "code": "022958",
+        "qty": 3
+      }
+    ],
+    "2500-high": [
+      {
+        "code": "005542",
+        "qty": 1
+      },
+      {
+        "code": "042467",
+        "qty": 1
+      },
+      {
+        "code": "000432",
+        "qty": 1
+      },
+      {
+        "code": "000296",
+        "qty": 3
+      },
+      {
+        "code": "029864",
+        "qty": 2
+      },
+      {
+        "code": "040542",
+        "qty": 1
+      },
+      {
+        "code": "023788",
+        "qty": 4
+      },
+      {
+        "code": "041278",
+        "qty": 1
+      },
+      {
+        "code": "041284",
+        "qty": 1
+      },
+      {
+        "code": "041292",
+        "qty": 1
+      },
+      {
+        "code": "000290",
+        "qty": 1
+      },
+      {
+        "code": "029897",
+        "qty": 1
+      },
+      {
+        "code": "040024",
+        "qty": 2
+      },
+      {
+        "code": "004382",
+        "qty": 2
+      },
+      {
+        "code": "030812",
+        "qty": 2
+      },
+      {
+        "code": "035809",
+        "qty": 1
+      },
+      {
+        "code": "040381",
+        "qty": 1
+      },
+      {
+        "code": "030822",
+        "qty": 2
+      },
+      {
+        "code": "000258",
+        "qty": 2
+      },
+      {
+        "code": "000311",
+        "qty": 1
+      },
+      {
+        "code": "004396",
+        "qty": 1
+      },
+      {
+        "code": "042133",
+        "qty": 1
+      },
+      {
+        "code": "041589",
+        "qty": 1
+      },
+      {
+        "code": "000441",
+        "qty": 1
+      },
+      {
+        "code": "002929",
+        "qty": 2
+      },
+      {
+        "code": "031270",
+        "qty": 1
+      },
+      {
+        "code": "000317",
+        "qty": 6
+      },
+      {
+        "code": "041275",
+        "qty": 1
+      },
+      {
+        "code": "022958",
+        "qty": 3
+      }
+    ],
+    "5000-low": [
+      {
+        "code": "040048",
+        "qty": 1
+      },
+      {
+        "code": "040537",
+        "qty": 1
+      },
+      {
+        "code": "000432",
+        "qty": 1
+      },
+      {
+        "code": "000296",
+        "qty": 3
+      },
+      {
+        "code": "029864",
+        "qty": 1
+      },
+      {
+        "code": "040542",
+        "qty": 1
+      },
+      {
+        "code": "023788",
+        "qty": 4
+      },
+      {
+        "code": "041278",
+        "qty": 1
+      },
+      {
+        "code": "041284",
+        "qty": 1
+      },
+      {
+        "code": "041292",
+        "qty": 1
+      },
+      {
+        "code": "000290",
+        "qty": 1
+      },
+      {
+        "code": "029897",
+        "qty": 1
+      },
+      {
+        "code": "040024",
+        "qty": 2
+      },
+      {
+        "code": "004382",
+        "qty": 2
+      },
+      {
+        "code": "030812",
+        "qty": 2
+      },
+      {
+        "code": "035809",
+        "qty": 1
+      },
+      {
+        "code": "040381",
+        "qty": 1
+      },
+      {
+        "code": "030822",
+        "qty": 2
+      },
+      {
+        "code": "000258",
+        "qty": 2
+      },
+      {
+        "code": "000311",
+        "qty": 1
+      },
+      {
+        "code": "004396",
+        "qty": 1
+      },
+      {
+        "code": "041202",
+        "qty": 1
+      },
+      {
+        "code": "041589",
+        "qty": 1
+      },
+      {
+        "code": "000441",
+        "qty": 1
+      },
+      {
+        "code": "002929",
+        "qty": 2
+      },
+      {
+        "code": "039789",
+        "qty": 1
+      },
+      {
+        "code": "000317",
+        "qty": 4
+      },
+      {
+        "code": "041275",
+        "qty": 1
+      },
+      {
+        "code": "022958",
+        "qty": 3
+      },
+      {
+        "code": "041484",
+        "qty": 1
+      }
+    ],
+    "5000-typ": [
+      {
+        "code": "005543",
+        "qty": 1
+      },
+      {
+        "code": "041561",
+        "qty": 1
+      },
+      {
+        "code": "000432",
+        "qty": 1
+      },
+      {
+        "code": "000296",
+        "qty": 3
+      },
+      {
+        "code": "029864",
+        "qty": 1
+      },
+      {
+        "code": "040542",
+        "qty": 1
+      },
+      {
+        "code": "023788",
+        "qty": 4
+      },
+      {
+        "code": "041278",
+        "qty": 1
+      },
+      {
+        "code": "041284",
+        "qty": 1
+      },
+      {
+        "code": "041292",
+        "qty": 1
+      },
+      {
+        "code": "000290",
+        "qty": 1
+      },
+      {
+        "code": "029897",
+        "qty": 1
+      },
+      {
+        "code": "040024",
+        "qty": 2
+      },
+      {
+        "code": "004382",
+        "qty": 2
+      },
+      {
+        "code": "030812",
+        "qty": 2
+      },
+      {
+        "code": "035809",
+        "qty": 1
+      },
+      {
+        "code": "040381",
+        "qty": 1
+      },
+      {
+        "code": "030822",
+        "qty": 2
+      },
+      {
+        "code": "000258",
+        "qty": 2
+      },
+      {
+        "code": "000311",
+        "qty": 1
+      },
+      {
+        "code": "004396",
+        "qty": 1
+      },
+      {
+        "code": "041202",
+        "qty": 1
+      },
+      {
+        "code": "041589",
+        "qty": 1
+      },
+      {
+        "code": "000441",
+        "qty": 1
+      },
+      {
+        "code": "002929",
+        "qty": 2
+      },
+      {
+        "code": "039789",
+        "qty": 1
+      },
+      {
+        "code": "000317",
+        "qty": 5
+      },
+      {
+        "code": "041275",
+        "qty": 1
+      },
+      {
+        "code": "022958",
+        "qty": 3
+      }
+    ],
+    "5000-high": [
+      {
+        "code": "005543",
+        "qty": 1
+      },
+      {
+        "code": "041562",
+        "qty": 1
+      },
+      {
+        "code": "000432",
+        "qty": 1
+      },
+      {
+        "code": "000296",
+        "qty": 3
+      },
+      {
+        "code": "029864",
+        "qty": 2
+      },
+      {
+        "code": "040542",
+        "qty": 1
+      },
+      {
+        "code": "023788",
+        "qty": 4
+      },
+      {
+        "code": "041278",
+        "qty": 1
+      },
+      {
+        "code": "041284",
+        "qty": 1
+      },
+      {
+        "code": "041292",
+        "qty": 1
+      },
+      {
+        "code": "000290",
+        "qty": 1
+      },
+      {
+        "code": "029897",
+        "qty": 1
+      },
+      {
+        "code": "040024",
+        "qty": 2
+      },
+      {
+        "code": "004382",
+        "qty": 2
+      },
+      {
+        "code": "030812",
+        "qty": 2
+      },
+      {
+        "code": "035809",
+        "qty": 1
+      },
+      {
+        "code": "040381",
+        "qty": 1
+      },
+      {
+        "code": "030822",
+        "qty": 2
+      },
+      {
+        "code": "000258",
+        "qty": 2
+      },
+      {
+        "code": "000311",
+        "qty": 1
+      },
+      {
+        "code": "004396",
+        "qty": 1
+      },
+      {
+        "code": "042133",
+        "qty": 1
+      },
+      {
+        "code": "041589",
+        "qty": 1
+      },
+      {
+        "code": "000441",
+        "qty": 1
+      },
+      {
+        "code": "002929",
+        "qty": 2
+      },
+      {
+        "code": "031270",
+        "qty": 1
+      },
+      {
+        "code": "000317",
+        "qty": 6
+      },
+      {
+        "code": "041275",
+        "qty": 1
+      },
+      {
+        "code": "022958",
+        "qty": 3
+      },
+      {
+        "code": "000272",
+        "qty": 1
+      },
+      {
+        "code": "030823",
+        "qty": 2
+      }
+    ]
+  }
+}

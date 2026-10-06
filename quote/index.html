@@ -38,6 +38,35 @@
       </div>
     </section>
 
+    <section class="card no-print" aria-labelledby="kits-heading">
+      <h2 id="kits-heading">Kits</h2>
+      <p class="hint">Tank + booster backup. Pick a size, then Budget, Typical or Premium. Lines stay editable.</p>
+      <div class="kit-block">
+        <p class="kit-size">1,000 L</p>
+        <div class="kit-row">
+          <button type="button" class="kit-btn" data-kit="1000-low">Budget</button>
+          <button type="button" class="kit-btn" data-kit="1000-typ">Typical</button>
+          <button type="button" class="kit-btn" data-kit="1000-high">Premium</button>
+        </div>
+      </div>
+      <div class="kit-block">
+        <p class="kit-size">2,500 L</p>
+        <div class="kit-row">
+          <button type="button" class="kit-btn" data-kit="2500-low">Budget</button>
+          <button type="button" class="kit-btn" data-kit="2500-typ">Typical</button>
+          <button type="button" class="kit-btn" data-kit="2500-high">Premium</button>
+        </div>
+      </div>
+      <div class="kit-block">
+        <p class="kit-size">5,000 L</p>
+        <div class="kit-row">
+          <button type="button" class="kit-btn" data-kit="5000-low">Budget</button>
+          <button type="button" class="kit-btn" data-kit="5000-typ">Typical</button>
+          <button type="button" class="kit-btn" data-kit="5000-high">Premium</button>
+        </div>
+      </div>
+    </section>
+
     <!-- Job details -->
     <section class="card" aria-labelledby="details-heading">
       <h2 id="details-heading" class="no-print">Job details</h2>
@@ -45,7 +74,8 @@
         <div class="print-brand">APS Plumbing</div>
         <div class="print-sub">Krugersdorp · Quote</div>
       </div>
-      <div class="form-grid">
+      <div class="print-only print-job" id="printJob"></div>
+      <div class="form-grid no-print">
         <label class="field">
           <span>Client name</span>
           <input type="text" id="clientName" autocomplete="name" placeholder="e.g. Johan van der Berg" />
@@ -70,6 +100,7 @@
             <option value="Basin / vanity">Basin / vanity</option>
             <option value="Toilet">Toilet</option>
             <option value="Filter">Filter</option>
+            <option value="Tank + booster backup">Tank + booster backup</option>
             <option value="Leak / repair">Leak / repair</option>
             <option value="Bathroom">Bathroom</option>
             <option value="Other">Other</option>
@@ -88,12 +119,32 @@
         <h2 id="materials-heading">Materials</h2>
         <button type="button" class="btn-sm no-print" id="addMaterial">+ Add line</button>
       </div>
-      <p class="hint no-print client-only">Client view: descriptions &amp; qty only — no per-item prices. Totals below.</p>
-      <p class="hint no-print internal-only">Internal: unit cost &amp; line totals visible for you.</p>
-      <div class="materials-table-wrap">
+      <p class="hint no-print client-only" id="materialsHintClient">Client view: descriptions &amp; qty only — no per-item prices. Totals below.</p>
+      <p class="hint no-print internal-only" id="materialsHintInternal">Internal: unit cost &amp; line totals visible for you.</p>
+      <p class="hint internal-only" id="kitExclusions" hidden>Excludes electrician plug point, slab/stand and tank delivery. Prices checked 6 Oct 2026.</p>
+      <div id="markupBox" class="markup-box internal-only" hidden>
+        <p class="hint">Big-ticket markup on tanks and pumps. Small parts stay at 30%.</p>
+        <div class="markup-compare" role="radiogroup" aria-label="Big-ticket markup">
+          <button type="button" class="markup-opt" data-markup="30" role="radio" aria-checked="false">
+            <span>30%</span>
+            <strong id="mk30">R 0.00</strong>
+          </button>
+          <button type="button" class="markup-opt" data-markup="25" role="radio" aria-checked="false">
+            <span>25%</span>
+            <strong id="mk25">R 0.00</strong>
+          </button>
+          <button type="button" class="markup-opt" data-markup="20" role="radio" aria-checked="false">
+            <span>20%</span>
+            <strong id="mk20">R 0.00</strong>
+          </button>
+        </div>
+      </div>
+      <div id="kitEditor" class="kit-editor internal-only" hidden></div>
+      <div class="materials-table-wrap" id="materialsWrap">
         <table class="materials-table" id="materialsTable">
           <thead>
             <tr>
+              <th class="col-code internal-col">Code</th>
               <th>Description</th>
               <th class="col-qty">Qty</th>
               <th class="col-cost internal-col">Unit R</th>
@@ -117,6 +168,7 @@
         <span>Labour (R)</span>
         <input type="number" id="labour" min="0" step="0.01" inputmode="decimal" placeholder="0.00" />
       </label>
+      <p class="hint internal-only" id="labourKitNote" hidden>labour not yet confirmed by Charl</p>
       <div class="totals" id="totalsBlock">
         <div class="total-line"><span>Materials</span><span id="tMaterials">R 0.00</span></div>
         <div class="total-line"><span>Labour</span><span id="tLabour">R 0.00</span></div>
@@ -148,6 +200,7 @@
     <p>APS Plumbing · Offline quote helper · Not a legal document</p>
   </footer>
 
+  <script src="kits/tank-booster.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
