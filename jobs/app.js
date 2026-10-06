@@ -44,9 +44,10 @@
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     return (neg ? '-R' : 'R') + parts.join('.');
   }
+  function vatOn(j) { return !!(j && j.vat === true); }
   function calc(j) {
     var sub = r2(num(j.materials) + num(j.labour));
-    var vat = j.vat === false ? 0 : r2(sub * VAT_RATE);
+    var vat = vatOn(j) ? r2(sub * VAT_RATE) : 0;
     var total = r2(sub + vat);
     var pct = j.depositPct === '' || j.depositPct == null ? 80 : Math.min(100, Math.max(0, num(j.depositPct)));
     return { sub: sub, vat: vat, total: total, pct: pct, deposit: r2(total * pct / 100), balance: r2(total - total * pct / 100) };
@@ -142,8 +143,8 @@
       '<div class="money">' +
         (num(j.materials) ? '<span>Materials</span><span>' + money(num(j.materials)) + '</span>' : '') +
         (num(j.labour) ? '<span>Labour</span><span>' + money(num(j.labour)) + '</span>' : '') +
-        (j.vat === false ? '<span>VAT</span><span>not added</span>' : '<span>VAT 15%</span><span>' + money(c.vat) + '</span>') +
-        '<span class="tot">Total' + (j.vat === false ? '' : ' incl. VAT') + '</span><span class="tot">' + money(c.total) + '</span>' +
+        (vatOn(j) ? '<span>VAT 15%</span><span>' + money(c.vat) + '</span>' : '') +
+        '<span class="tot">Total' + (vatOn(j) ? ' incl. VAT' : '') + '</span><span class="tot">' + money(c.total) + '</span>' +
         '<span class="dep">Deposit ' + c.pct + '%</span><span class="dep">' + money(c.deposit) + '</span>' +
       '</div>' : '';
     return '<article class="card st-' + j.status + '" data-id="' + j.id + '">' +
@@ -196,8 +197,7 @@
       lines.push('');
       if (num(j.materials)) lines.push('Materials: ' + money(num(j.materials)));
       if (num(j.labour)) lines.push('Labour: ' + money(num(j.labour)));
-      if (j.vat !== false) lines.push('VAT 15%: ' + money(c.vat));
-      lines.push('*Total' + (j.vat !== false ? ' incl. VAT' : '') + ': ' + money(c.total) + '*');
+      lines.push('*Total: ' + money(c.total) + '*');
       if (early && c.pct > 0) lines.push('Deposit to book (' + c.pct + '%): ' + money(c.deposit));
       if (!early && j.status !== 'paid' && c.pct > 0 && c.pct < 100) lines.push('Balance after ' + c.pct + '% deposit: ' + money(c.balance));
     }
@@ -233,13 +233,13 @@
 
   function openForm(id) {
     editingId = id || null;
-    var j = id ? byId(id) : { type: 'geyser', status: 'lead', depositPct: 80, vat: true };
+    var j = id ? byId(id) : { type: 'geyser', status: 'lead', depositPct: 80, vat: false };
     form.reset();
     ['client', 'phone', 'suburb', 'address', 'type', 'scope', 'materials', 'labour', 'depositPct', 'status', 'notes'].forEach(function (k) {
       var v = j[k]; form.elements[k].value = (v == null ? '' : v);
     });
     if (!id) form.elements.depositPct.value = 80;
-    form.elements.vat.checked = j.vat !== false;
+    form.elements.vat.checked = vatOn(j);
     form.elements.client.classList.remove('invalid');
     $('#dlgTitle').textContent = id ? 'Edit job' : 'New job';
     $('#deleteBtn').hidden = !id;
@@ -264,8 +264,8 @@
     var c = calc(readForm());
     var v = form.elements.vat.checked;
     $('#calcPreview').innerHTML =
-      '<span>Subtotal</span><span>' + money(c.sub) + '</span>' +
-      '<span>VAT 15%</span><span>' + (v ? money(c.vat) : '—') + '</span>' +
+      (v ? '<span>Subtotal</span><span>' + money(c.sub) + '</span>' +
+        '<span>VAT 15%</span><span>' + money(c.vat) + '</span>' : '') +
       '<span><strong>Total' + (v ? ' incl. VAT' : '') + '</strong></span><span>' + money(c.total) + '</span>' +
       '<span>Deposit ' + c.pct + '%</span><span>' + money(c.deposit) + '</span>' +
       '<span>Balance on completion</span><span>' + money(c.balance) + '</span>';
@@ -349,7 +349,7 @@
       id: uid(), created: now, updated: now, client: 'Example – Mrs Botha', phone: '', suburb: 'Krugersdorp',
       address: '12 Example Street, Monument', type: 'geyser', status: 'quoted',
       scope: 'Remove burst 150L geyser, supply and install new 150L geyser with full safety valve set, drip tray and vacuum breakers. Test, commission and issue CoC.',
-      materials: 9800, labour: 3200, depositPct: 80, vat: true, notes: 'Example job – delete me once you have real jobs.'
+      materials: 9800, labour: 3200, depositPct: 80, vat: false, notes: 'Example job – delete me once you have real jobs.'
     });
     save(); filter = { q: '', status: '', suburb: '' }; $('#q').value = ''; render();
     toast('Example job added. Tap Edit → Delete to remove it.');
@@ -368,7 +368,7 @@
       var c = calc(j);
       var o = {}; Object.keys(j).forEach(function (k) { o[k] = j[k]; });
       o.status = statusLabel(j.status); o.type = TYPES[j.type] || 'Other';
-      o.vat = j.vat === false ? 'no' : 'yes';
+      o.vat = vatOn(j) ? 'yes' : 'no';
       o.subtotal = c.sub.toFixed(2); o.vatAmount = c.vat.toFixed(2); o.total = c.total.toFixed(2); o.deposit = c.deposit.toFixed(2);
       rows.push(CSV_COLS.map(function (k) { return csvCell(o[k]); }).join(','));
     });
@@ -421,7 +421,7 @@
         materials: col(r, 'materials') === '' ? '' : r2(num(col(r, 'materials'))),
         labour: col(r, 'labour') === '' ? '' : r2(num(col(r, 'labour'))),
         depositPct: col(r, 'depositPct') === '' ? 80 : num(col(r, 'depositPct')),
-        vat: !/^(no|false|0)$/i.test(col(r, 'vat').trim()), notes: col(r, 'notes').trim()
+        vat: /^(yes|true|1)$/i.test(col(r, 'vat').trim()), notes: col(r, 'notes').trim()
       };
       if (!j.client) return;
       var ex = byId(j.id);

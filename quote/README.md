@@ -14,14 +14,14 @@ Offline-first, phone-first web app for APS Plumbing quotes. Client view hides pe
 
 ## How Charl uses it
 
-1. Open `index.html` on the phone (or host the folder). Tap a **package** (geyser / basin / toilet / filter), fill client details, add unit costs on **Internal**, set labour, then switch to **Client** — materials show description + qty only; pricing is totals + 15% VAT + 80% deposit.
+1. Open `index.html` on the phone (or host the folder). Tap a **package** (geyser / basin / toilet / filter), fill client details, add unit costs on **Internal**, set labour, then switch to **Client** — materials show description + qty only; pricing is materials + labour and an 80% deposit. APS is not VAT-registered.
 2. **Copy client text** or **Open WhatsApp** to send the short-scope quote; **Print / Save PDF** for a branded one-pager.
 3. **Save quote** keeps the last 10 on that device (localStorage); reopen from the list to edit.
 
 ## Quote rules baked in
 
 - Generic material names on the client side (e.g. “22mm ball valve”)
-- No per-item prices on client quote — materials total, labour, VAT, grand total only
+- No per-item prices on client quote — materials total, labour and grand total only. No VAT.
 - Short scope — no fitting detail for competitors
 - 80% deposit to book
 

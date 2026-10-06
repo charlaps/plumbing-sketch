@@ -2,7 +2,6 @@
 (function () {
   "use strict";
 
-  const VAT_RATE = 0.15;
   const DEPOSIT_RATE = 0.8;
   const STORAGE_KEY = "aps-quote-saved-v1";
   const MAX_SAVED = 10;
@@ -117,11 +116,9 @@
       return s + q * c;
     }, 0);
     const labour = Number($("labour").value) || 0;
-    const subtotal = materialsSum + labour;
-    const vat = subtotal * VAT_RATE;
-    const grand = subtotal + vat;
-    const deposit = grand * DEPOSIT_RATE;
-    return { materialsSum, labour, subtotal, vat, grand, deposit };
+    const total = materialsSum + labour;
+    const deposit = total * DEPOSIT_RATE;
+    return { materialsSum, labour, total, deposit };
   }
 
   function updateTotals() {
@@ -129,9 +126,7 @@
     $("materialsTotalDisplay").textContent = money(t.materialsSum);
     $("tMaterials").textContent = money(t.materialsSum);
     $("tLabour").textContent = money(t.labour);
-    $("tSubtotal").textContent = money(t.subtotal);
-    $("tVat").textContent = money(t.vat);
-    $("tGrand").textContent = money(t.grand);
+    $("tGrand").textContent = money(t.total);
     $("tDeposit").textContent = money(t.deposit);
   }
 
@@ -255,12 +250,11 @@
     lines.push("PRICING");
     lines.push(`Materials total: ${money(t.materialsSum)}`);
     lines.push(`Labour: ${money(t.labour)}`);
-    lines.push(`Subtotal (ex VAT): ${money(t.subtotal)}`);
-    lines.push(`VAT (15%): ${money(t.vat)}`);
-    lines.push(`TOTAL incl. VAT: ${money(t.grand)}`);
+    lines.push(`TOTAL: ${money(t.total)}`);
     lines.push(`Deposit to book (80%): ${money(t.deposit)}`);
     lines.push("");
     lines.push("80% deposit required to book. Balance on completion.");
+    lines.push("APS is not VAT-registered.");
     lines.push("Thank you — APS Plumbing");
     return lines.join("\n");
   }

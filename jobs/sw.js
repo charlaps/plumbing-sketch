@@ -1,5 +1,5 @@
 /* APS Jobs service worker – cache app shell so it opens with no signal */
-const CACHE = 'aps-jobs-v1';
+const CACHE = 'aps-jobs-v2';
 const FILES = ['./', 'index.html', 'styles.css', 'app.js', 'site.webmanifest',
   'fonts/montserrat-var.woff2', 'img/logo-white.png', 'icon-192.png', 'icon-512.png',
   'apple-touch-icon.png', 'favicon-32.png', 'favicon.ico'];

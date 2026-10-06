@@ -45,7 +45,7 @@
     <p>Tap the big blue <strong>+ New job</strong> button to add your first job.</p>
     <ol>
       <li>Fill in the client, suburb and a short scope.</li>
-      <li>Add materials and labour (excl. VAT) — the app works out VAT and the 80% deposit.</li>
+      <li>Add materials and labour — the total and the 80% deposit are materials plus labour. APS is not VAT-registered.</li>
       <li>Tap the status chip to move the job along: Lead → Quoted → Booked → On site → Done → Invoiced → Paid.</li>
       <li>Send the client a summary on WhatsApp with one tap.</li>
     </ol>
@@ -86,8 +86,8 @@
         <textarea name="scope" rows="3" placeholder="e.g. Replace burst 150L geyser, new safety valve set, test and certify."></textarea>
       </label>
       <div class="two">
-        <label>Materials R (excl. VAT)<input name="materials" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></label>
-        <label>Labour R (excl. VAT)<input name="labour" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></label>
+        <label>Materials R<input name="materials" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></label>
+        <label>Labour R<input name="labour" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></label>
       </div>
       <div class="two">
         <label>Deposit %<input name="depositPct" type="number" inputmode="numeric" min="0" max="100" step="1" value="80"></label>
@@ -95,7 +95,7 @@
           <select name="status" id="statusSelect"></select>
         </label>
       </div>
-      <label class="check"><input type="checkbox" name="vat" checked> Add VAT 15%</label>
+      <label class="check"><input type="checkbox" name="vat"> Add VAT 15%</label>
       <div class="calc" id="calcPreview"></div>
       <label>Notes (internal — not sent to client)<textarea name="notes" rows="2"></textarea></label>
     </div>
@@ -114,7 +114,7 @@
     <p><strong>One list for every job</strong>, from first call to money in the bank.</p>
     <ul>
       <li><strong>Tap the status chip</strong> on a job to move it to the next step. Wrong tap? Hit <em>Undo</em>, or use Edit to pick any status.</li>
-      <li><strong>Totals:</strong> enter materials and labour <em>excl. VAT</em>. The card shows VAT 15%, total and the deposit (default 80%).</li>
+      <li><strong>Totals:</strong> enter materials and labour. The total and the deposit (default 80%) are materials plus labour. VAT stays off unless you tick Add VAT 15% — APS is not VAT-registered.</li>
       <li><strong>WhatsApp:</strong> sends the scope and totals only — no fittings list.</li>
       <li><strong>Notes</strong> stay private and are never sent.</li>
       <li><strong>Saved on this phone only.</strong> Export CSV regularly as a backup, or to open in Excel. Import CSV to move jobs to another phone.</li>
