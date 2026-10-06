@@ -38,3 +38,19 @@ Offline-first, phone-first web app for APS Plumbing quotes. Client view hides pe
 ## Note
 
 Does not replace Sketch, Field Manual, or Field App. Separate folder only.
+
+## Auto-pull prices (Plumblink + APS labour)
+
+Added files (nothing removed):
+
+| File | Purpose |
+|------|---------|
+| `autoprice.js` | Plumblink type-ahead (Internal view), markup selectors, job-book labour picker, typical-materials kits, package auto-pricing |
+| `autoprice.css` | Styles for the above |
+| `aps-data.json` | APS Job Book labour (97 jobs, `u:1` = yellow/unconfirmed), live price checks 5–6 Oct (override the snapshot), typical kits, package→job map |
+
+- Plumblink catalogue is **reused** from `../field/items.json` (Field App, snapshot 4 Oct 2026, 5,232 items) and only fetched when you first search (≈129 KB gzipped).
+- Sell = Plumblink cost incl VAT × markup. Small items 30% (35/40 selectable). Tanks, pumps & geysers are "big ticket": 30/25/20% selector (default 30%).
+- Client text / print show generic names + qty, materials total, labour, total and 80% deposit only. Codes, brands, Plumblink names, per-item prices and "unconfirmed" badges are Internal-only. No VAT anywhere.
+- A hand-typed unit price wins over Plumblink for that line. Typing labour by hand clears the job-book link.
+- To refresh data: regenerate `aps-data.json` (box script `/workspace/aps-quote-v2/build/build_data.py`) and/or the Field App's `items.json`.

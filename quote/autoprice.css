@@ -1,0 +1,46 @@
+/* ——— Auto-pull: Plumblink search + job-book labour (autoprice.js) ——— */
+.pl-box, .lab-box { position: relative; margin-bottom: 0.65rem; }
+.pl-search-field input, .lab-box input[type="search"] { font-size: 1rem; }
+.pl-results {
+  list-style: none; margin: 0.3rem 0 0; padding: 0;
+  max-height: 22rem; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border); border-radius: 10px; background: #fff;
+  box-shadow: 0 6px 18px rgba(0, 40, 100, 0.14);
+  position: absolute; left: 0; right: 0; z-index: 15;
+}
+.pl-results li + li { border-top: 1px solid #eef2f7; }
+.pl-hit {
+  display: flex; flex-direction: column; gap: 0.1rem; width: 100%;
+  text-align: left; border: 0; background: #fff; padding: 0.55rem 0.7rem; cursor: pointer; font: inherit;
+}
+.pl-hit:active, .pl-hit:hover { background: var(--blue-soft); }
+.pl-gen { font-weight: 700; color: var(--blue); font-size: 0.88rem; }
+.pl-name { font-size: 0.72rem; color: var(--muted); }
+.pl-price { font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+.pl-empty { padding: 0.6rem 0.7rem; font-size: 0.8rem; color: var(--muted); }
+.badge-big, .badge-live, .badge-low, .badge-unconf {
+  font-style: normal; font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.35rem; border-radius: 999px; white-space: nowrap;
+}
+.badge-big { background: #fff4e0; color: #8a5a00; }
+.badge-live { background: #e6f4ec; color: var(--ok); }
+.badge-low { background: #fdecea; color: var(--danger); }
+.badge-unconf { background: #FFF2CC; color: #7a5b00; border: 1px solid #e8d48a; }
+.mk-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.8rem; margin: 0.5rem 0 0.25rem; font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+.mk-row select { font: inherit; border: 1px solid var(--border); border-radius: 6px; padding: 0.15rem 0.25rem; background: #fff; color: var(--text); }
+.pl-date { margin: 0.25rem 0 0; font-size: 0.7rem; }
+.pl-meta { font-size: 0.66rem; color: var(--muted); margin-top: 0.15rem; line-height: 1.3; }
+.lab-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.45rem; }
+.lab-chip {
+  display: inline-flex; align-items: center; gap: 0.3rem; flex-wrap: wrap;
+  background: var(--blue-soft); border: 1px solid var(--border); border-radius: 10px; padding: 0.3rem 0.5rem; font-size: 0.75rem;
+}
+.lab-chip b { color: var(--blue); font-variant-numeric: tabular-nums; }
+.lab-chip-x { border: 0; background: transparent; color: var(--danger); font-size: 1rem; line-height: 1; cursor: pointer; padding: 0 0.1rem; }
+.lab-sum { font-size: 0.75rem; font-weight: 700; color: var(--blue-dark); align-self: center; }
+.pl-offer { margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.offer-row { background: #f7fafe; border: 1px dashed var(--blue); border-radius: 10px; padding: 0.5rem 0.6rem; font-size: 0.78rem; display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+.offer-row > span { flex: 1 1 100%; }
+.btn-sm.ghost { background: transparent; border-color: var(--border); color: var(--muted); }
+@media print { .pl-meta, .pl-box, .lab-box { display: none !important; } }
+.materials-table tr.has-meta td { border-bottom: 0; padding-bottom: 0.1rem; }
+.pl-meta-row td { padding-top: 0 !important; }

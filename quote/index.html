@@ -10,6 +10,7 @@
   <link rel="manifest" href="site.webmanifest" />
   <title>APS Quote</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="autoprice.css" />
 </head>
 <body>
   <header class="app-header no-print">
@@ -123,7 +124,7 @@
       <p class="hint no-print internal-only" id="materialsHintInternal">Internal: unit cost &amp; line totals visible for you.</p>
       <p class="hint internal-only" id="kitExclusions" hidden>Excludes electrician plug point, slab/stand and tank delivery. Prices checked 6 Oct 2026.</p>
       <div id="markupBox" class="markup-box internal-only" hidden>
-        <p class="hint">Big-ticket markup on tanks and pumps. Small parts stay at 30%.</p>
+        <p class="hint">Big-ticket markup on tanks, pumps and geysers. On a tank kit, small parts stay at 30%.</p>
         <div class="markup-compare" role="radiogroup" aria-label="Big-ticket markup">
           <button type="button" class="markup-opt" data-markup="30" role="radio" aria-checked="false">
             <span>30%</span>
@@ -202,5 +203,6 @@
 
   <script src="kits/tank-booster.js"></script>
   <script src="app.js"></script>
+  <script src="autoprice.js"></script>
 </body>
 </html>

@@ -121,8 +121,44 @@
   let mode = "client";
   let activeKit = "";
   let bigMarkup = 30;
+  const bigMarkupListeners = [];
 
   const $ = (id) => document.getElementById(id);
+
+  /* Hooks + small API for add-ons (autoprice.js: Plumblink prices + job-book labour) */
+  const HOOKS = {};
+  window.APSQuote = {
+    hooks: HOOKS,
+    getMaterials: () => materials,
+    setMaterials: (arr) => {
+      materials = Array.isArray(arr) ? arr : [];
+      renderMaterials();
+    },
+    addMaterial: (row) => addMaterial(row),
+    render: () => renderMaterials(),
+    getLabour: () => $("labour").value,
+    setLabour: (v) => {
+      $("labour").value = v === "" || v == null ? "" : Number(v);
+      updateTotals();
+    },
+    getMode: () => mode,
+    money: (n) => money(n),
+    toast: (m) => toast(m),
+    getBigMarkup: () => bigMarkup,
+    onBigMarkupChange: (cb) => {
+      if (typeof cb === "function") bigMarkupListeners.push(cb);
+    },
+  };
+
+  function notifyBigMarkup() {
+    bigMarkupListeners.forEach((cb) => {
+      try {
+        cb();
+      } catch (err) {
+        /* add-on */
+      }
+    });
+  }
 
   function moneyParts() {
     const parts = new Intl.NumberFormat("en-ZA", {
@@ -300,7 +336,7 @@
     const on = kitOn();
     $("labourKitNote").hidden = !on;
     $("kitExclusions").hidden = !on;
-    $("markupBox").hidden = !on;
+    $("markupBox").hidden = false;
     const showEditor = mode === "internal" && on;
     $("kitEditor").hidden = !showEditor;
     $("materialsWrap").hidden = showEditor;
@@ -415,6 +451,7 @@
         editor.appendChild(row);
       });
     }
+    if (HOOKS.afterRender) HOOKS.afterRender(tbody, materials);
     updateTotals();
     syncKitChrome();
   }
@@ -434,7 +471,15 @@
   }
 
   function addMaterial(row) {
-    materials.push(blankLine(row || {}));
+    const src = row || {};
+    materials.push({
+      ...src,
+      ...blankLine(src),
+      ...src,
+      desc: src.desc || "",
+      qty: src.qty != null ? Number(src.qty) : 1,
+      cost: src.cost != null ? Number(src.cost) : 0,
+    });
     renderMaterials();
   }
 
@@ -452,6 +497,7 @@
     }
     renderMaterials();
     toast("Package loaded — fill costs & labour");
+    if (HOOKS.afterPreset) HOOKS.afterPreset(key);
   }
 
   function applyKit(key) {
@@ -489,6 +535,7 @@
     $("scope").value = `Supply and install a ${tank.clientLabel} and a ${pump.clientLabel} as a backup water supply. Includes an inline water filter, tank float valve, overflow pipe, mains bypass with non-return valve, pump cover, and connection to the existing supply.`;
     $("scope").placeholder = SCOPE_PLACEHOLDERS["Tank + booster backup"];
     $("labour").value = "9000";
+    $("labour").dispatchEvent(new Event("input", { bubbles: true }));
     if (!$("quoteNumber").value.trim()) {
       $("quoteNumber").value = suggestQuoteNumber();
     }
@@ -505,6 +552,7 @@
     } catch {
       /* private mode */
     }
+    notifyBigMarkup();
     renderMaterials();
   }
 
@@ -519,9 +567,11 @@
       jobType: $("jobType").value,
       scope: $("scope").value.trim(),
       labour: Number($("labour").value) || 0,
+      ...(HOOKS.extraForm ? HOOKS.extraForm() : {}),
       kitId: activeKit,
       bigticketMarkup: bigMarkup,
       materials: materials.map((m) => ({
+        ...m,
         desc: m.desc,
         qty: Number(m.qty) || 0,
         cost: Number(m.cost) || 0,
@@ -551,9 +601,19 @@
         /* private mode */
       }
     }
-    materials = Array.isArray(q.materials) ? q.materials.map((m) => blankLine(m)) : [];
+    materials = Array.isArray(q.materials)
+      ? q.materials.map((m) => ({
+          ...m,
+          ...blankLine(m),
+          ...m,
+          desc: m.desc || "",
+          qty: Number(m.qty) || 0,
+          cost: Number(m.cost) || 0,
+        }))
+      : [];
     if (!materials.some((m) => m.fromKit)) activeKit = "";
     renderMaterials();
+    if (HOOKS.afterLoad) HOOKS.afterLoad(q);
   }
 
   function buildClientText() {
@@ -668,6 +728,7 @@
     $("labour").value = "";
     materials = [];
     renderMaterials();
+    if (HOOKS.afterNew) HOOKS.afterNew();
     toast("New blank quote");
   }
 
