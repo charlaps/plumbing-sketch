@@ -136,6 +136,11 @@ h1 span{color:var(--blue)}
 .book-panel:hover{background:var(--navy)}
 .book-label{display:block;font-weight:700;font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;opacity:.92}
 .book-num{display:block;font-weight:800;font-size:clamp(1.9rem,8vw,2.5rem);line-height:1.15;letter-spacing:.01em}
+.book-line{margin:18px 0 4px;font-weight:700;font-size:1.05rem;color:var(--navy)}
+.book-line a{color:var(--blue);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.text-link{font-weight:700;color:var(--blue);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.talk-alt{color:#fff;margin:0 0 16px;opacity:.95}
+.talk-alt a{color:#fff;font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .offer-extra{margin:16px 0 4px;font-weight:600;color:var(--navy)}
 .fine{font-size:.82rem;color:var(--lgrey);margin:0}
 .offer-photo{aspect-ratio:4/3}
