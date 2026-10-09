@@ -44,3 +44,33 @@
 @media print { .pl-meta, .pl-box, .lab-box { display: none !important; } }
 .materials-table tr.has-meta td { border-bottom: 0; padding-bottom: 0.1rem; }
 .pl-meta-row td { padding-top: 0 !important; }
+/* ——— 8 Oct 2026: geyser inspection repairs, basin labour choice, Plumblink links ——— */
+.gi-btn {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--blue);
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.6rem 0.35rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.gi-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.gi-btn:active { transform: scale(0.98); }
+.basin-choice .basin-opt {
+  flex: 1 1 0;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.45rem 0.3rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.basin-choice .basin-opt strong { display: block; margin-top: 0.15rem; color: var(--text); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+.basin-choice .basin-opt.active { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
+.basin-choice .basin-opt.active strong { color: var(--blue); }
+.gi-info { border-style: solid; border-color: #e8d48a; background: #fffbeb; }
+.pl-link { color: var(--blue); text-decoration: underline; }

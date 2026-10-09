@@ -54,3 +54,14 @@ Added files (nothing removed):
 - Client text / print show generic names + qty, materials total, labour, total and 80% deposit only. Codes, brands, Plumblink names, per-item prices and "unconfirmed" badges are Internal-only. No VAT anywhere.
 - A hand-typed unit price wins over Plumblink for that line. Typing labour by hand clears the job-book link.
 - To refresh data: regenerate `aps-data.json` (box script `/workspace/aps-quote-v2/build/build_data.py`) and/or the Field App's `items.json`.
+
+## 8 Oct 2026 update (geyser inspection repairs, basin rates, live check)
+
+Changed files: `index.html`, `app.js`, `autoprice.js`, `autoprice.css`, `aps-data.json`, `README.md`. Nothing removed. `field/items.json` is not touched.
+
+- **After geyser inspection** card: 150 L geyser swap, valve refresh, and drip tray + drain line, each as Budget / Typical / Premium. One tap loads Plumblink-priced lines (Sourcing kits 5 Oct, re-checked 8 Oct) plus job-book labour (R5,000 swap; R975 / R1,300 valves; R1,300 tray). The geyser follows the shared 30/25/20% big-ticket selector. No call-out is added (the free inspection counts as the call-out, Charl to confirm). An internal note shows Quoting's 8 Oct price bands. "Itemise" lists every Plumblink item.
+- **Basin / vanity** package: labour defaults to R2,275 (straight swap). Tap "New supply pipework" for R2,500 (approx 4 hrs, confirmed: quoted to Charles Shopfitters). Both are also in the job-book search.
+- **Prices**: `aps-data.json` checks now cover 126 codes live-checked up to 8 Oct 2026 (no price or stock changes). Six Kwikot valve pages were renamed on Plumblink (001346, 001343, 040402, 001347, 007706, 001518). `aps-data.json` `urls` / `names` override them. Internal meta rows link each Plumblink code to its product page.
+- The 30/25/20% compare boxes now also reflect Plumblink-priced geysers (they were flat before).
+- Asset URLs carry `?v=20261008` so phones pick up the update without a hard refresh.
+- Client output is unchanged: generic names, no per-item prices, totals + 80% deposit, "APS is not VAT-registered."

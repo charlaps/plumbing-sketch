@@ -2,7 +2,8 @@
  * Loaded after app.js. Talks to it through window.APSQuote (see app.js).
  * Data:
  *   ../field/items.json  — Plumblink catalogue shipped with the Field App (reused, not duplicated)
- *   aps-data.json        — APS job book labour rates, live price checks (override snapshot), typical kits
+ *   aps-data.json        — APS job book labour rates, live price checks (override snapshot), typical kits,
+ *                          geyser-inspection repair packages, Plumblink URL/name overrides for renamed pages
  * Client output never shows codes, brands, Plumblink names or per-item prices.
  */
 (function () {
@@ -11,12 +12,12 @@
   if (!Q) return;
 
   var ITEMS_URL = "../field/items.json";
-  var DATA_URL = "aps-data.json";
+  var DATA_URL = "aps-data.json?v=20261008";
   var MK_SMALL_KEY = "aps-quote-mk-small";
   var MK_BIG_KEY = "aps-quote-mk-big";
   var CALLOUT = 550;
 
-  var D = { items: null, byCode: null, snap: "", data: null, loading: null, dataLoading: null };
+  var D = { items: null, byCode: null, snap: "", data: null, loading: null, dataLoading: null, base: "", slugs: [] };
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); };
   var r2 = function (n) { return Math.round((Number(n) || 0) * 100 + 1e-9) / 100; };
@@ -178,17 +179,18 @@
     if (D.loading) return D.loading;
     D.loading = Promise.all([fetch(ITEMS_URL).then(function (r) { if (!r.ok) throw new Error("items " + r.status); return r.json(); }), loadData()])
       .then(function (res) {
-        var j = res[0], data = res[1], checks = data.checks || {};
+        var j = res[0], data = res[1], checks = data.checks || {}, names = data.names || {};
         D.snap = j.snap || data.snap || "";
+        D.base = j.base || ""; D.slugs = j.slugs || [];
         D.byCode = {};
         D.items = j.rows.map(function (r) {
           var cat = (j.cats[r[2]] || "").toUpperCase();
-          var code = r[0], name = r[1], cost = Number(r[3]) || 0, chk = checks[code];
-          var it = { code: code, name: name, cat: cat, cost: cost, low: r[4] === 1, checked: "" };
+          var code = r[0], snapName = r[1], name = names[code] || snapName, cost = Number(r[3]) || 0, chk = checks[code];
+          var it = { code: code, name: name, snapName: snapName, slug: r[5], cat: cat, cost: cost, low: r[4] === 1, checked: "" };
           if (chk) { it.cost = Number(chk[0]); it.checked = chk[1]; it.low = chk[2] === "L"; it.out = chk[2] === "O"; }
           it.big = isBig(name.toUpperCase(), cat, it.cost);
           it.gen = genericName(name);
-          it.hay = (name + " " + it.gen + " " + cat.split(" > ").slice(-1)[0] + " " + code).toLowerCase().replace(/(\d)\s+mm\b/g, "$1mm");
+          it.hay = (name + " " + (snapName !== name ? snapName + " " : "") + it.gen + " " + cat.split(" > ").slice(-1)[0] + " " + code).toLowerCase().replace(/(\d)\s+mm\b/g, "$1mm");
           D.byCode[code] = it;
           return it;
         });
@@ -205,6 +207,22 @@
     if (!D.snap) { el.textContent = "Plumblink prices load when you search."; return; }
     var n = D.data && D.data.checks ? Object.keys(D.data.checks).length : 0;
     el.textContent = "Plumblink prices as at " + fmtDate(D.snap) + (n ? " · " + n + " items live-checked up to " + fmtDate(D.data.checked) : "") + " · incl VAT cost × APS markup";
+  }
+
+  /* ---------- Plumblink product links (internal only) ----------
+   * Built the same way as the Field App (items.json slugs). Renamed pages are overridden from aps-data.json "urls"
+   * (8 Oct 2026: six Kwikot valve pages moved; field/items.json is left alone). */
+  function slugName(n) { return String(n || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, ""); }
+  function itemUrl(code) {
+    var o = D.data && D.data.urls && D.data.urls[code];
+    if (o) return o;
+    var it = D.byCode && D.byCode[code];
+    if (!it || !D.base || it.slug == null || !D.slugs[it.slug]) return "";
+    return D.base + D.slugs[it.slug] + "/" + slugName(it.snapName || it.name) + "-" + code + "/" + code;
+  }
+  function codeLink(code, label) {
+    var u = itemUrl(code);
+    return u ? '<a class="pl-link" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(label || code) + "</a>" : esc(label || code);
   }
 
   /* ---------- search ---------- */
@@ -478,8 +496,8 @@
       var tr = rows[i]; if (!tr) return;
       var meta = "";
       if (m.src !== "pl" && !m.nopl) return;
-      if (m.code) meta = esc(m.pl || "") + " · " + esc(m.code) + " · cost " + money(m.plc) + " × " + (m.big ? mkBig() + "% big ticket" : mkSmall() + "%") + (m.chk ? " · live " + esc(fmtDate(m.chk).replace(/ \d{4}$/, "")) : "");
-      else if (m.bundle) meta = "Plumblink: " + m.bundle.map(function (p) { var it = D.byCode && D.byCode[p[1]]; return p[0] + "× " + (it ? esc(it.gen) : p[1]) + " (" + p[1] + ")"; }).join(", ");
+      if (m.code) meta = esc(m.pl || "") + " · " + codeLink(m.code) + " · cost " + money(m.plc) + " × " + (m.big ? mkBig() + "% big ticket" : mkSmall() + "%") + (m.chk ? " · live " + esc(fmtDate(m.chk).replace(/ \d{4}$/, "")) : "");
+      else if (m.bundle) meta = "Plumblink: " + m.bundle.map(function (p) { var it = D.byCode && D.byCode[p[1]]; return p[0] + "× " + (it ? esc(it.gen) : p[1]) + " (" + codeLink(p[1]) + ")"; }).join(", ") + (m.big ? " · geyser/tank/pump at " + mkBig() + "% big ticket, rest " + mkSmall() + "%" : "");
       else if (m.nopl) meta = "Not in the Plumblink kit — search above or type the price.";
       if (m.manual && (m.code || m.bundle)) meta += " · <b>price typed by hand</b>";
       if (meta) { tr.classList.add("has-meta"); tr.insertAdjacentHTML("afterend", '<tr class="pl-meta-row internal-only no-print"><td colspan="5"><div class="pl-meta">' + meta + "</div></td></tr>"); }
@@ -487,10 +505,12 @@
   };
   Q.hooks.afterPreset = function (key) {
     picked = [];
+    setRepairActive("");
     loadData().then(function (data) {
       var jn = data.preset && data.preset[key];
       var job = jn && data.jobs.filter(function (j) { return j.j === jn; })[0];
       if (job) pickJob(job, { noKit: true, quiet: true });
+      if (key === "basin") basinChoice();
       return loadItems().then(function () {
         var n = fillPresetLines(key);
         var t = D.data.kits[key] ? kitTotal(key) : null;
@@ -503,14 +523,112 @@
       });
     }).catch(function () { Q.toast("Package loaded — fill costs & labour"); });
   };
-  Q.hooks.afterLoad = function (q) { picked = Array.isArray(q && q.labourJobs) ? q.labourJobs.slice() : []; renderChips(); };
-  Q.hooks.extraForm = function () { return { labourJobs: picked.slice() }; };
-  Q.hooks.afterNew = function () { picked = []; renderChips(); var o = $("plOffer"); o.innerHTML = ""; o.hidden = true; };
+  Q.hooks.afterLoad = function (q) { picked = Array.isArray(q && q.labourJobs) ? q.labourJobs.slice() : []; renderChips(); setRepairActive((q && q.repairId) || ""); };
+  Q.hooks.extraForm = function () { return { labourJobs: picked.slice(), repairId: activeRepair }; };
+  Q.hooks.afterNew = function () { picked = []; renderChips(); var o = $("plOffer"); o.innerHTML = ""; o.hidden = true; setRepairActive(""); };
+  // Markup compare boxes: show what Plumblink-priced big-ticket lines (e.g. a geyser) would cost at 25% / 20%.
+  Q.hooks.compareCentsAt = function (pct, base) { return base + bigDeltaCents(pct); };
+
+  /* ---------- big-ticket compare for Plumblink-priced lines ---------- */
+  function bigDeltaCents(pct) {
+    if (!D.byCode) return 0;
+    var f1 = 1 + pct / 100, delta = 0;
+    Q.getMaterials().forEach(function (m) {
+      if (m.manual || m.src !== "pl" || m.fromKit || !m.big) return;
+      var q = Number(m.qty) || 0, at = null;
+      if (m.bundle && m.bundle.length) {
+        var s = 0;
+        m.bundle.forEach(function (p) { var it = D.byCode[p[1]]; if (it) s += p[0] * it.cost * (it.big ? f1 : factor(false)); });
+        at = r2(s);
+      } else if (m.plc != null) at = r2(m.plc * f1);
+      if (at == null) return;
+      delta += Math.round(q * Math.round(at * 100)) - Math.round(q * Math.round((Number(m.cost) || 0) * 100));
+    });
+    return delta;
+  }
+
+  /* ---------- basin: straight swap R2,275 or new supply pipework R2,500 ---------- */
+  var basinScope0 = "";
+  function jobByName(n) { return ((D.data && D.data.jobs) || []).filter(function (j) { return j.j === n; })[0]; }
+  function basinChoice() {
+    var alt = D.data && D.data.presetAlt && D.data.presetAlt.basin; if (!alt) return;
+    basinScope0 = $("scope").value;
+    var cur = picked.length ? picked[0].j : alt[0][0];
+    var offer = $("plOffer");
+    var html = '<div class="offer-row basin-choice"><span>Basin labour from the job book. Pick one:</span>' + alt.map(function (a) {
+      var j = jobByName(a[0]); if (!j) return "";
+      var on = j.j === cur;
+      return '<button type="button" class="basin-opt' + (on ? " active" : "") + '" data-basin-job="' + esc(j.j) + '" aria-pressed="' + (on ? "true" : "false") + '" title="' + esc(j.j) + '">' +
+        "<span>" + esc(a[1]) + "</span><strong>" + money(j.r) + "</strong></button>";
+    }).join("") + "</div>";
+    offer.insertAdjacentHTML("afterbegin", html);
+    offer.hidden = false;
+  }
+  function chooseBasin(name) {
+    var alt = (D.data.presetAlt.basin || []).map(function (a) { return a[0]; });
+    var job = jobByName(name); if (!job) return;
+    picked = picked.filter(function (p) { return alt.indexOf(p.j) < 0; });
+    picked.unshift({ j: job.j, r: Number(job.r) || 0, u: job.u ? 1 : 0 });
+    syncLabour();
+    var sc = $("scope"), piped = basinScope0.replace("reconnect hot & cold supply and waste", "run new hot & cold supply pipework to the basin and connect the waste");
+    if (basinScope0 && (sc.value === basinScope0 || sc.value === piped)) {
+      sc.value = name === alt[1] ? piped : basinScope0;
+      sc.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    document.querySelectorAll(".basin-opt").forEach(function (b) { var on = b.dataset.basinJob === name; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
+    document.querySelectorAll("#plOffer .offer-row > span").forEach(function (sp) {
+      if (/job-book labour /.test(sp.textContent)) sp.textContent = sp.textContent.replace(/job-book labour .*?\. Want/, "job-book labour " + money(job.r) + ". Want");
+    });
+    Q.toast("Basin labour: " + money(job.r));
+  }
+
+  /* ---------- geyser inspection follow-on repairs (Quoting sheet 8 Oct) ---------- */
+  var activeRepair = "";
+  function setRepairActive(key) {
+    activeRepair = key || "";
+    document.querySelectorAll(".gi-btn").forEach(function (b) { var on = b.dataset.repair === activeRepair; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
+  }
+  function repairLines(key) {
+    var R = D.data.repairs[key], kit = D.data.kits[R.kit].l, used = {};
+    R.lines.forEach(function (ln) { ln[1].forEach(function (c) { if (c !== "*") used[c] = 1; }); });
+    return R.lines.map(function (ln) {
+      var pairs = ln[1][0] === "*" ? kit.filter(function (p) { return !used[p[1]]; }) : kit.filter(function (p) { return ln[1].indexOf(p[1]) >= 0; });
+      var b = bundleLine(ln[0], pairs);
+      return { src: "pl", desc: ln[0], qty: 1, cost: b.cost, bundle: b.bundle, big: b.big };
+    }).filter(function (m) { return m.bundle.length; });
+  }
+  function rands(n) { return "R" + Number(n).toLocaleString("en-ZA").replace(/\u00a0| /g, ","); }
+  function applyRepair(key) {
+    return loadItems().then(function () {
+      var R = D.data.repairs && D.data.repairs[key];
+      if (!R || !D.data.kits[R.kit]) { Q.toast("Repair list is missing on this phone"); return; }
+      picked = [];
+      Q.loadPackage({ jobType: "Geyser", scope: R.scope, labour: "", materials: repairLines(key) });
+      var job = jobByName(R.job);
+      if (job) pickJob(job, { noKit: true, quiet: true });
+      setRepairActive(key);
+      var sh = R.sheet || [], offer = $("plOffer");
+      var info = "Quoting's 8 Oct sheet: " + esc(R.t.toLowerCase()) + " " + rands(sh[0]) + "–" + rands(sh[2]) + ", typical about " + rands(sh[1]) + ". " +
+        (R.g === "valve" ? "Labour R975 for safety valve + vacuum breakers, R1,300 when the pressure valve is replaced too. " : "") +
+        "No call-out added (free inspection visit counts as the call-out, Charl to confirm). Excludes electrician COC, ceiling/roof repair and disposal of the old geyser (R287.50).";
+      offer.insertAdjacentHTML("beforeend", '<div class="offer-row internal-only gi-info"><span>' + info + "</span></div>" +
+        '<div class="offer-row"><span>' + esc(R.t) + " · " + esc(R.tier) + " priced from Plumblink" + (job ? " + job-book labour " + money(job.r) : "") + ". Want every item listed instead (" + D.data.kits[R.kit].l.length + ' lines)?</span> <button type="button" class="btn-sm" data-kit="' + R.kit + '" data-kmode="replace">Itemise</button> <button type="button" class="btn-sm ghost" data-offer-close="1">Keep short</button></div>');
+      offer.hidden = false;
+      Q.toast(R.t + " · " + R.tier + " loaded");
+    }).catch(function () { Q.toast("Couldn't load Plumblink prices (offline?)"); });
+  }
+  function bindExtras() {
+    document.querySelectorAll(".gi-btn").forEach(function (b) { b.addEventListener("click", function () { applyRepair(b.dataset.repair); }); });
+    document.querySelectorAll(".kit-btn").forEach(function (b) { b.addEventListener("click", function () { setRepairActive(""); }); });
+    $("plOffer").addEventListener("click", function (e) { var b = e.target.closest("[data-basin-job]"); if (b) chooseBasin(b.dataset.basinJob); });
+  }
 
   // Expose for tests / other add-ons
-  window.APSAutoPrice = { genericName: genericName, isBig: isBig, loadItems: loadItems, loadData: loadData, search: search, kitTotal: kitTotal, factor: factor, D: D };
+  window.APSAutoPrice = { genericName: genericName, isBig: isBig, loadItems: loadItems, loadData: loadData, search: search, kitTotal: kitTotal, factor: factor, D: D,
+    itemUrl: itemUrl, repairLines: repairLines, applyRepair: applyRepair, chooseBasin: chooseBasin };
 
   injectUI();
   bind();
+  bindExtras();
   Q.render();
 })();

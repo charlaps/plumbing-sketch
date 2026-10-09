@@ -148,6 +148,22 @@
     onBigMarkupChange: (cb) => {
       if (typeof cb === "function") bigMarkupListeners.push(cb);
     },
+    /* Load a package that an add-on has already priced (e.g. geyser inspection repairs). */
+    loadPackage: (p) => {
+      const pk = p || {};
+      activeKit = "";
+      if (pk.jobType != null) $("jobType").value = pk.jobType;
+      if (pk.scope != null) {
+        $("scope").value = pk.scope;
+        $("scope").placeholder = pk.scope;
+      }
+      $("labour").value = pk.labour === "" || pk.labour == null ? "" : Number(pk.labour);
+      materials = Array.isArray(pk.materials) ? pk.materials.map((m) => ({ ...blankLine(m), ...m })) : [];
+      if (!$("quoteNumber").value.trim()) {
+        $("quoteNumber").value = suggestQuoteNumber();
+      }
+      renderMaterials();
+    },
   };
 
   function notifyBigMarkup() {
@@ -321,7 +337,8 @@
     MARKUP_CHOICES.forEach((pct) => {
       const el = $("mk" + pct);
       if (!el) return;
-      const cents = materialsCentsAt(pct);
+      const base = materialsCentsAt(pct);
+      const cents = HOOKS.compareCentsAt && pct !== bigMarkup ? HOOKS.compareCentsAt(pct, base) : base;
       el.textContent = moneyFromCents(cents);
       el.dataset.cents = String(cents);
     });
