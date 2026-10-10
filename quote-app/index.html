@@ -175,7 +175,8 @@ table.sum tr.dep td{font-weight:700;color:var(--blue)}
   <div class="card">
     <label>Who supplies materials?</label>
     <div class="seg" id="segSup"><button data-v="APS">APS</button><button data-v="Client">Client</button><button data-v="Mixed">Mixed</button></div>
-    <label for="f-mat">Materials total (R) — Plumblink incl. VAT × 1.30</label><input id="f-mat" data-k="mat" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">
+    <label for="f-mat">Materials total (R) — after markup, before consumables</label><input id="f-mat" data-k="mat" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="f-cons" checked onchange="S.cons=this.checked;persist();if(window.renderAll)renderAll()"> Add 5% consumables on materials</label>
     <label for="f-matnote">Materials note (internal)</label><textarea id="f-matnote" data-k="matnote" style="min-height:60px"></textarea>
   </div>
   <div class="card">
@@ -236,7 +237,8 @@ const RULES=[
  ['After-hours','× 1.5 = R825 an hour, + R550 call-out.'],
  ['Installs & big jobs','Days × R3,250. Part days R400/h (crew) or R450/h (plumber alone). No call-out.'],
  ['Call-out','R550 — only on Maintenance/repair and Emergency jobs.'],
- ['Materials','Plumblink price incl. VAT × 1.30, entered as one total.'],
+ ['Materials','Plumblink price incl. VAT + markup: expensive items (R750+ each, e.g. geysers, pumps) 25%, lower-cost items like pipe 35%, fittings 45%. Entered as one total.'],
+ ['Consumables','+5% of the materials total on every quote (solder, flux, PTFE, glue).'],
  ['VAT','APS is not VAT-registered. No VAT on anything.'],
  ['Deposit','80% to book, balance on completion.'],
  ['Quote valid','14 days.']];
@@ -272,14 +274,15 @@ function totals(){
   const ah=S.ah?r2(labour*0.5):0;
   const disc=-r2((labour+ah)*Math.min(Math.max(+S.disc||0,0),100)/100);
   const mat=r2(+S.mat||0);
-  const total=r2(labour+co+ah+disc+mat);
+  const cons=(S.cons===false)?0:r2(mat*0.05);
+  const total=r2(labour+co+ah+disc+mat+cons);
   const dep=r2(total*0.8);
-  return{labour,co,ah,disc,mat,total,dep,bal:r2(total-dep),labourAll:r2(labour+co+ah+disc)};
+  return{labour,co,ah,disc,mat,cons,total,dep,bal:r2(total-dep),labourAll:r2(labour+co+ah+disc)};
 }
 function persist(){LS.set('aps_current',S);const t=totals();$('hdTot').textContent=R(t.total);$('hdTitle').textContent=S.name?(S.no+' · '+S.name):S.no}
 
 /* ---------- client & extras fields ---------- */
-function bindFields(){
+function bindFields(){const cb=document.getElementById('f-cons');if(cb)cb.checked=(S.cons!==false);
   document.querySelectorAll('[data-k]').forEach(el=>{
     el.value=S[el.dataset.k]??'';
     el.addEventListener('input',()=>{S[el.dataset.k]=el.value;if(el.dataset.k==='type'){if(S.type==='Emergency/after-hours'){S.ah=true;$('f-ah').checked=true}coNote()}persist()});
@@ -330,7 +333,7 @@ function renderItems(){
 /* ---------- summary & quote ---------- */
 function renderSummary(){
   const t=totals();
-  const rows=[['Labour ('+S.items.length+' line'+(S.items.length===1?'':'s')+')',t.labour],['Call-out',t.co],['After-hours (+50% labour)',t.ah],['Discount'+(+S.disc?` (${+S.disc}%)`:''),t.disc],['Materials'+(S.sup?` (${S.sup})`:''),t.mat]];
+  const rows=[['Labour ('+S.items.length+' line'+(S.items.length===1?'':'s')+')',t.labour],['Call-out',t.co],['After-hours (+50% labour)',t.ah],['Discount'+(+S.disc?` (${+S.disc}%)`:''),t.disc],['Materials'+(S.sup?` (${S.sup})`:''),t.mat],['Consumables (5%)',t.cons]];
   $('sumTable').innerHTML=rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${R(r[1])}</td></tr>`).join('')+
    `<tr class="tot"><td>TOTAL</td><td>${R(t.total)}</td></tr><tr class="dep"><td>80% deposit to book</td><td>${R(t.dep)}</td></tr><tr><td>Balance on completion</td><td>${R(t.bal)}</td></tr>`;
 }
@@ -345,7 +348,7 @@ function renderQuote(){
   <div class="bar">JOB</div><p><b>${esc(S.title||S.type||'Plumbing work')}</b></p>
   <div class="bar">SCOPE OF WORK</div>${S.desc?`<p>${esc(S.desc).replace(/\n/g,'<br>')}</p>`:''}${scope?`<ul class="sc${S.items.length>6?' two':''}">${scope}</ul>`:''}
   <div class="bar">PRICE</div>
-  <table class="pr"><tr><td>Materials</td><td>${R(t.mat)}</td></tr><tr><td>Labour${t.co?' (incl. call-out)':''}</td><td>${R(t.labourAll)}</td></tr><tr class="t"><td>TOTAL</td><td>${R(t.total)}</td></tr></table>
+  <table class="pr"><tr><td>Materials</td><td>${R(t.mat)}</td></tr>${t.cons?`<tr><td>Consumables (5%)</td><td>${R(t.cons)}</td></tr>`:''}<tr><td>Labour${t.co?' (incl. call-out)':''}</td><td>${R(t.labourAll)}</td></tr><tr class="t"><td>TOTAL</td><td>${R(t.total)}</td></tr></table>
   <div class="dep">80% deposit to book and buy materials: ${R(t.dep)}. Balance on completion: ${R(t.bal)}.</div>
   <div class="bar">NOT INCLUDED</div><p>${esc(S.notinc||NOT_INCL)}</p>
   <div class="bar">TERMS &amp; CONDITIONS</div><ol class="tc">${TERMS.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
