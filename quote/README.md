@@ -31,7 +31,7 @@ Offline-first, phone-first web app for APS Plumbing quotes. Client view hides pe
 
 **Kits** has nine presets: 1,000 L, 2,500 L and 5,000 L, each as Budget, Typical or Premium. Loading one fills the quote with shelf cost × qty. Lines stay editable.
 
-- Small parts are marked up 30%. Tanks and pumps use 30%, 25% or 20% (default 30%, remembered on this phone). Internal view shows all three materials totals.
+- Markup follows Charl's tiered rule (10 Oct 2026, see below): tanks and pumps 20/25%, pipe 30/35%, fittings 40/45%, set with the **Markup: Low / High** switch. Internal view shows both materials totals and each line's class and %.
 - Labour prefills at R9,000. The note “labour not yet confirmed by Charl” is internal only.
 - Client WhatsApp text and print/PDF use plain names only (no brand, code or material type) and group the fittings. Prices shown are materials total, labour, total and the 80% deposit. No VAT line.
 
@@ -47,10 +47,10 @@ Added files (nothing removed):
 |------|---------|
 | `autoprice.js` | Plumblink type-ahead (Internal view), markup selectors, job-book labour picker, typical-materials kits, package auto-pricing |
 | `autoprice.css` | Styles for the above |
-| `aps-data.json` | APS Job Book labour (97 jobs, `u:1` = yellow/unconfirmed), live price checks 5–6 Oct (override the snapshot), typical kits, package→job map |
+| `aps-data.json` | APS Job Book labour (97 jobs, `u:1` = yellow/unconfirmed), live price checks 5–6 Oct (override the snapshot), typical kits, package→job map, markup class per Plumblink code (`cls`) |
 
 - Plumblink catalogue is **reused** from `../field/items.json` (Field App, snapshot 4 Oct 2026, 5,232 items) and only fetched when you first search (≈129 KB gzipped).
-- Sell = Plumblink cost incl VAT × markup. Small items 30% (35/40 selectable). Tanks, pumps & geysers are "big ticket": 30/25/20% selector (default 30%).
+- Sell = Plumblink cost incl VAT × markup for the item's class (tiered rule, 10 Oct 2026, below).
 - Client text / print show generic names + qty, materials total, labour, total and 80% deposit only. Codes, brands, Plumblink names, per-item prices and "unconfirmed" badges are Internal-only. No VAT anywhere.
 - A hand-typed unit price wins over Plumblink for that line. Typing labour by hand clears the job-book link.
 - To refresh data: regenerate `aps-data.json` (box script `/workspace/aps-quote-v2/build/build_data.py`) and/or the Field App's `items.json`.
@@ -65,3 +65,23 @@ Changed files: `index.html`, `app.js`, `autoprice.js`, `autoprice.css`, `aps-dat
 - The 30/25/20% compare boxes now also reflect Plumblink-priced geysers (they were flat before).
 - Asset URLs carry `?v=20261008` so phones pick up the update without a hard refresh.
 - Client output is unchanged: generic names, no per-item prices, totals + 80% deposit, "APS is not VAT-registered."
+
+## 10 Oct 2026 update (tiered markup)
+
+Changed files: `index.html`, `app.js`, `autoprice.js`, `autoprice.css`, `aps-data.json`, `kits/tank-booster.json`, `kits/tank-booster.js`, `README.md`. Nothing removed. `field/items.json` is not touched.
+
+Charl's rule (10 Oct 2026) replaces the flat 30% and the 30/25/20% big-ticket selector:
+
+| Class | Low | High | What |
+|---|---:|---:|---|
+| Expensive | 20% | 25% | geysers, water heaters, heat pumps, solar geysers, tanks, pumps, and any other single item at R750 or more |
+| Pipe | 30% | 35% | lengths of copper tube, PVC / HDPE / PEX / multilayer / galv pipe, suction hose (any price) |
+| Fitting | 40% | 45% | fittings, valves, traps, wastes, flexis, mixers, consumables, covers, filters and everything else |
+
+- **Markup: Low / High** switch (Internal view). Default **High**; the choice is remembered on this phone (`aps-quote-markup-tier`). A saved quote reopens at the setting it was saved with. Both boxes show the materials total at that setting.
+- Every Internal line shows its class and % (tank-kit lines, Plumblink lines, itemised kits, search results; package lines list each item's class).
+- How items are classed (`aps-data.json` `cls`, all 5,232 items in `field/items.json`): 1) Sourcing's classification for the 115 kit codes in `tiered-markup-20261010.json`; 2) **pipe**: Plumblink pipe categories, or a pipe/tube/hose name with a length, any price; 3) **expensive**: geyser / water heater / heat pump / solar geyser / tank / pump main units (not spares), or any other item at R750+ (Sourcing's threshold); 4) **fitting**: everything else. The rule agrees with Sourcing on all 115 of its codes.
+- Counts: **1,335 expensive**, **357 pipe**, **3,540 fitting** (expensive: 1,230 by the R750 threshold, 88 geyser/tank/pump units, rest from Sourcing).
+- Tank kits: markup per class on shelf cost, total rounded once (Sourcing's rounding), so all nine kits match Sourcing to the cent at Low and High. Geyser repairs and the geyser/basin packages match within a few cents.
+- Client output is unchanged: generic names, no per-item prices, no class or %, totals + 80% deposit, "APS is not VAT-registered."
+- Asset URLs carry `?v=20261010`.

@@ -74,3 +74,16 @@
 .basin-choice .basin-opt.active strong { color: var(--blue); }
 .gi-info { border-style: solid; border-color: #e8d48a; background: #fffbeb; }
 .pl-link { color: var(--blue); text-decoration: underline; }
+/* ——— 10 Oct 2026: tiered markup (Low / High switch, class + % per line) ——— */
+.markup-title { margin: 0 0 0.35rem; font-size: 0.8rem; font-weight: 700; color: var(--text); }
+.markup-compare.markup-tiers { grid-template-columns: 1fr 1fr; }
+.markup-tiers .markup-opt { padding: 0.5rem 0.4rem 0.55rem; font-size: 0.8rem; }
+.markup-tiers .markup-opt small { display: block; font-size: 0.66rem; font-weight: 600; color: var(--muted); margin-top: 0.05rem; }
+.markup-tiers .markup-opt strong { font-size: 0.88rem; }
+.markup-key { margin: 0.35rem 0 0; font-size: 0.68rem; }
+.badge-cls, .cls-tag {
+  font-style: normal; font-size: 0.64rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; white-space: nowrap;
+}
+.cls-e { background: #fff4e0; color: #8a5a00; }
+.cls-p { background: #e8f0fb; color: #1d4f91; }
+.cls-f { background: #eef6ee; color: #2f6b34; }

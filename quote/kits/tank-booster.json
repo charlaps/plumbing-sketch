@@ -6,242 +6,290 @@
     {
       "code": "036583",
       "name": "ECO WATER TANK VERTICAL 950L GREEN SLIMLINE",
-      "cost": 2111.91
+      "cost": 2111.91,
+      "cls": "e"
     },
     {
       "code": "040536",
       "name": "PLUMLINE PERIPHERAL VANE BOOSTER PUMP COMBO KIT QB60 0.37KW",
-      "cost": 2150
+      "cost": 2150,
+      "cls": "e"
     },
     {
       "code": "017895",
       "name": "NYLON REDUCING BUSH 40x25mm BLACK",
-      "cost": 23.48
+      "cost": 23.48,
+      "cls": "f"
     },
     {
       "code": "000296",
       "name": "GALVANISED BARREL NIPPLE 25mm",
-      "cost": 11.14
+      "cost": 11.14,
+      "cls": "f"
     },
     {
       "code": "029864",
       "name": "GENEBRE LEVER BALL VALVE FXF PN25 (S/S LEVER) 25mm 3031 06",
-      "cost": 268.99
+      "cost": 268.99,
+      "cls": "f"
     },
     {
       "code": "040542",
       "name": "PLUMLINE PUMP / TANK SUCTION HOSE KIT ONLY GREEN 90011234",
-      "cost": 369
+      "cost": 369,
+      "cls": "p"
     },
     {
       "code": "023788",
       "name": "HOSE CLAMP UNIVERSAL GS20 19-44mm",
-      "cost": 10
+      "cost": 10,
+      "cls": "f"
     },
     {
       "code": "041277",
       "name": "VISCOSITY FILTER HOUSING & BODY SMALL 250mm LONG 20mm PORT",
-      "cost": 228.99
+      "cost": 228.99,
+      "cls": "f"
     },
     {
       "code": "041281",
       "name": "VISCOSITY FILTER CARTRIDGE ONLY 250mm LONG 20 MICRON SMALL FILTER",
-      "cost": 38.99
+      "cost": 38.99,
+      "cls": "f"
     },
     {
       "code": "041289",
       "name": "VISCOSITY FILTER BRACKET inc 4x SCREWS FOR SMALL SINGLE FILTER",
-      "cost": 38.99
+      "cost": 38.99,
+      "cls": "f"
     },
     {
       "code": "000290",
       "name": "GALVANISED CONE FACE UNION 25mm",
-      "cost": 54.19
+      "cost": 54.19,
+      "cls": "f"
     },
     {
       "code": "029897",
       "name": "GENEBRE BRASS SPRING TYPE CHECK VALVE FXF PN25 25mm 3121 06",
-      "cost": 188.99
+      "cost": 188.99,
+      "cls": "f"
     },
     {
       "code": "040024",
       "name": "HDPE COMPRESSION BALLVALVE 25mm PXP PN16",
-      "cost": 260.62
+      "cost": 260.62,
+      "cls": "f"
     },
     {
       "code": "004382",
       "name": "HDPE COMPRESSION ADAPTOR BSP MALE 25X1",
-      "cost": 28.95
+      "cost": 28.95,
+      "cls": "f"
     },
     {
       "code": "030812",
       "name": "BRASSMAN COMPRESSION EQUAL TEE 22mm CXCXC",
-      "cost": 100.67
+      "cost": 100.67,
+      "cls": "f"
     },
     {
       "code": "035809",
       "name": "PLUMLINE LEVER BALL VALVE CxC DZR 22mm",
-      "cost": 198.99
+      "cost": 198.99,
+      "cls": "f"
     },
     {
       "code": "040381",
       "name": "PLUMLINE SPRING LOADED NON RETURN VALVE CxC 22mm",
-      "cost": 125
+      "cost": 125,
+      "cls": "f"
     },
     {
       "code": "030822",
       "name": "BRASSMAN COMPRESSION STRAIGHT MALE COUPLER 22mm MIXC",
-      "cost": 48.56
+      "cost": 48.56,
+      "cls": "f"
     },
     {
       "code": "000258",
       "name": "HDPE COMPRESSION ADAPTOR BSP FEMALE 25X3/4",
-      "cost": 33
+      "cost": 33,
+      "cls": "f"
     },
     {
       "code": "000311",
       "name": "HDPE COMPRESSION COUPLING REDUCING 25X20 PXP",
-      "cost": 53.15
+      "cost": 53.15,
+      "cls": "f"
     },
     {
       "code": "004396",
       "name": "HDPE COMPRESSION ADAPTOR BSP FEMALE 20X3/4",
-      "cost": 29.78
+      "cost": 29.78,
+      "cls": "f"
     },
     {
       "code": "041202",
       "name": "WARTHOG WFK/001 20MM STANDARD TANK FLOAT VALVE KIT",
-      "cost": 296.01
+      "cost": 296.01,
+      "cls": "f"
     },
     {
       "code": "041589",
       "name": "NYLON REDUCING NIPPLE 50x40mm BLACK",
-      "cost": 51.61
+      "cost": 51.61,
+      "cls": "f"
     },
     {
       "code": "000441",
       "name": "PVC SV PIPE 40mm x6m PLAIN ENDED SABS NEW SPEC WHITE",
-      "cost": 138.12
+      "cost": 138.12,
+      "cls": "p"
     },
     {
       "code": "002929",
       "name": "PVC SV BEND 40x87 PLAIN NEW SPEC W40B",
-      "cost": 9.32
+      "cost": 9.32,
+      "cls": "f"
     },
     {
       "code": "039784",
       "name": "HDPE PRESSURE PIPE 25X6m CLASS 12 PE100 PN12.5",
-      "cost": 76.59
+      "cost": 76.59,
+      "cls": "p"
     },
     {
       "code": "000317",
       "name": "HDPE COMPRESSION ELBOW 25X90 PXP",
-      "cost": 53.15
+      "cost": 53.15,
+      "cls": "f"
     },
     {
       "code": "041275",
       "name": "WARTHOG WPC/R01 BOOSTER PUMP COVER GREY",
-      "cost": 660.33
+      "cost": 660.33,
+      "cls": "f"
     },
     {
       "code": "022958",
       "name": "PTFE LUX THREAD SEAL TAPE 12M X12mm (0.1mm)",
-      "cost": 8.57
+      "cost": 8.57,
+      "cls": "f"
     },
     {
       "code": "041484",
       "name": "ECO WATER TANK OUTLET / CONNECTOR ONLY 40mm",
-      "cost": 75
+      "cost": 75,
+      "cls": "f"
     },
     {
       "code": "039425",
       "name": "JOJO SLIMLINE RAINWATER TANK VERTICAL 1000L GREEN",
-      "cost": 2616.65
+      "cost": 2616.65,
+      "cls": "e"
     },
     {
       "code": "000432",
       "name": "GALVANISED REDUCING BUSH 40X25mm",
-      "cost": 23.12
+      "cost": 23.12,
+      "cls": "f"
     },
     {
       "code": "040537",
       "name": "PLUMLINE PERIPHERAL VANE BOOSTER PUMP COMBO KIT QB80 0.75KW",
-      "cost": 3250
+      "cost": 3250,
+      "cls": "e"
     },
     {
       "code": "041278",
       "name": "VISCOSITY FILTER HOUSING & BODY LARGE 500mm LONG 25mm PORT",
-      "cost": 798.99
+      "cost": 798.99,
+      "cls": "e"
     },
     {
       "code": "041284",
       "name": "VISCOSITY FILTER CARTRIDGE ONLY 500mm LONG 20 MICRON LARGE FILTER",
-      "cost": 178.99
+      "cost": 178.99,
+      "cls": "f"
     },
     {
       "code": "041292",
       "name": "VISCOSITY FILTER BRACKET inc 4x SCREWS FOR LARGE SINGLE FILTER",
-      "cost": 128.99
+      "cost": 128.99,
+      "cls": "f"
     },
     {
       "code": "039789",
       "name": "HDPE PRESSURE PIPE 25X25m CLASS 12 PE100 PN12.5",
-      "cost": 319.13
+      "cost": 319.13,
+      "cls": "p"
     },
     {
       "code": "040047",
       "name": "ECO WATER TANK VERTICAL 2750L GREEN",
-      "cost": 2523.67
+      "cost": 2523.67,
+      "cls": "e"
     },
     {
       "code": "005542",
       "name": "JOJO WATER TANK VERTICAL 2500L / 2700L GREEN",
-      "cost": 4848.11
+      "cost": 4848.11,
+      "cls": "e"
     },
     {
       "code": "042467",
       "name": "VISCOSITY VSD INTELLIGENT MULTISTAGE CENTRIFUGAL PUMP SSP100 0.75KW 2",
-      "cost": 4795
+      "cost": 4795,
+      "cls": "e"
     },
     {
       "code": "042133",
       "name": "TANK BUDDY WATER LEVEL CONTROL VALVE 20mm",
-      "cost": 848.99
+      "cost": 848.99,
+      "cls": "e"
     },
     {
       "code": "031270",
       "name": "HDPE PRESSURE PIPE 25X50m CLASS 16 PE100 PN16",
-      "cost": 775.03
+      "cost": 775.03,
+      "cls": "p"
     },
     {
       "code": "040048",
       "name": "ECO WATER TANK VERTICAL 5050L GREEN",
-      "cost": 5577.32
+      "cost": 5577.32,
+      "cls": "e"
     },
     {
       "code": "005543",
       "name": "JOJO WATER TANK VERTICAL 5000L / 5250L GREEN",
-      "cost": 7916.37
+      "cost": 7916.37,
+      "cls": "e"
     },
     {
       "code": "041561",
       "name": "PLUMLINE CENTRIFUGAL BOOSTER PUMP AND CONTROLLER CPM170 1.1KW",
-      "cost": 4995
+      "cost": 4995,
+      "cls": "e"
     },
     {
       "code": "041562",
       "name": "PLUMLINE CENTRIFUGAL BOOSTER PUMP AND CONTROLLER CPM190 1.5KW",
-      "cost": 5595
+      "cost": 5595,
+      "cls": "e"
     },
     {
       "code": "000272",
       "name": "COPPER TUBE 22X5.5m 460/0 DOMESTIC",
-      "cost": 822.68
+      "cost": 822.68,
+      "cls": "p"
     },
     {
       "code": "030823",
       "name": "BRASSMAN COMPRESSION STRAIGHT COUPLER 22mm CXC",
-      "cost": 64.45
+      "cost": 64.45,
+      "cls": "f"
     }
   ],
   "bigticket": [
@@ -1340,5 +1388,6 @@
         "qty": 2
       }
     ]
-  }
+  },
+  "markup": "Tiered markup set by Charl 10 Oct 2026: cls e = expensive (tanks, pumps, R750+ items) 20/25%, p = pipe 30/35%, f = fittings 40/45% (Low/High). Classes from Sourcing's tiered-markup-20261010.json."
 }

@@ -4,9 +4,17 @@
 
   const DEPOSIT_RATE = 0.8;
   const STORAGE_KEY = "aps-quote-saved-v1";
-  const MARKUP_KEY = "aps-quote-bigticket-markup";
+  const TIER_KEY = "aps-quote-markup-tier";
   const MAX_SAVED = 10;
-  const MARKUP_CHOICES = [30, 25, 20];
+  /* Tiered markup set by Charl, 10 Oct 2026 (replaces flat 30% and the 30/25/20 big-ticket selector).
+   * e = expensive (geysers, pumps, tanks, any R750+ single item), p = pipe, f = fittings and everything else. */
+  const TIERS = {
+    low: { e: 20, p: 30, f: 40 },
+    high: { e: 25, p: 35, f: 45 },
+  };
+  const TIER_LIST = ["low", "high"];
+  const DEFAULT_TIER = "high";
+  const CLASS_NAMES = { e: "Expensive", p: "Pipe", f: "Fitting" };
   const GROUP_ORDER = ["tank", "pump", "filter", "bypass", "float", "overflow", "supply", "cover"];
 
   const CLIENT_BY_CODE = {
@@ -120,8 +128,8 @@
   let materials = [];
   let mode = "client";
   let activeKit = "";
-  let bigMarkup = 30;
-  const bigMarkupListeners = [];
+  let tier = DEFAULT_TIER;
+  const tierListeners = [];
 
   const $ = (id) => document.getElementById(id);
 
@@ -144,9 +152,14 @@
     getMode: () => mode,
     money: (n) => money(n),
     toast: (m) => toast(m),
-    getBigMarkup: () => bigMarkup,
-    onBigMarkupChange: (cb) => {
-      if (typeof cb === "function") bigMarkupListeners.push(cb);
+    getTier: () => tier,
+    setTier: (t) => setTier(t),
+    tiers: TIERS,
+    classNames: CLASS_NAMES,
+    /* Markup % for a class ("e" | "p" | "f") at a tier (default: the current one). */
+    rateFor: (cls, t) => rateFor(cls, t),
+    onTierChange: (cb) => {
+      if (typeof cb === "function") tierListeners.push(cb);
     },
     /* Load a package that an add-on has already priced (e.g. geyser inspection repairs). */
     loadPackage: (p) => {
@@ -166,8 +179,17 @@
     },
   };
 
-  function notifyBigMarkup() {
-    bigMarkupListeners.forEach((cb) => {
+  function normCls(c) {
+    return c === "e" || c === "p" || c === "f" ? c : "f";
+  }
+
+  function rateFor(cls, t) {
+    const tt = TIERS[t] || TIERS[tier] || TIERS[DEFAULT_TIER];
+    return tt[normCls(cls)];
+  }
+
+  function notifyTier() {
+    tierListeners.forEach((cb) => {
       try {
         cb();
       } catch (err) {
@@ -258,6 +280,7 @@
       code,
       fromKit: !!partial?.fromKit,
       bigticket: !!partial?.bigticket,
+      cls: partial?.cls || (partial?.fromKit ? (partial?.bigticket ? "e" : "f") : ""),
       group: partial?.group || (partial?.fromKit ? meta.group : ""),
       clientLabel: partial?.clientLabel || (partial?.fromKit ? meta.clientLabel : ""),
     };
@@ -279,30 +302,34 @@
     renderMaterials();
   }
 
+  /* Kit lines carry shelf cost; markup is added per class and the kit total is rounded once
+   * (same rounding as Sourcing's tiered-markup-20261010.json). Other lines are already priced. */
+  function lineCls(m) {
+    return normCls(m.cls || (m.bigticket ? "e" : "f"));
+  }
+
   function splitCents() {
-    let big = 0;
-    let small = 0;
+    const byCls = { e: 0, p: 0, f: 0 };
     let plain = 0;
     materials.forEach((m) => {
       const ext = extCents(m.qty, m.cost);
-      if (m.fromKit && m.bigticket) big += ext;
-      else if (m.fromKit) small += ext;
+      if (m.fromKit) byCls[lineCls(m)] += ext;
       else plain += ext;
     });
-    return { big, small, plain };
+    return { byCls, plain };
   }
 
-  function materialsCentsAt(percent) {
-    const { big, small, plain } = splitCents();
-    const bigRate = 100 + percent;
-    return roundRatio(big * bigRate + small * 130, 100) + plain;
+  function materialsCentsAt(t) {
+    const { byCls, plain } = splitCents();
+    const num = ["e", "p", "f"].reduce((s, c) => s + byCls[c] * (100 + rateFor(c, t)), 0);
+    return roundRatio(num, 100) + plain;
   }
 
-  function lineSellMap(percent) {
-    const total = materialsCentsAt(percent);
+  function lineSellMap(t) {
+    const total = materialsCentsAt(t);
     const parts = materials.map((m, i) => {
       const ext = extCents(m.qty, m.cost);
-      const rate = m.fromKit ? (m.bigticket ? 100 + percent : 130) : 100;
+      const rate = m.fromKit ? 100 + rateFor(lineCls(m), t) : 100;
       const num = ext * rate;
       return { i, base: Math.floor(num / 100), frac: num % 100 };
     });
@@ -320,7 +347,7 @@
   }
 
   function calc() {
-    const materialsSumCents = materialsCentsAt(bigMarkup);
+    const materialsSumCents = materialsCentsAt(tier);
     const labourCents = randsToCents($("labour").value);
     const totalCents = materialsSumCents + labourCents;
     const depositCents = roundRatio(totalCents * 80, 100);
@@ -334,16 +361,16 @@
     $("tLabour").textContent = moneyFromCents(t.labourCents);
     $("tGrand").textContent = moneyFromCents(t.totalCents);
     $("tDeposit").textContent = moneyFromCents(t.depositCents);
-    MARKUP_CHOICES.forEach((pct) => {
-      const el = $("mk" + pct);
+    TIER_LIST.forEach((t2) => {
+      const el = $(t2 === "low" ? "mkLow" : "mkHigh");
       if (!el) return;
-      const base = materialsCentsAt(pct);
-      const cents = HOOKS.compareCentsAt && pct !== bigMarkup ? HOOKS.compareCentsAt(pct, base) : base;
+      const base = materialsCentsAt(t2);
+      const cents = HOOKS.compareCentsAt && t2 !== tier ? HOOKS.compareCentsAt(t2, base) : base;
       el.textContent = moneyFromCents(cents);
       el.dataset.cents = String(cents);
     });
     document.querySelectorAll(".markup-opt").forEach((btn) => {
-      const on = Number(btn.dataset.markup) === bigMarkup;
+      const on = btn.dataset.tier === tier;
       btn.classList.toggle("active", on);
       btn.setAttribute("aria-checked", on ? "true" : "false");
     });
@@ -433,7 +460,7 @@
         tbody.appendChild(tr);
       });
     } else if (!(mode === "internal" && on)) {
-      const sells = lineSellMap(bigMarkup);
+      const sells = lineSellMap(tier);
       materials.forEach((m, i) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -448,14 +475,15 @@
       });
     }
     if (mode === "internal" && on) {
-      const sells = lineSellMap(bigMarkup);
+      const sells = lineSellMap(tier);
       materials.forEach((m, i) => {
         const row = document.createElement("div");
-        row.className = "kit-line" + (m.bigticket ? " is-big" : "");
+        const c = lineCls(m);
+        row.className = "kit-line" + (c === "e" ? " is-big" : "");
         row.innerHTML = `
           <div class="kit-line-top">
             <span class="code">${escapeHtml(m.code || "—")}</span>
-            ${m.bigticket ? '<span class="big-tag">Tank / pump</span>' : ""}
+            <span class="cls-tag cls-${c}">${CLASS_NAMES[c]} +${rateFor(c)}%</span>
             <button type="button" class="btn-icon" data-del="${i}" aria-label="Remove line">×</button>
           </div>
           <textarea data-i="${i}" data-f="desc" rows="2">${escapeHtml(m.desc)}</textarea>
@@ -542,6 +570,7 @@
         code: line.code,
         fromKit: true,
         bigticket: big.has(line.code),
+        cls: normCls(item.cls || (big.has(line.code) ? "e" : "f")),
         group: meta.group,
         clientLabel: meta.clientLabel,
       });
@@ -561,15 +590,14 @@
     toast(meta ? `${meta.size} ${meta.tier} loaded` : "Kit loaded");
   }
 
-  function setBigMarkup(pct) {
-    const n = Number(pct);
-    bigMarkup = MARKUP_CHOICES.indexOf(n) === -1 ? 30 : n;
+  function setTier(t) {
+    tier = TIER_LIST.indexOf(t) === -1 ? DEFAULT_TIER : t;
     try {
-      localStorage.setItem(MARKUP_KEY, String(bigMarkup));
+      localStorage.setItem(TIER_KEY, tier);
     } catch {
       /* private mode */
     }
-    notifyBigMarkup();
+    notifyTier();
     renderMaterials();
   }
 
@@ -586,7 +614,7 @@
       labour: Number($("labour").value) || 0,
       ...(HOOKS.extraForm ? HOOKS.extraForm() : {}),
       kitId: activeKit,
-      bigticketMarkup: bigMarkup,
+      markupTier: tier,
       materials: materials.map((m) => ({
         ...m,
         desc: m.desc,
@@ -595,6 +623,7 @@
         code: m.code || "",
         fromKit: !!m.fromKit,
         bigticket: !!m.bigticket,
+        cls: m.cls || "",
         group: m.group || "",
         clientLabel: m.clientLabel || "",
       })),
@@ -610,13 +639,14 @@
     $("scope").value = q.scope || "";
     $("labour").value = q.labour != null && q.labour !== "" ? q.labour : "";
     activeKit = q.kitId || "";
-    if (MARKUP_CHOICES.indexOf(Number(q.bigticketMarkup)) !== -1) {
-      bigMarkup = Number(q.bigticketMarkup);
+    if (TIER_LIST.indexOf(q.markupTier) !== -1 && q.markupTier !== tier) {
+      tier = q.markupTier;
       try {
-        localStorage.setItem(MARKUP_KEY, String(bigMarkup));
+        localStorage.setItem(TIER_KEY, tier);
       } catch {
         /* private mode */
       }
+      notifyTier();
     }
     materials = Array.isArray(q.materials)
       ? q.materials.map((m) => ({
@@ -758,7 +788,7 @@
     if (f === "desc") materials[i].desc = t.value;
     else materials[i][f] = t.value === "" ? 0 : Number(t.value);
     if (f === "qty" || f === "cost") {
-      const sells = lineSellMap(bigMarkup);
+      const sells = lineSellMap(tier);
       document.querySelectorAll(".line-total").forEach((el, idx) => {
         if (sells.has(idx)) el.textContent = moneyFromCents(sells.get(idx) || 0);
       });
@@ -789,7 +819,7 @@
     });
 
     document.querySelectorAll(".markup-opt").forEach((btn) => {
-      btn.addEventListener("click", () => setBigMarkup(btn.dataset.markup));
+      btn.addEventListener("click", () => setTier(btn.dataset.tier));
     });
 
     $("addMaterial").addEventListener("click", () => addMaterial());
@@ -874,10 +904,10 @@
 
   function loadMarkupPref() {
     try {
-      const v = localStorage.getItem(MARKUP_KEY);
-      if (v === "25" || v === "20" || v === "30") bigMarkup = Number(v);
+      const v = localStorage.getItem(TIER_KEY);
+      tier = TIER_LIST.indexOf(v) !== -1 ? v : DEFAULT_TIER;
     } catch {
-      bigMarkup = 30;
+      tier = DEFAULT_TIER;
     }
   }
 

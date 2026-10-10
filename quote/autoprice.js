@@ -3,7 +3,8 @@
  * Data:
  *   ../field/items.json  — Plumblink catalogue shipped with the Field App (reused, not duplicated)
  *   aps-data.json        — APS job book labour rates, live price checks (override snapshot), typical kits,
- *                          geyser-inspection repair packages, Plumblink URL/name overrides for renamed pages
+ *                          geyser-inspection repair packages, Plumblink URL/name overrides for renamed pages,
+ *                          markup class per Plumblink code ("cls": e = expensive, p = pipe, rest = fitting; 10 Oct 2026)
  * Client output never shows codes, brands, Plumblink names or per-item prices.
  */
 (function () {
@@ -12,9 +13,7 @@
   if (!Q) return;
 
   var ITEMS_URL = "../field/items.json";
-  var DATA_URL = "aps-data.json?v=20261008";
-  var MK_SMALL_KEY = "aps-quote-mk-small";
-  var MK_BIG_KEY = "aps-quote-mk-big";
+  var DATA_URL = "aps-data.json?v=20261010";
   var CALLOUT = 550;
 
   var D = { items: null, byCode: null, snap: "", data: null, loading: null, dataLoading: null, base: "", slugs: [] };
@@ -25,15 +24,25 @@
   var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   function fmtDate(iso) { var p = String(iso || "").split("-"); if (p.length < 3) return iso || ""; return Number(p[2]) + " " + MONTHS[Number(p[1]) - 1] + " " + p[0]; }
 
-  /* ---------- markup ---------- */
-  function mkSmall() { var v = Number(localStorage.getItem(MK_SMALL_KEY)); return [30, 35, 40].indexOf(v) >= 0 ? v : 30; }
-  function mkBig() {
-    if (typeof Q.getBigMarkup === "function") { var t = Number(Q.getBigMarkup()); if (t) return t; }
-    var v = Number(localStorage.getItem(MK_BIG_KEY)); return [30, 25, 20].indexOf(v) >= 0 ? v : 30;
+  /* ---------- markup: Charl's tiered rule (10 Oct 2026), Low / High switch lives in app.js ----------
+   * cls "e" expensive (geysers, pumps, tanks, R750+ items) 20/25%, "p" pipe 30/35%, "f" fittings + everything else 40/45%. */
+  var CLS_NAME = (Q.classNames) || { e: "Expensive", p: "Pipe", f: "Fitting" };
+  function normCls(c) { return c === "e" || c === "p" || c === "f" ? c : "f"; }
+  function pct(cls, tier) { return Q.rateFor(normCls(cls), tier); }
+  function factor(cls, tier) { return 1 + pct(cls, tier) / 100; }
+  function clsLabel(cls, tier) { var c = normCls(cls); return CLS_NAME[c] + " +" + pct(c, tier) + "%"; }
+  function clsBadge(cls) { var c = normCls(cls); return '<em class="badge-cls cls-' + c + '">' + esc(clsLabel(c)) + "</em>"; }
+  function lineCls(m) { return normCls(m.cls || (m.big ? "e" : "f")); }
+  var CLS_MAP = null; // code -> "e" | "p" (absent = "f"), from aps-data.json
+  function clsOf(code) {
+    if (!CLS_MAP && D.data && D.data.cls) {
+      CLS_MAP = {};
+      ["e", "p"].forEach(function (k) { (D.data.cls[k] || []).forEach(function (c) { CLS_MAP[c] = k; }); });
+    }
+    return (CLS_MAP && CLS_MAP[code]) || "f";
   }
-  function factor(big) { return 1 + (big ? mkBig() : mkSmall()) / 100; }
 
-  /* ---------- big-ticket rule: tanks, pumps, geysers ---------- */
+  /* ---------- old big-ticket rule (kept for the "big" flag only; markup uses cls) ---------- */
   var BIG_CAT = /TANKS - |PUMPS|DOMESTIC GEYSERS|HEAT PUMPS|SOLAR CYLINDERS|GAS GEYSERS|GAS PRODUCTS|INSTANTANEOUS|COMPACT|STIEBEL/;
   var BIG_NAME = /TANK|PUMP|GEYSER|WATER HEATER/;
   function isBig(name, cat, cost) {
@@ -189,6 +198,7 @@
           var it = { code: code, name: name, snapName: snapName, slug: r[5], cat: cat, cost: cost, low: r[4] === 1, checked: "" };
           if (chk) { it.cost = Number(chk[0]); it.checked = chk[1]; it.low = chk[2] === "L"; it.out = chk[2] === "O"; }
           it.big = isBig(name.toUpperCase(), cat, it.cost);
+          it.cls = clsOf(code);
           it.gen = genericName(name);
           it.hay = (name + " " + (snapName !== name ? snapName + " " : "") + it.gen + " " + cat.split(" > ").slice(-1)[0] + " " + code).toLowerCase().replace(/(\d)\s+mm\b/g, "$1mm");
           D.byCode[code] = it;
@@ -206,7 +216,7 @@
     if (!el) return;
     if (!D.snap) { el.textContent = "Plumblink prices load when you search."; return; }
     var n = D.data && D.data.checks ? Object.keys(D.data.checks).length : 0;
-    el.textContent = "Plumblink prices as at " + fmtDate(D.snap) + (n ? " · " + n + " items live-checked up to " + fmtDate(D.data.checked) : "") + " · incl VAT cost × APS markup";
+    el.textContent = "Plumblink prices as at " + fmtDate(D.snap) + (n ? " · " + n + " items live-checked up to " + fmtDate(D.data.checked) : "") + " · incl VAT cost × APS markup (" + (Q.getTier() === "low" ? "Low 20/30/40%" : "High 25/35/45%") + ")";
   }
 
   /* ---------- Plumblink product links (internal only) ----------
@@ -256,27 +266,33 @@
 
   /* ---------- material lines ---------- */
   function lineFromItem(it, qty) {
-    return { src: "pl", desc: it.gen, qty: qty || 1, cost: r2(it.cost * factor(it.big)), code: it.code, pl: it.name, plc: it.cost, big: it.big ? 1 : 0, chk: it.checked || "" };
+    return { src: "pl", desc: it.gen, qty: qty || 1, cost: r2(it.cost * factor(it.cls)), code: it.code, pl: it.name, plc: it.cost, cls: it.cls, big: it.cls === "e" ? 1 : 0, chk: it.checked || "" };
+  }
+  function bundleSum(pairs, tier) { // Plumblink cost x class markup, summed unrounded (Sourcing's rounding), then to the cent
+    var sum = 0;
+    pairs.forEach(function (p) { var it = D.byCode[p[1]]; if (it) sum += Math.round(p[0] * it.cost * 100) / 100 * factor(it.cls, tier); });
+    return r2(sum);
   }
   function bundleLine(desc, pairs) { // several Plumblink items priced into one generic line
-    var parts = [], sum = 0, big = 0;
+    var parts = [], big = 0;
     pairs.forEach(function (p) {
       var it = D.byCode[p[1]]; if (!it) return;
-      parts.push([p[0], it.code]); sum += p[0] * it.cost * factor(it.big); if (it.big) big = 1;
+      parts.push([p[0], it.code]); if (it.cls === "e") big = 1;
     });
-    return { src: "pl", desc: desc, qty: 1, cost: r2(sum), bundle: parts, big: big };
+    return { src: "pl", desc: desc, qty: 1, cost: bundleSum(parts), bundle: parts, big: big };
   }
   function repriceLine(m) {
     if (m.manual || m.src !== "pl") return m; // only lines this add-on priced
-    if (m.bundle && m.bundle.length) { var b = bundleLine(m.desc, m.bundle); m.cost = b.cost; return m; }
-    if (m.code && D.byCode && D.byCode[m.code]) { var it = D.byCode[m.code]; m.plc = it.cost; m.big = it.big ? 1 : 0; m.cost = r2(it.cost * factor(it.big)); }
-    else if (m.code && m.plc != null) m.cost = r2(m.plc * factor(m.big));
+    if (m.bundle && m.bundle.length) { if (!D.byCode) return m; var b = bundleLine(m.desc, m.bundle); m.cost = b.cost; m.big = b.big; return m; }
+    if (m.code && D.byCode && D.byCode[m.code]) { var it = D.byCode[m.code]; m.plc = it.cost; m.cls = it.cls; m.big = it.cls === "e" ? 1 : 0; m.cost = r2(it.cost * factor(it.cls)); }
+    else if (m.code && m.plc != null) { m.cls = lineCls(m); m.cost = r2(m.plc * factor(m.cls)); }
     return m;
   }
   function repriceAll() {
     var mats = Q.getMaterials();
     mats.forEach(repriceLine);
     Q.render();
+    updatePriceDate();
   }
 
   /* ---------- kits ---------- */
@@ -288,7 +304,7 @@
   };
   function kitTotal(key) {
     var kit = D.data.kits[key]; var s = 0, c = 0;
-    kit.l.forEach(function (p) { var it = D.byCode[p[1]]; if (it) { s += p[0] * r2(it.cost * factor(it.big)); c += p[0] * it.cost; } });
+    kit.l.forEach(function (p) { var it = D.byCode[p[1]]; if (it) { s += p[0] * r2(it.cost * factor(it.cls)); c += p[0] * it.cost; } });
     return { sell: s, cost: c, n: kit.l.length };
   }
   function kitLines(key) {
@@ -372,9 +388,6 @@
       '<label class="field pl-search-field"><span>Add from Plumblink</span>' +
       '<input type="search" id="plSearch" autocomplete="off" placeholder="Search e.g. 22mm ball valve, 150L geyser, code" enterkeyhint="search" /></label>' +
       '<ul class="pl-results" id="plResults" hidden></ul>' +
-      '<div class="mk-row"><span>Markup</span>' +
-      '<label>Small items <select id="mkSmall"><option>30</option><option>35</option><option>40</option></select>%</label>' +
-      '<label id="mkBigWrap">Tanks, pumps &amp; geysers <select id="mkBig"><option>30</option><option>25</option><option>20</option></select>%</label></div>' +
       '<p class="hint pl-date" id="plPriceDate">Plumblink prices load when you search.</p>' +
       "</div>" +
       '<p class="hint client-only">Switch to <b>Internal</b> to add materials from Plumblink with prices filled in.</p>';
@@ -392,19 +405,15 @@
       '<div class="pl-offer" id="plOffer" hidden></div>';
     lf.parentNode.insertBefore(lb, lf);
 
-    $("mkSmall").value = String(mkSmall());
-    $("mkBig").value = String(mkBig());
-    // If the tank-kit build already has a big-ticket selector, use that one and hide ours.
-    if (typeof Q.getBigMarkup === "function") $("mkBigWrap").hidden = true;
   }
 
   function renderPlResults(list) {
     var ul = $("plResults");
     if (!list.length) { ul.innerHTML = '<li class="pl-empty">No Plumblink match. Try fewer words (e.g. "ball valve 22").</li>'; ul.hidden = false; return; }
     ul.innerHTML = list.map(function (it) {
-      var sell = r2(it.cost * factor(it.big));
+      var sell = r2(it.cost * factor(it.cls));
       return '<li><button type="button" class="pl-hit" data-code="' + esc(it.code) + '">' +
-        '<span class="pl-gen">' + esc(it.gen) + (it.big ? ' <em class="badge-big">big ticket ' + mkBig() + '%</em>' : "") + "</span>" +
+        '<span class="pl-gen">' + esc(it.gen) + " " + clsBadge(it.cls) + "</span>" +
         '<span class="pl-name">' + esc(it.name) + " · " + esc(it.code) + "</span>" +
         '<span class="pl-price">Cost ' + money(it.cost) + " → APS <b>" + money(sell) + "</b>" +
         (it.checked ? ' <em class="badge-live">live ' + esc(fmtDate(it.checked).replace(/ \d{4}$/, "")) + "</em>" : "") +
@@ -438,12 +447,15 @@
       var b = e.target.closest("[data-code]"); if (!b) return;
       var it = D.byCode[b.dataset.code]; if (!it) return;
       Q.addMaterial(lineFromItem(it, 1));
-      Q.toast(it.gen + " added · APS " + money(r2(it.cost * factor(it.big))));
+      Q.toast(it.gen + " added · APS " + money(r2(it.cost * factor(it.cls))));
       $("plSearch").value = ""; $("plResults").hidden = true;
     });
-    $("mkSmall").addEventListener("change", function (e) { localStorage.setItem(MK_SMALL_KEY, e.target.value); repriceAll(); });
-    $("mkBig").addEventListener("change", function (e) { localStorage.setItem(MK_BIG_KEY, e.target.value); repriceAll(); });
-    if (typeof Q.onBigMarkupChange === "function") Q.onBigMarkupChange(function () { if (D.items) repriceAll(); });
+    // Low / High switch (app.js): re-price every Plumblink line, and refresh any open search results.
+    Q.onTierChange(function () {
+      if (D.items) { repriceAll(); var v = $("plSearch").value; if (v.trim() && !$("plResults").hidden) renderPlResults(search(v, 25)); return; }
+      var any = Q.getMaterials().some(function (m) { return m.src === "pl" && !m.manual; });
+      if (any) loadItems().then(repriceAll, function () { repriceAll(); });
+    });
 
     $("labSearch").addEventListener("focus", function () { loadData().catch(function () {}); });
     $("labSearch").addEventListener("input", function (e) {
@@ -495,9 +507,12 @@
     mats.forEach(function (m, i) {
       var tr = rows[i]; if (!tr) return;
       var meta = "";
-      if (m.src !== "pl" && !m.nopl) return;
-      if (m.code) meta = esc(m.pl || "") + " · " + codeLink(m.code) + " · cost " + money(m.plc) + " × " + (m.big ? mkBig() + "% big ticket" : mkSmall() + "%") + (m.chk ? " · live " + esc(fmtDate(m.chk).replace(/ \d{4}$/, "")) : "");
-      else if (m.bundle) meta = "Plumblink: " + m.bundle.map(function (p) { var it = D.byCode && D.byCode[p[1]]; return p[0] + "× " + (it ? esc(it.gen) : p[1]) + " (" + codeLink(p[1]) + ")"; }).join(", ") + (m.big ? " · geyser/tank/pump at " + mkBig() + "% big ticket, rest " + mkSmall() + "%" : "");
+      if (m.src !== "pl" && !m.nopl) {
+        if (!m.fromKit && (Number(m.cost) || 0) > 0) tr.insertAdjacentHTML("afterend", '<tr class="pl-meta-row internal-only no-print"><td colspan="5"><div class="pl-meta">Typed price, used as is (no markup added).</div></td></tr>');
+        return;
+      }
+      if (m.code) meta = clsBadge(lineCls(m)) + " " + esc(m.pl || "") + " · " + codeLink(m.code) + " · cost " + money(m.plc) + " × " + (1 + pct(lineCls(m)) / 100).toFixed(2) + (m.chk ? " · live " + esc(fmtDate(m.chk).replace(/ \d{4}$/, "")) : "");
+      else if (m.bundle) meta = "Plumblink: " + m.bundle.map(function (p) { var it = D.byCode && D.byCode[p[1]]; return p[0] + "× " + (it ? esc(it.gen) : p[1]) + " (" + codeLink(p[1]) + ")" + (it ? " " + clsBadge(it.cls) : ""); }).join(", ");
       else if (m.nopl) meta = "Not in the Plumblink kit — search above or type the price.";
       if (m.manual && (m.code || m.bundle)) meta += " · <b>price typed by hand</b>";
       if (meta) { tr.classList.add("has-meta"); tr.insertAdjacentHTML("afterend", '<tr class="pl-meta-row internal-only no-print"><td colspan="5"><div class="pl-meta">' + meta + "</div></td></tr>"); }
@@ -526,21 +541,18 @@
   Q.hooks.afterLoad = function (q) { picked = Array.isArray(q && q.labourJobs) ? q.labourJobs.slice() : []; renderChips(); setRepairActive((q && q.repairId) || ""); };
   Q.hooks.extraForm = function () { return { labourJobs: picked.slice(), repairId: activeRepair }; };
   Q.hooks.afterNew = function () { picked = []; renderChips(); var o = $("plOffer"); o.innerHTML = ""; o.hidden = true; setRepairActive(""); };
-  // Markup compare boxes: show what Plumblink-priced big-ticket lines (e.g. a geyser) would cost at 25% / 20%.
-  Q.hooks.compareCentsAt = function (pct, base) { return base + bigDeltaCents(pct); };
+  // Low / High boxes: show what the Plumblink-priced lines would come to at the other setting.
+  Q.hooks.compareCentsAt = function (tier, base) { return base + tierDeltaCents(tier); };
 
-  /* ---------- big-ticket compare for Plumblink-priced lines ---------- */
-  function bigDeltaCents(pct) {
+  /* ---------- Low / High compare for Plumblink-priced lines ---------- */
+  function tierDeltaCents(tier) {
     if (!D.byCode) return 0;
-    var f1 = 1 + pct / 100, delta = 0;
+    var delta = 0;
     Q.getMaterials().forEach(function (m) {
-      if (m.manual || m.src !== "pl" || m.fromKit || !m.big) return;
+      if (m.manual || m.src !== "pl" || m.fromKit) return;
       var q = Number(m.qty) || 0, at = null;
-      if (m.bundle && m.bundle.length) {
-        var s = 0;
-        m.bundle.forEach(function (p) { var it = D.byCode[p[1]]; if (it) s += p[0] * it.cost * (it.big ? f1 : factor(false)); });
-        at = r2(s);
-      } else if (m.plc != null) at = r2(m.plc * f1);
+      if (m.bundle && m.bundle.length) at = bundleSum(m.bundle, tier);
+      else if (m.plc != null) at = r2(m.plc * factor(lineCls(m), tier));
       if (at == null) return;
       delta += Math.round(q * Math.round(at * 100)) - Math.round(q * Math.round((Number(m.cost) || 0) * 100));
     });
@@ -624,7 +636,7 @@
   }
 
   // Expose for tests / other add-ons
-  window.APSAutoPrice = { genericName: genericName, isBig: isBig, loadItems: loadItems, loadData: loadData, search: search, kitTotal: kitTotal, factor: factor, D: D,
+  window.APSAutoPrice = { genericName: genericName, isBig: isBig, clsOf: clsOf, loadItems: loadItems, loadData: loadData, search: search, kitTotal: kitTotal, factor: factor, D: D,
     itemUrl: itemUrl, repairLines: repairLines, applyRepair: applyRepair, chooseBasin: chooseBasin };
 
   injectUI();
