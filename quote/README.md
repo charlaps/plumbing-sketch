@@ -16,14 +16,14 @@ Offline-first, phone-first web app for APS Plumbing quotes. Client view hides pe
 
 ## How Charl uses it
 
-1. Open `index.html` on the phone (or host the folder). Tap a **package** (geyser / basin / toilet / filter) or a **tank + booster kit**, fill client details, check costs on **Internal**, set labour, then switch to **Client** — materials show description + qty only; pricing is materials + labour and an 80% deposit. APS is not VAT-registered.
+1. Open `index.html` on the phone (or host the folder). Tap a **package** (geyser / basin / toilet / filter) or a **tank + booster kit**, fill client details, check costs on **Internal**, set labour, then switch to **Client** — materials show description + qty only; pricing is materials, consumables (5% of materials), labour, and an 80% deposit. APS is not VAT-registered.
 2. **Copy client text** or **Open WhatsApp** to send the short-scope quote; **Print / Save PDF** for a branded one-pager.
 3. **Save quote** keeps the last 10 on that device (localStorage); reopen from the list to edit.
 
 ## Quote rules baked in
 
 - Generic material names on the client side (e.g. “22mm ball valve”)
-- No per-item prices on client quote — materials total, labour and grand total only. No VAT.
+- No per-item prices on client quote — materials total, consumables (5%), labour and grand total only. No VAT.
 - Short scope — no fitting detail for competitors
 - 80% deposit to book
 
@@ -33,7 +33,7 @@ Offline-first, phone-first web app for APS Plumbing quotes. Client view hides pe
 
 - Markup follows Charl's tiered rule (10 Oct 2026, see below): tanks and pumps 20/25%, pipe 30/35%, fittings 40/45%, set with the **Markup: Low / High** switch. Internal view shows both materials totals and each line's class and %.
 - Labour prefills at R9,000. The note “labour not yet confirmed by Charl” is internal only.
-- Client WhatsApp text and print/PDF use plain names only (no brand, code or material type) and group the fittings. Prices shown are materials total, labour, total and the 80% deposit. No VAT line.
+- Client WhatsApp text and print/PDF use plain names only (no brand, code or material type) and group the fittings. Prices shown are materials total, consumables (5%), labour, total and the 80% deposit. No VAT line.
 
 ## Note
 
@@ -83,5 +83,6 @@ Charl's rule (10 Oct 2026) replaces the flat 30% and the 30/25/20% big-ticket se
 - How items are classed (`aps-data.json` `cls`, all 5,232 items in `field/items.json`): 1) Sourcing's classification for the 115 kit codes in `tiered-markup-20261010.json`; 2) **pipe**: Plumblink pipe categories, or a pipe/tube/hose name with a length, any price; 3) **expensive**: geyser / water heater / heat pump / solar geyser / tank / pump main units (not spares), or any other item at R750+ (Sourcing's threshold); 4) **fitting**: everything else. The rule agrees with Sourcing on all 115 of its codes.
 - Counts: **1,335 expensive**, **357 pipe**, **3,540 fitting** (expensive: 1,230 by the R750 threshold, 88 geyser/tank/pump units, rest from Sourcing).
 - Tank kits: markup per class on shelf cost, total rounded once (Sourcing's rounding), so all nine kits match Sourcing to the cent at Low and High. Geyser repairs and the geyser/basin packages match within a few cents.
-- Client output is unchanged: generic names, no per-item prices, no class or %, totals + 80% deposit, "APS is not VAT-registered."
-- Asset URLs carry `?v=20261010`.
+- **Consumables (5%)** is 5% of the materials total after markup, not of labour. It is its own line in the Internal view and in the client output (listed next to the materials total). It is included in the grand total and the 80% deposit. Saved quotes pick it up when they are reopened and recalculated. Kit material totals are unchanged.
+- Client output otherwise stays: generic names, no per-item prices, no class or markup %, "APS is not VAT-registered."
+- Asset URLs carry `?v=20261010b`.

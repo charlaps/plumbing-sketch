@@ -13,7 +13,7 @@
   if (!Q) return;
 
   var ITEMS_URL = "../field/items.json";
-  var DATA_URL = "aps-data.json?v=20261010";
+  var DATA_URL = "aps-data.json?v=20261010b";
   var CALLOUT = 550;
 
   var D = { items: null, byCode: null, snap: "", data: null, loading: null, dataLoading: null, base: "", slugs: [] };

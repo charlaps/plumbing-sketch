@@ -3,6 +3,8 @@
   "use strict";
 
   const DEPOSIT_RATE = 0.8;
+  /* 5% of the materials total after markup. Not applied to labour. */
+  const CONSUMABLES_RATE = 5;
   const STORAGE_KEY = "aps-quote-saved-v1";
   const TIER_KEY = "aps-quote-markup-tier";
   const MAX_SAVED = 10;
@@ -348,16 +350,19 @@
 
   function calc() {
     const materialsSumCents = materialsCentsAt(tier);
+    const consumablesCents = roundRatio(materialsSumCents * CONSUMABLES_RATE, 100);
     const labourCents = randsToCents($("labour").value);
-    const totalCents = materialsSumCents + labourCents;
+    const totalCents = materialsSumCents + consumablesCents + labourCents;
     const depositCents = roundRatio(totalCents * 80, 100);
-    return { materialsSumCents, labourCents, totalCents, depositCents };
+    return { materialsSumCents, consumablesCents, labourCents, totalCents, depositCents };
   }
 
   function updateTotals() {
     const t = calc();
     $("materialsTotalDisplay").textContent = moneyFromCents(t.materialsSumCents);
+    $("materialsConsumablesDisplay").textContent = moneyFromCents(t.consumablesCents);
     $("tMaterials").textContent = moneyFromCents(t.materialsSumCents);
+    $("tConsumables").textContent = moneyFromCents(t.consumablesCents);
     $("tLabour").textContent = moneyFromCents(t.labourCents);
     $("tGrand").textContent = moneyFromCents(t.totalCents);
     $("tDeposit").textContent = moneyFromCents(t.depositCents);
@@ -688,6 +693,7 @@
     }
     lines.push("PRICING");
     lines.push(`Materials total: ${moneyFromCents(t.materialsSumCents)}`);
+    lines.push(`Consumables (5%): ${moneyFromCents(t.consumablesCents)}`);
     lines.push(`Labour: ${moneyFromCents(t.labourCents)}`);
     lines.push(`TOTAL: ${moneyFromCents(t.totalCents)}`);
     lines.push(`Deposit to book (80%): ${moneyFromCents(t.depositCents)}`);

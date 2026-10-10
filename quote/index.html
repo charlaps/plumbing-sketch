@@ -9,8 +9,8 @@
   <meta name="description" content="APS Quote Helper — client and internal plumbing quotes" />
   <link rel="manifest" href="site.webmanifest" />
   <title>APS Quote</title>
-  <link rel="stylesheet" href="styles.css?v=20261010" />
-  <link rel="stylesheet" href="autoprice.css?v=20261010" />
+  <link rel="stylesheet" href="styles.css?v=20261010b" />
+  <link rel="stylesheet" href="autoprice.css?v=20261010b" />
 </head>
 <body>
   <header class="app-header no-print">
@@ -188,6 +188,10 @@
         <span>Materials total</span>
         <strong id="materialsTotalDisplay">R 0.00</strong>
       </div>
+      <div class="materials-total-row">
+        <span>Consumables (5%)</span>
+        <strong id="materialsConsumablesDisplay">R 0.00</strong>
+      </div>
     </section>
 
     <!-- Labour & totals -->
@@ -200,6 +204,7 @@
       <p class="hint internal-only" id="labourKitNote" hidden>labour not yet confirmed by Charl</p>
       <div class="totals" id="totalsBlock">
         <div class="total-line"><span>Materials</span><span id="tMaterials">R 0.00</span></div>
+        <div class="total-line"><span>Consumables (5%)</span><span id="tConsumables">R 0.00</span></div>
         <div class="total-line"><span>Labour</span><span id="tLabour">R 0.00</span></div>
         <div class="total-line grand"><span>Total</span><span id="tGrand">R 0.00</span></div>
         <div class="total-line deposit"><span>Deposit to book (80%)</span><span id="tDeposit">R 0.00</span></div>
@@ -229,8 +234,8 @@
     <p>APS Plumbing · Offline quote helper · Not a legal document</p>
   </footer>
 
-  <script src="kits/tank-booster.js?v=20261010"></script>
-  <script src="app.js?v=20261010"></script>
-  <script src="autoprice.js?v=20261010"></script>
+  <script src="kits/tank-booster.js?v=20261010b"></script>
+  <script src="app.js?v=20261010b"></script>
+  <script src="autoprice.js?v=20261010b"></script>
 </body>
 </html>
