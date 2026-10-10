@@ -390,6 +390,10 @@ $('nJobs').textContent=JOBS.length;
     desc:'Strip out 8 existing fixtures across 3 bathrooms, run new first-fix copper hot and cold supplies and PVC wastes, fit a geyser pressure control valve, pressure test, then refit 3 basins, 2 showers, 1 bath and 2 toilets. All sanitaryware is supplied by the client.',
     sup:'Mixed',mat:'16669.15',notinc:'Tiling, building, plaster/paint, electrical work, and any client-supplied items (all sanitaryware is supplied by the client).',items:[]});
     [QUICK[0][1],QUICK[1][1],QUICK[2][1]].forEach(n=>addJob(n,8));}
+  if(p.get('demo')==='filter'){const old=LS.get('aps_saved',[]).find(x=>x.id==='filter3');
+    if(old){S=Object.assign(blank(),old)}else{S=Object.assign(blank(),{id:'filter3',date:'2026-10-10',type:'Installation',title:'Small 3-stage whole-house water filter',
+    desc:'Supply and install a 3-stage whole-house water filter (sediment, carbon and carbon block) on a wall bracket, tied into the 22 mm main with isolating valves and a bypass so the water stays on during filter changes. Leak-tested.',
+    sup:'APS',mat:'3223.48',cons:true,matnote:'Flowbins 3-stage slim 20in, 3/4in ports (check on site). PRV not included (~R1,420 if pressure >5 bar). Spare cartridge set ~R407.',items:[{j:'Whole-house filter install with 22 mm tie-in and bypass',l:1650,c:'Water treatment',m:'Package',q:1}]});saveQuote();}}
   bindFields();persist();renderAll();
   if(p.get('q')){$('q').value=p.get('q');renderResults()}
   if(p.get('screen'))go(p.get('screen'));
