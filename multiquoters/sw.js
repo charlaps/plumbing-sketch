@@ -1,4 +1,4 @@
-const CACHE = 'multiquoters-v1';
+const CACHE = 'multiquoters-v3';
 const ASSETS = [
   './index.html',
   './styles.css',

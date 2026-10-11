@@ -9,6 +9,7 @@
     showCreate: false,
     create: null,
     bidDraft: {},
+    confirmBid: null,
     threadFor: ''
   };
   let lastRoute = '';
@@ -110,7 +111,7 @@
     const c = MQ.state.client;
     return {
       step: 1, trade: '', title: '', description: '', photos: [],
-      suburb: '', timing: '', budget: '', name: c.name || '', phone: c.phone || '', error: ''
+      suburb: '', timing: 'week', budget: '', name: c.name || '', phone: c.phone || '', error: ''
     };
   }
 
@@ -124,36 +125,30 @@
     return parts[0];
   }
 
+  function currentRole(parts) {
+    const area = areaOf(parts);
+    if (area === 'contractor') return 'contractor';
+    if (area === 'client') return 'client';
+    return MQ.state.session.role || 'client';
+  }
+
   function shell() {
     const parts = route();
-    const area = areaOf(parts);
-    const role = area === 'contractor' ? 'contractor' : area === 'client' ? 'client' : (MQ.state.session.role || 'client');
+    const role = currentRole(parts);
     document.getElementById('role-switch').innerHTML =
-      '<a href="#/client/requests" class="' + (role === 'client' ? 'is-on' : '') + '">Client</a>' +
-      '<a href="#/contractor/leads" class="' + (role === 'contractor' ? 'is-on' : '') + '">Contractor</a>';
+      '<a href="#/client/requests" class="' + (role === 'client' ? 'is-on' : '') + '" aria-pressed="' + (role === 'client') + '">Client</a>' +
+      '<a href="#/contractor/leads" class="' + (role === 'contractor' ? 'is-on' : '') + '" aria-pressed="' + (role === 'contractor') + '">Contractor</a>';
+    const bar = document.getElementById('viewing-as');
+    if (bar) bar.innerHTML = 'You\'re viewing as: <strong>' + (role === 'contractor' ? 'Contractor' : 'Client') + '</strong>';
 
     const sub = document.getElementById('subnav');
     const bottom = document.getElementById('bottom-nav');
-    if (area === 'client') {
-      const links = [
-        ['#/client/new', 'New request'],
-        ['#/client/requests', 'My requests']
-      ];
-      sub.innerHTML = links.map(([href, label]) => navLink(href, label, parts)).join('');
-      bottom.innerHTML = links.map(([href, label]) => navLink(href, label, parts)).join('');
-    } else if (area === 'contractor' && activeCo()) {
-      const links = [
-        ['#/contractor/leads', 'Leads'],
-        ['#/contractor/work', 'My work'],
-        ['#/contractor/wallet', 'Wallet'],
-        ['#/contractor/profile', 'Profile']
-      ];
-      sub.innerHTML = links.map(([href, label]) => navLink(href, label, parts)).join('');
-      bottom.innerHTML = links.map(([href, label]) => navLink(href, label, parts)).join('');
-    } else {
-      sub.innerHTML = '';
-      bottom.innerHTML = '';
-    }
+    const links = role === 'contractor'
+      ? [['#/contractor/leads', 'Leads'], ['#/contractor/work', 'Work'], ['#/contractor/wallet', 'Wallet'], ['#/contractor/vip', 'VIP'], ['#/contractor/profile', 'Profile']]
+      : [['#/client/new', 'New request'], ['#/client/requests', 'My requests'], ['#/pricing', 'Pricing']];
+    const html = links.map(([href, label]) => navLink(href, label, parts)).join('');
+    sub.innerHTML = html;
+    bottom.innerHTML = html;
   }
 
   function navLink(href, label, parts) {
@@ -185,6 +180,9 @@
   function screen(parts) {
     if (!parts.length) return landing();
     if (parts[0] === 'admin') return admin();
+    if (parts[0] === 'pricing') return pricingPage();
+    if (parts[0] === 'trust') return trustPage();
+    if (parts[0] === 'contractor' && parts[1] === 'vip') return activeCo() ? vipPage() : signIn();
     if (parts[0] === 'client' && parts[1] === 'new') return wizard();
     if (parts[0] === 'client' && parts[1] === 'requests') return requests();
     if (parts[0] === 'client' && parts[1] === 'request') return requestDetail(parts[2]);
@@ -199,55 +197,111 @@
   }
 
   function landing() {
-    return '<section data-screen="landing" class="hero-grid"><div>' +
+    return '<section data-screen="landing"><div class="hero-grid"><div>' +
       '<div class="hero-mark"><img src="icon.svg" alt=""><div><strong>Multiquoters</strong><div class="tiny">Gauteng quote marketplace</div></div></div>' +
       '<h1>Post once. Get up to three quotes.</h1>' +
-      '<p class="lede">Homeowners put a job up for 12 hours. Contractors bid tokens for a place in the top 3. You compare their prices, ratings and what is included, then choose one.</p>' +
+      '<p class="lede">Up to 3 vetted contractors will quote. Free for you. You choose; there\'s no obligation.</p>' +
       '<div class="stack">' +
       '<a class="btn btn-orange btn-block" href="#/client/new">I need a quote</a>' +
       '<a class="btn btn-teal btn-block" href="#/contractor/leads">I\'m a contractor</a>' +
       '</div></div>' +
-      '<div class="card"><h2>How it works</h2><div class="steps">' +
-      step(1, 'Post the job', 'Trade, photos, suburb and when you need it. Your number stays masked.') +
-      step(2, 'Top 3 bid', '1 token is R20. The three highest bids win the lead and pay their own bids.') +
-      step(3, 'Compare and accept', 'Quotes sit side by side. Accept one. The others are marked not selected.') +
-      '</div><p class="tiny">Krugersdorp, Roodepoort, Randburg, Centurion, Pretoria and nearby.</p></div></section>';
+      '<div class="card promise"><h2>Free for homeowners</h2><p>Your number stays hidden until a contractor wins a place. At most 3 contractors see it.</p></div></div>' +
+      '<div class="how-grid" data-testid="how-it-works">' +
+      '<section class="card"><h2>How it works if you need a quote</h2><div class="steps">' +
+      step(1, 'Post the job', 'Trade, a photo, where and when. About a minute.') +
+      step(2, 'Contractors bid', 'You see how many are bidding and when quotes are due.') +
+      step(3, 'Compare and choose', 'Up to 3 quotes, side by side. Accept one, or none.') +
+      '</div></section>' +
+      '<section class="card"><h2>How it works if you are a contractor</h2><div class="steps">' +
+      step(1, 'Buy tokens', 'R20 each. No subscription and no hidden fees.') +
+      step(2, 'Bid for a place', 'Top 3 win. Held tokens come back if you are pushed out.') +
+      step(3, 'Send one quote', 'You only pay the tokens if you keep a top-3 place.') +
+      '</div><p class="tiny">Optional VIP: unlimited tokens for R X / year <span class="tbc">price TBC</span>. Fair-play caps still apply.</p></section></div>' +
+      '<p class="tiny">Krugersdorp, Roodepoort, Randburg, Centurion, Pretoria and nearby.</p>' +
+      '<p class="row"><a href="#/pricing">Pricing &amp; fees</a> · <a href="#/trust">Trust &amp; safety</a> · <a href="#/admin">Overview</a></p></section>';
   }
 
   function step(n, title, body) {
-    return '<div class="step"><div class="num">' + n + '</div><div><strong>' + title + '</strong><div class="tiny">' + body + '</div></div></div>';
+    return '<div class="step"><div class="num">' + n + '</div><div><strong>' + esc(title) + '</strong><div class="tiny">' + esc(body) + '</div></div></div>';
+  }
+
+  function tradeMark(trade) {
+    return '<span class="trade-ico" aria-hidden="true">' + esc(String(trade || '?').slice(0, 1).toUpperCase()) + '</span>';
+  }
+
+  function promise() {
+    return '<p class="promise-line">Up to 3 vetted contractors will quote. Free for you. You choose; there\'s no obligation.</p>';
+  }
+
+  function progress(step, label) {
+    const pct = Math.round((step / 6) * 100);
+    return '<div class="progress" role="progressbar" aria-valuenow="' + step + '" aria-valuemin="1" aria-valuemax="6" aria-label="Step ' + step + ' of 6, ' + esc(label) + '"><span style="width:' + pct + '%"></span></div>' +
+      '<p class="tiny">Step ' + step + ' of 6 · ' + esc(label) + '</p>';
+  }
+
+  function wizardNav(back) {
+    return '<div class="row">' +
+      (back ? '<button type="button" class="btn btn-ghost" data-action="wizard-back">Back</button>' : '') +
+      '<button type="button" class="btn btn-orange" data-action="wizard-next">Next</button></div>';
   }
 
   function wizard() {
     if (!memory.wizard) memory.wizard = blankWizard();
     const w = memory.wizard;
+    const err = w.error ? '<p class="form-error" role="alert" data-testid="form-error">' + esc(w.error) + '</p>' : '';
     if (w.step === 1) {
-      return '<section data-screen="trade-picker"><p class="tiny">Step 1 of 2</p><h1>What do you need done?</h1>' +
+      return '<section data-screen="trade-picker">' + progress(1, 'Trade') + '<h1>What do you need done?</h1>' +
+        '<p class="lede">Pick one trade. You can post another job later.</p>' +
         '<div class="trade-grid">' + MQ.TRADES.map((t) =>
-          '<button type="button" class="trade" data-action="pick-trade" data-trade="' + esc(t) + '">' + esc(t) + '</button>'
+          '<button type="button" class="trade" data-action="pick-trade" data-trade="' + esc(t) + '">' + tradeMark(t) + ' ' + esc(t) + '</button>'
         ).join('') + '</div></section>';
     }
-    return '<section data-screen="job-form"><p class="tiny">Step 2 of 2 · ' + esc(w.trade) + '</p><h1>Describe the job</h1>' +
-      (w.error ? '<p class="form-error" role="alert" data-testid="form-error">' + esc(w.error) + '</p>' : '') +
-      '<div class="stack">' +
-      field('Job title', '<input id="job-title" data-field="wiz-title" type="text" maxlength="80" value="' + esc(w.title) + '" placeholder="Burst geyser">') +
-      field('What happened?', '<textarea id="job-description" data-field="wiz-description" placeholder="Where it is, what is broken, anything a contractor should know.">' + esc(w.description) + '</textarea>') +
-      field('Photos', '<input id="job-photos" data-testid="job-photos" type="file" accept="image/*" multiple><span class="tiny">Camera or gallery. Photos are resized on this phone.</span>' +
-        (w.photos.length ? '<span data-testid="photo-ready" class="tiny">' + w.photos.length + ' photo ready</span><div class="thumbs">' + w.photos.map((src) => '<img src="' + src + '" alt="Job photo">').join('') + '</div>' : '')) +
-      field('Suburb', '<select id="job-suburb" data-field="wiz-suburb">' +
-        '<option value="">Choose a suburb</option>' + MQ.AREAS.map((a) => '<option' + (w.suburb === a ? ' selected' : '') + '>' + esc(a) + '</option>').join('') + '</select>') +
-      '<div class="field"><span>When do you need it?</span><div class="stack">' +
-      ['urgent', 'week', 'flexible'].map((key) =>
-        '<label class="choice"><input type="radio" name="timing" data-field="wiz-timing" value="' + key + '"' + (w.timing === key ? ' checked' : '') + '> ' + TIMING[key] + '</label>'
-      ).join('') + '</div></div>' +
-      field('Budget range (optional)', '<select id="job-budget" data-field="wiz-budget"><option value="">No budget in mind</option>' +
-        MQ.BUDGETS.map((b) => '<option' + (w.budget === b ? ' selected' : '') + '>' + esc(b) + '</option>').join('') + '</select>') +
-      field('Your name', '<input id="job-name" data-field="wiz-name" type="text" value="' + esc(w.name) + '">') +
-      field('Mobile number', '<input id="job-phone" data-field="wiz-phone" type="tel" inputmode="tel" value="' + esc(w.phone) + '" placeholder="082 000 0000">') +
-      '<p class="tiny">Contractors see your suburb and the job. Your number stays masked until they finish in the top 3.</p>' +
-      '<button type="button" class="btn btn-ghost" data-action="wizard-back">Back</button>' +
-      '<button type="button" class="btn btn-orange btn-block" data-action="post-job">Post job</button>' +
-      '</div></section>';
+    if (w.step === 2) {
+      return '<section data-screen="wizard">' + progress(2, 'Photos') + '<h1>Add a photo</h1>' + err +
+        '<p>A picture helps contractors price the job. Camera or gallery. Optional.</p>' +
+        '<label class="field"><span>Photo</span><input id="job-photos" data-testid="job-photos" type="file" accept="image/*" multiple></label>' +
+        (w.photos.length ? '<span data-testid="photo-ready">' + w.photos.length + ' photo ready</span><div class="thumbs">' + w.photos.map((src) => '<img src="' + src + '" alt="Job photo">').join('') + '</div>' : '<p class="tiny">You can skip this and still post.</p>') +
+        wizardNav(true) + '</section>';
+    }
+    if (w.step === 3) {
+      return '<section data-screen="wizard">' + progress(3, 'Describe') + '<h1>Describe the job</h1>' + err +
+        '<div class="stack">' +
+        field('Short title', '<input id="job-title" data-field="wiz-title" type="text" maxlength="80" value="' + esc(w.title) + '" placeholder="Leaking outside tap">') +
+        field('What is wrong?', '<textarea id="job-description" data-field="wiz-description" placeholder="What happened, and anything they should know.">' + esc(w.description) + '</textarea>') +
+        wizardNav(true) + '</div></section>';
+    }
+    if (w.step === 4) {
+      return '<section data-screen="wizard">' + progress(4, 'Where and when') + '<h1>Where and when?</h1>' + err +
+        '<div class="stack">' +
+        field('Suburb', '<select id="job-suburb" data-field="wiz-suburb"><option value="">Choose a suburb</option>' +
+          MQ.AREAS.map((a) => '<option' + (w.suburb === a ? ' selected' : '') + '>' + esc(a) + '</option>').join('') + '</select>') +
+        '<div class="field"><span>When do you need it?</span><div class="stack">' +
+        ['urgent', 'week', 'flexible'].map((key) =>
+          '<label class="choice"><input type="radio" name="timing" data-field="wiz-timing" value="' + key + '"' + (w.timing === key ? ' checked' : '') + '> ' + TIMING[key] + '</label>'
+        ).join('') + '</div></div>' +
+        field('Budget (optional)', '<select id="job-budget" data-field="wiz-budget"><option value="">Not sure yet</option>' +
+          MQ.BUDGETS.map((b) => '<option' + (w.budget === b ? ' selected' : '') + '>' + esc(b) + '</option>').join('') + '</select>') +
+        wizardNav(true) + '</div></section>';
+    }
+    if (w.step === 5) {
+      return '<section data-screen="wizard">' + progress(5, 'Contact') + '<h1>How can they reach you?</h1>' + err +
+        '<p class="promise-line">Your number stays masked until a contractor wins a place in the top 3.</p>' +
+        '<div class="stack">' +
+        field('Your name', '<input id="job-name" data-field="wiz-name" type="text" autocomplete="name" value="' + esc(w.name) + '">') +
+        field('Mobile number', '<input id="job-phone" data-field="wiz-phone" type="tel" inputmode="tel" autocomplete="tel" value="' + esc(w.phone) + '" placeholder="082 000 0000">') +
+        wizardNav(true) + '</div></section>';
+    }
+    return '<section data-screen="wizard" data-step="review">' + progress(6, 'Review') + '<h1>Check this, then post</h1>' + err +
+      '<div class="card stack">' +
+      '<p><strong>' + esc(w.trade) + '</strong> · ' + esc(w.title || 'No title') + '</p>' +
+      '<p>' + esc(w.description) + '</p>' +
+      '<p>' + esc(w.suburb) + ' · ' + esc(TIMING[w.timing] || '') + (w.budget ? ' · ' + esc(w.budget) : '') + '</p>' +
+      '<p>' + esc(w.name) + ' · ' + esc(maskPhone(w.phone)) + '</p>' +
+      '<p class="tiny">' + (w.photos.length ? w.photos.length + ' photo attached.' : 'No photo.') + '</p>' +
+      '<p>Up to 3 vetted contractors will quote. Free for you. You choose; there\'s no obligation.</p>' +
+      '</div>' +
+      '<div class="row"><button type="button" class="btn btn-ghost" data-action="wizard-back">Back</button>' +
+      '<button type="button" class="btn btn-orange" data-action="post-job">Post job</button></div></section>';
   }
 
   function field(label, inner) {
@@ -256,9 +310,10 @@
 
   function requests() {
     const mine = MQ.state.leads.filter((l) => l.owner === 'demo');
-    return '<section data-screen="requests"><h1>My requests</h1>' +
-      (mine.length ? '<div class="stack">' + mine.map(requestCard).join('') + '</div>' : '<p>No jobs yet.</p>') +
-      '<p><a class="btn btn-orange" href="#/client/new">I need a quote</a></p></section>';
+    return '<section data-screen="requests"><h1>My requests</h1>' + promise() +
+      (mine.length ? '<div class="stack">' + mine.map(requestCard).join('') + '</div>' :
+        '<div class="card"><h2>No jobs yet</h2><p>Posting takes about a minute. Contractors in your suburb can then bid.</p><a class="btn btn-orange" href="#/client/new">I need a quote</a></div>') +
+      (mine.length ? '<p><a class="btn btn-orange" href="#/client/new">Post another job</a></p>' : '') + '</section>';
   }
 
   function requestCard(item) {
@@ -291,12 +346,33 @@
 
   function clientAuction(item) {
     const n = rank(item).length;
+    const people = new Set(item.bids.map((b) => b.contractorId)).size;
     return '<section data-screen="client-auction"><p class="tiny">' + esc(item.trade) + ' · ' + esc(item.suburb) + '</p>' +
-      '<h1>' + esc(item.title) + '</h1><p>' + esc(item.description) + '</p>' +
-      '<div class="card"><h2>Auction</h2><p>' + countHtml(item.auctionEndsAt) + '</p>' +
-      '<p><strong>' + n + '</strong> ' + (n === 1 ? 'bid' : 'bids') + ' so far. The top 3 each send you a quote. Your number stays hidden until then.</p>' +
-      '<p class="tiny">Shown to contractors as ' + esc(maskName(item.contactName)) + ' · ' + esc(maskPhone(item.contactPhone)) + '</p></div>' +
+      '<h1>' + esc(item.title) + '</h1>' + promise() + statusTimeline(item) +
+      '<p>' + esc(item.description) + '</p>' +
+      '<div class="card"><h2>Bidding now</h2><p>' + countHtml(item.auctionEndsAt) + '</p>' +
+      '<p><strong>' + people + '</strong> ' + (people === 1 ? 'contractor is' : 'contractors are') + ' bidding (' + n + ' bids).</p>' +
+      '<p>Quotes are expected when the auction ends. Up to 3 contractors will each send one quote.</p>' +
+      '<p class="tiny">Shown to them as ' + esc(maskName(item.contactName)) + ' · ' + esc(maskPhone(item.contactPhone)) + '</p></div>' +
       thumbs(item.photos) + '</section>';
+  }
+
+  function statusTimeline(item) {
+    const quotes = MQ.quotesFor(item.id);
+    const steps = [
+      ['Posted', true],
+      ['Bidding', item.status !== 'open'],
+      ['Contractors chosen', item.status === 'matched' || item.status === 'accepted'],
+      ['Quotes in', item.status !== 'open' && quotes.length > 0],
+      ['Accepted', item.status === 'accepted']
+    ];
+    let seen = false;
+    return '<ol class="timeline">' + steps.map(([label, done]) => {
+      const current = !seen && !done;
+      if (!done) seen = true;
+      const cls = done ? 'done' : (current ? 'current' : '');
+      return '<li class="' + cls + '">' + label + '</li>';
+    }).join('') + '</ol>';
   }
 
   function compare(item) {
@@ -309,9 +385,13 @@
     const cheap = Math.min(...quotes.map((q) => q.total));
     const best = Math.max(...quotes.map((q) => MQ.ratingOf(MQ.contractor(q.contractorId)) || 0));
     const accepted = quotes.find((q) => q.status === 'accepted');
+    const due = quotes.length >= Math.min(3, (item.winners || []).length || 3)
+      ? 'All quotes that are in can be compared now. You do not have to accept one.'
+      : 'Quotes are expected shortly. ' + quotes.length + ' of up to 3 are in.';
     return '<section data-screen="compare" data-quote-count="' + quotes.length + '">' +
       '<p class="tiny">Your matched contractors</p><h1>' + esc(item.title) + '</h1>' +
-      '<p class="muted">' + esc(item.suburb) + ' · compare up to 3 quotes</p>' +
+      promise() + '<p>' + due + '</p>' + statusTimeline(item) +
+      '<p class="muted">' + esc(item.suburb) + '</p>' +
       (accepted ? acceptedBanner(accepted) : '') +
       '<div class="row" style="margin:10px 0">' +
       '<button type="button" class="btn btn-small ' + (memory.sort === 'price' ? 'btn-teal' : 'btn-ghost') + '" data-action="sort" data-sort="price">Sort by price</button>' +
@@ -319,7 +399,7 @@
       '</div>' +
       '<div class="quote-cards stack">' + quotes.map((q) => quoteCard(item, q, cheap, best)).join('') + '</div>' +
       '<div class="compare-table-wrap card table-wrap"><table class="compare-table"><thead><tr>' +
-      '<th>Contractor</th><th>Rating</th><th>Price</th><th>Included</th><th>Timeline</th><th>Years</th><th>Verified</th><th></th>' +
+      '<th>Contractor</th><th>Rating</th><th>Price</th><th>VAT</th><th>Included</th><th>Excluded</th><th>Timeline</th><th>Verified</th><th></th>' +
       '</tr></thead><tbody>' + quotes.map((q) => quoteRow(item, q, cheap, best)).join('') + '</tbody></table></div>' +
       (item.status !== 'accepted' ? '<p><button type="button" class="btn btn-ghost btn-block" data-action="request-more" data-lead="' + item.id + '">Request more contractors</button></p>' +
         (memory.moreError ? '<p class="form-error" role="alert">' + esc(memory.moreError) + '</p>' : '') : '') +
@@ -338,29 +418,44 @@
 
   function quoteCard(item, q, cheap, best) {
     const f = flags(q, cheap, best);
-    const cls = 'card quote-card' + (f.isCheap ? ' is-cheap' : '') + (f.isBest ? ' is-best' : '');
-    return '<article class="' + cls + '" data-quote="' + q.id + '">' +
+    const cls = 'card quote-card' + (f.isCheap ? ' is-cheap' : '') + (f.isBest ? ' is-best' : '') + (f.co.vip ? ' is-vip' : '');
+    return '<article class="' + cls + '" data-quote="' + q.id + '"' + (f.co.vip ? ' data-vip-member="1"' : '') + '>' +
       badges(f) + proHead(f.co, f.rating) +
-      '<p class="price">' + formatR(q.total) + '</p>' +
-      '<p class="tiny">' + esc(q.timeline) + ' · valid ' + esc(niceDate(q.validUntil)) + '</p>' +
       quoteBody(q) + quoteActions(item, q) + '</article>';
   }
 
   function quoteRow(item, q, cheap, best) {
     const f = flags(q, cheap, best);
-    const cls = (f.isCheap ? 'cheap' : '') + (f.isBest ? ' best' : '');
-    return '<tr class="' + cls + '"><td>' + esc(f.co.business) + badges(f) + '</td>' +
+    const cls = (f.isCheap ? 'cheap' : '') + (f.isBest ? ' best' : '') + (f.co.vip ? ' vip' : '');
+    return '<tr class="' + cls + '"' + (f.co.vip ? ' data-vip-member="1"' : '') + '><td>' + esc(f.co.business) + badges(f) + '<div class="tiny">' + f.co.reviews.length + ' reviews · ' + f.co.years + ' years</div></td>' +
       '<td>' + (f.rating == null ? 'New' : f.rating.toFixed(1)) + '</td>' +
-      '<td><strong>' + formatR(q.total) + '</strong></td>' +
-      '<td>' + esc(q.included) + '</td><td>' + esc(q.timeline) + '</td>' +
-      '<td>' + f.co.years + '</td><td>' + (f.co.verified ? 'Verified' : '—') + '</td><td>' + quoteActions(item, q) + '</td></tr>';
+      '<td><strong>' + formatR(q.total) + '</strong><div class="tiny">' + vatText(f.co) + '</div></td>' +
+      '<td>' + (f.co.vatRegistered ? 'Registered' : 'Not registered') + '</td>' +
+      '<td>' + esc(q.included) + '</td><td>' + esc(q.excluded || 'None stated') + '</td><td>' + esc(q.timeline) + '<div class="tiny">Valid ' + esc(niceDate(q.validUntil)) + '</div></td>' +
+      '<td>' + (f.co.verified ? 'Verified' : 'Not verified') + '</td><td>' + quoteActions(item, q) + '</td></tr>';
   }
 
   function badges(f) {
     return '<div class="row">' +
       (f.isCheap ? '<span class="pill pill-good">Cheapest</span>' : '') +
       (f.isBest ? '<span class="pill pill-orange">Best rated</span>' : '') +
+      vipBadge(f.co) +
       '</div>';
+  }
+
+  function vipBadge(co) {
+    if (!co || !co.vip) return '';
+    return '<span class="vip-badge">VIP member</span>';
+  }
+
+  function vipPriceLabel() {
+    if (MQ.VIP_PRICE_YEARLY == null) return 'R X / year';
+    return formatR(MQ.VIP_PRICE_YEARLY) + ' / year';
+  }
+
+  function vipRevenueLabel() {
+    if (MQ.VIP_PRICE_YEARLY == null) return 'R X';
+    return formatR((MQ.stats().vipMembers || 0) * MQ.VIP_PRICE_YEARLY);
   }
 
   function proHead(co, rating) {
@@ -368,17 +463,29 @@
       '<div class="tiny">' + esc(co.name) + '</div>' +
       '<div class="stars" aria-label="' + (rating == null ? 'New contractor' : rating.toFixed(1) + ' stars') + '">' +
       (rating == null ? 'New' : stars(rating) + ' ' + rating.toFixed(1)) + '</div>' +
-      '<div class="tiny">' + co.reviews.length + ' reviews · ' + co.years + ' years' + (co.verified ? ' · <span class="pill">Verified</span>' : '') + '</div></div></div>';
+      '<div class="tiny">' + (rating == null ? 'No reviews yet' : co.reviews.length + ' reviews') + ' · ' + co.years + ' years</div>' +
+      vipBadge(co) +
+      (co.verified ? '<span class="pill">Verified</span><p class="tiny">Verified means we checked the business name and the areas they work in. Reviews come only from accepted jobs. Demo check.</p>' : '<p class="tiny">Not verified yet.</p>') +
+      '</div></div>';
+  }
+
+  function vatText(co) {
+    return co && co.vatRegistered ? 'Total includes VAT' : 'Total excludes VAT';
   }
 
   function quoteBody(q) {
+    const co = MQ.contractor(q.contractorId);
     const rows = (q.lineItems || []).map((li) =>
       '<div class="between"><span>' + esc(li.description) + ' × ' + esc(li.qty) + '</span><strong>' + formatR(li.qty * li.price) + '</strong></div>'
     ).join('');
-    return rows +
+    return '<h3>Materials</h3>' + rows +
       '<div class="between"><span>Labour</span><strong>' + formatR(q.labour) + '</strong></div>' +
       '<div class="between"><span>Call-out</span><strong>' + formatR(q.callout) + '</strong></div>' +
+      '<p class="price">' + formatR(q.total) + '</p><p><strong>' + vatText(co) + '.</strong> ' + (co && co.vatRegistered ? 'This contractor is VAT registered.' : 'This contractor is not VAT registered.') + '</p>' +
       '<p><strong>Included.</strong> ' + esc(q.included) + '</p>' +
+      '<p><strong>Excluded.</strong> ' + esc(q.excluded || 'No exclusions stated.') + '</p>' +
+      '<p><strong>Timeline.</strong> ' + esc(q.timeline) + '</p>' +
+      '<p><strong>Valid until.</strong> ' + esc(niceDate(q.validUntil)) + '</p>' +
       (q.notes ? '<p class="tiny">' + esc(q.notes) + '</p>' : '');
   }
 
@@ -448,24 +555,81 @@
     const co = activeCo();
     const open = MQ.state.leads.filter((item) => item.status === 'open' && MQ.matches(item, co))
       .sort((a, b) => a.auctionEndsAt - b.auctionEndsAt);
+    const won = MQ.state.leads.filter((item) => item.status !== 'open' && (item.winners || []).includes(co.id) && MQ.matches(item, co));
     const w = MQ.wallet(co.id);
-    const notes = MQ.state.notices.filter((n) => n.contractorId === co.id && !n.read).slice(0, 3);
-    return '<section data-screen="leads"><div class="between"><h1>Leads</h1><a href="#/contractor/wallet">' + w.available + ' available</a></div>' +
-      '<p class="tiny">' + esc(co.business) + ' · ' + esc(co.trades.join(', ')) + ' · ' + esc(co.areas.join(', ')) + '</p>' +
-      '<p class="tiny">Top 3 bids win. 1 token = R20. While fewer than 3 contractors have bid, the minimum is 1 token. After that, bid at least one more than 3rd place.</p>' +
+    const notes = MQ.state.notices.filter((n) => n.contractorId === co.id && !n.read).slice(0, 2);
+    const cards = won.map((item) => leadCard(item, co)).concat(open.map((item) => leadCard(item, co)));
+    return '<section data-screen="leads"><div class="between"><h1>Leads</h1><a href="#/contractor/wallet">' + w.available + ' free</a></div>' +
+      '<p class="fee-note">R20 per token. Live bids show as Contractor A, B or C. You only pay if you win a top-3 place. No subscription and no hidden fees. <a href="#/pricing">Pricing &amp; fees</a> · <a href="#/contractor/vip">VIP ' + vipPriceLabel() + '</a></p>' +
       notes.map((n) => '<div class="notice"><p>' + esc(n.text) + '</p><button type="button" class="btn btn-small btn-ghost" data-action="dismiss" data-id="' + n.id + '">Dismiss</button></div>').join('') +
-      '<div class="lead-grid stack">' + (open.length ? open.map((item) => leadCard(item, co)).join('') : '<p>No open leads in your trades and areas.</p>') + '</div></section>';
+      '<div class="lead-grid stack">' + (cards.length ? cards.join('') : '<div class="card"><h2>No leads in your area yet</h2><p>Jobs appear here when they match your trades and suburbs. You can add areas on your profile.</p><a class="btn btn-teal" href="#/contractor/profile">Check profile</a></div>') + '</div></section>';
+  }
+
+  function statusWord(place, won) {
+    if (won) return 'Won';
+    if (place === 'in' || place === 'kept') return 'In top 3';
+    if (place === 'out') return 'Outbid';
+    return 'Not bidding';
+  }
+
+  function ownBid(item, contractorId) {
+    return MQ.rank(item).find((b) => b.contractorId === contractorId) || null;
   }
 
   function leadCard(item, co) {
-    const top = MQ.topBidders(item);
-    const place = MQ.standing(item, co.id);
-    const min = MQ.minBid(item, co.id);
-    return '<article class="card"><div class="between"><span class="pill">' + esc(item.trade) + '</span>' + countHtml(item.auctionEndsAt) + '</div>' +
-      '<h3>' + esc(item.title) + '</h3><p class="tiny">' + esc(item.suburb) + ' · ' + esc(TIMING[item.timing] || '') + '</p>' +
-      '<p>' + esc(item.description.slice(0, 140)) + (item.description.length > 140 ? '…' : '') + '</p>' +
-      thumbs(item.photos) + topList(item, top) + standingBlock(item, co, place, min) +
-      '<a class="btn btn-teal btn-block" href="#/contractor/lead/' + item.id + '">View and bid</a></article>';
+    const won = (item.winners || []).includes(co.id) && item.status !== 'open';
+    const place = won ? 'won' : MQ.standing(item, co.id);
+    const min = item.status === 'open' ? MQ.minBid(item, co.id) : 0;
+    const word = statusWord(place === 'won' ? 'won' : place, won);
+    const standing = won ? 'won' : place;
+    const mine = ownBid(item, co.id);
+    const held = (MQ.wallet(co.id).holds || {})[item.id] || 0;
+    const vipBid = co.vip && mine && item.status === 'open';
+    return '<article class="card glance' + (co.vip ? ' is-vip' : '') + '" data-lead="' + item.id + '"' + (co.vip ? ' data-vip="yes"' : '') + '><a class="glance-main" href="#/contractor/lead/' + item.id + '">' +
+      '<div class="between">' + tradeMark(item.trade) + '<span class="sr">' + esc(item.trade) + '</span>' + (co.vip ? vipBadge(co) : '') + countHtml(item.auctionEndsAt) + '</div>' +
+      '<h3>' + esc(item.suburb) + '</h3>' +
+      '<p class="tiny">' + esc(item.title) + '</p>' +
+      (item.status === 'open' ? '<p class="getin">Get in at <strong>' + min + ' tokens' + (co.vip ? (min > MQ.VIP_MAX_BID ? ' · over the VIP cap' : ' · VIP pays R0') : ' · ' + formatR(min * MQ.TOKEN_RAND)) + '</strong></p>' : '') +
+      (vipBid ? '<p class="tiny" data-testid="vip-bid">Your VIP bid: ' + mine.amount + ' tokens' + (held ? '' : ' · no tokens held') + '</p>' : '') +
+      '<p class="standing ' + standing + '" data-standing="' + standing + '">' + word + '</p></a>' +
+      (item.status === 'open' ? bidTaps(item, min) + confirmBox(item) : '<a class="btn btn-teal btn-block" href="#/contractor/lead/' + item.id + '">View and bid</a>') +
+      '</article>';
+  }
+
+  function bidTaps(item, min) {
+    const co = activeCo();
+    const vip = !!(co && co.vip);
+    if (vip && min > MQ.VIP_MAX_BID) {
+      return '<p class="form-error" data-testid="vip-cap">Fair-play cap is ' + MQ.VIP_MAX_BID + ' tokens per lead. This lead needs ' + min + '. A non-VIP can outbid you.</p>';
+    }
+    return '<div class="bid-taps" aria-label="One-tap bid">' +
+      [1, 2, 5].map((extra) => {
+        const amount = min + extra - 1;
+        if (vip && amount > MQ.VIP_MAX_BID) {
+          return '<button type="button" class="btn btn-ghost" disabled>+' + extra + '<span class="tiny">Over VIP cap</span></button>';
+        }
+        const price = vip ? 'R0' : formatR(amount * MQ.TOKEN_RAND);
+        return '<button type="button" class="btn btn-teal" data-action="pick-bid" data-lead="' + item.id + '" data-extra="' + extra + '">+' + extra + '<span class="tiny">' + amount + ' · ' + price + '</span></button>';
+      }).join('') + '</div>';
+  }
+
+  function bidSentence(amount, vip) {
+    const word = Number(amount) === 1 ? 'token' : 'tokens';
+    if (vip) return 'Bid ' + amount + ' ' + word + '. VIP: no tokens held (fair-play cap ' + MQ.VIP_MAX_BID + ' per lead).';
+    return 'Bid ' + amount + ' ' + word + ' = ' + formatR(amount * MQ.TOKEN_RAND) + ', held until the auction ends.';
+  }
+
+  function confirmBox(item) {
+    const c = memory.confirmBid;
+    if (!c || c.leadId !== item.id) return '';
+    const vip = !!(activeCo() && activeCo().vip);
+    return '<div class="confirm" data-testid="bid-confirm"><p><strong>' + bidSentence(c.amount, vip) + '</strong></p>' +
+      (vip
+        ? '<p>This bid costs nothing. You only take a place if you stay in the top 3. Cap: ' + MQ.VIP_MAX_BID + ' tokens per lead, and ' + MQ.VIP_MAX_ACTIVE + ' open top-3 places. Non-VIPs can outbid you.</p>'
+        : '<p>Released if you are pushed out. You only pay if you win a top-3 place.</p>') +
+      (memory.bidError ? '<p class="form-error" role="alert">' + esc(memory.bidError) + '</p>' : '') +
+      '<button type="button" class="btn btn-orange btn-block" data-action="confirm-bid">Confirm bid</button>' +
+      '<button type="button" class="btn btn-ghost btn-block" data-action="cancel-bid">Cancel</button></div>';
   }
 
   function topList(item) {
@@ -480,19 +644,33 @@
         const co = MQ.contractor(b.contractorId);
         const you = b.contractorId === MQ.state.session.contractorId;
         const beat = i === places - 1 && top.length >= places;
-        html += '<li class="' + (beat ? 'beat' : '') + '"><span>' + (i + 1) + '. ' + esc(you ? 'You' : (co ? co.business : 'Contractor')) +
-          (beat ? ' · bid to beat' : '') + '</span><span class="token">' + b.amount + ' · ' + formatR(b.amount * MQ.TOKEN_RAND) + '</span></li>';
+        const who = MQ.contractor(b.contractorId);
+        const vip = who && who.vip ? ' · VIP member' : '';
+        const cost = who && who.vip ? b.amount + ' · R0' : b.amount + ' · ' + formatR(b.amount * MQ.TOKEN_RAND);
+        html += '<li class="' + (beat ? 'beat' : '') + '"><span>' + (i + 1) + '. ' + esc(you ? 'You' : anonName(item, b.contractorId)) + vip +
+          (beat ? ' · bid to beat' : '') + '</span><span class="token">' + cost + '</span></li>';
       }
     }
     return html + '</ol>';
   }
 
+  function anonName(item, contractorId) {
+    if (contractorId === MQ.state.session.contractorId) return 'You';
+    const order = [];
+    (item.bids || []).forEach((b) => {
+      if (order.indexOf(b.contractorId) < 0) order.push(b.contractorId);
+    });
+    const others = order.filter((id) => id !== MQ.state.session.contractorId);
+    const idx = others.indexOf(contractorId);
+    const letter = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(idx < 0 ? 0 : idx) || '?';
+    return 'Contractor ' + letter;
+  }
+
   function standingBlock(item, co, place, min) {
-    const label = place === 'in' ? 'You are in the top 3'
-      : place === 'kept' ? 'You already have a place'
-      : place === 'out' ? 'You are outside the top 3'
-      : 'You have not bid';
-    return '<div class="standing ' + place + '" data-standing="' + place + '">' + label + ' · next bid ' + randTokens(min) + '</div>';
+    const label = place === 'in' || place === 'kept' ? 'In top 3'
+      : place === 'out' ? 'Outbid'
+      : 'Not bidding';
+    return '<div class="standing ' + place + '" data-standing="' + place + '">' + label + ' · minimum to get in ' + randTokens(min) + '</div>';
   }
 
   function thumbs(photos) {
@@ -519,7 +697,7 @@
       '<p>' + esc(won ? item.description : item.description.slice(0, 220)) + '</p>' +
       (won ? '<div class="gallery">' + (item.photos || []).map((src) => '<img src="' + src + '" alt="Job photo">').join('') + '</div>' : thumbs(item.photos)) +
       (won ? contactBlock(item) : '<div class="card"><h2>Contact hidden</h2><p>' + esc(maskName(item.contactName)) + ' · ' + esc(maskPhone(item.contactPhone)) + '</p><p class="tiny">The top 3 see the full number and the street note when the auction ends.</p></div>') +
-      (item.status === 'open' ? topList(item) + standingBlock(item, co, place, min) + bidBox(item, draft, min) : '') +
+      (item.status === 'open' ? '<p class="fee-note">' + (co.vip ? 'You are a VIP member. Bids cost no tokens, up to ' + MQ.VIP_MAX_BID + ' per lead, and at most ' + MQ.VIP_MAX_ACTIVE + ' open top-3 places. Non-VIPs can bid higher.' : 'Minimum bid to get in is ' + randTokens(min) + '. Held tokens are released if you are pushed out. You only pay if you win a top-3 place.') + '</p>' + topList(item) + standingBlock(item, co, place, min) + bidTaps(item, min) + confirmBox(item) + '<p class="tiny">Demo only — skip the countdown.</p><button type="button" class="btn btn-ghost btn-block" data-action="end-auction" data-lead="' + item.id + '">End auction now</button>' : '') +
       (won ? '<div class="card"><h2>You won a place</h2><p>Your bid has been spent. Send the client a quote.</p>' +
         (mineQuote ? '<p class="pill">Quote ' + esc(statusLabel(mineQuote.status)) + ' · ' + formatR(mineQuote.total) + '</p>' : '<a class="btn btn-orange btn-block" data-testid="send-quote" href="#/contractor/quote/' + item.id + '">Send quote</a>') +
         '</div>' + contractorThread(item) : '') +
@@ -532,17 +710,7 @@
       '<p class="tiny">' + esc(item.privateNote || '') + '</p></div>';
   }
 
-  function bidBox(item, draft, min) {
-    const w = MQ.wallet(activeCo().id);
-    return '<div class="card"><h2>Place a bid</h2>' +
-      (memory.bidError ? '<p class="form-error" role="alert">' + esc(memory.bidError) + '</p>' : '') +
-      '<label class="field"><span>Tokens (minimum ' + min + ')</span>' +
-      '<input id="bid-amount" data-field="bid" data-lead="' + item.id + '" type="number" min="' + min + '" step="1" value="' + esc(draft) + '"></label>' +
-      '<p class="tiny">This holds ' + randTokens(draft || min) + ' until you are pushed out or you win. Available now: ' + w.available + ' · held ' + w.held + '.</p>' +
-      '<button type="button" class="btn btn-orange btn-block" data-action="place-bid" data-lead="' + item.id + '">Place bid</button>' +
-      '<hr class="sep"><p class="tiny">Demo only — skip the countdown.</p>' +
-      '<button type="button" class="btn btn-ghost btn-block" data-action="end-auction" data-lead="' + item.id + '">End auction now</button></div>';
-  }
+  function bidBox() { return ''; }
 
   function contractorThread(item) {
     const msgs = MQ.state.messages.filter((m) => m.leadId === item.id);
@@ -561,7 +729,7 @@
       memory.quote = {
         leadId: id,
         lineItems: [{ description: '', qty: 1, price: '' }],
-        labour: '', callout: '', included: '', validUntil: isoDays(14), timeline: '', notes: '', error: ''
+        labour: '', callout: '', included: '', excluded: '', validUntil: isoDays(14), timeline: '', notes: '', error: ''
       };
     }
     const q = memory.quote;
@@ -581,6 +749,8 @@
       field('Call-out (R)', '<input id="q-callout" data-field="q-callout" type="number" min="0" value="' + esc(q.callout) + '">') +
       '</div>' +
       field('What’s included', '<textarea id="q-included" data-field="q-included">' + esc(q.included) + '</textarea>') +
+      field('What’s excluded', '<textarea id="q-excluded" data-field="q-excluded" placeholder="Work you will not do">' + esc(q.excluded || '') + '</textarea>') +
+      '<p class="tiny">' + vatText(co) + '. This follows your VAT registration.</p>' +
       field('Valid until', '<input id="q-valid" data-field="q-validUntil" type="date" value="' + esc(q.validUntil) + '">') +
       field('Timeline', '<input id="q-timeline" data-field="q-timeline" type="text" value="' + esc(q.timeline) + '" placeholder="Tomorrow morning">') +
       field('Notes', '<textarea id="q-notes" data-field="q-notes">' + esc(q.notes) + '</textarea>') +
@@ -617,7 +787,11 @@
   }
 
   function stackCards(items, lost) {
-    if (!items.length) return '<p class="muted">Nothing here yet.</p>';
+    if (!items.length) {
+      return lost
+        ? '<div class="card"><h2>No lost leads</h2><p>If you are pushed out of the top 3, the lead shows here after the auction ends. Held tokens come back. VIP bids were never held.</p></div>'
+        : '<div class="card"><h2>No won leads yet</h2><p>Bid on an open lead. If you finish in the top 3, send a quote from here.</p><a class="btn btn-teal" href="#/contractor/leads">See leads</a></div>';
+    }
     return '<div class="stack">' + items.map((item) =>
       '<a class="card' + (lost ? ' lost' : '') + '" href="#/contractor/lead/' + item.id + '" style="text-decoration:none;color:inherit"><h3>' +
       esc(item.title) + '</h3><p class="tiny">' + esc(item.suburb) + ' · ' + (lost ? 'Lost' : 'Won') + '</p></a>'
@@ -629,27 +803,37 @@
   }
 
   function quoteList(quotes) {
-    if (!quotes.length) return '<p class="muted">No quotes sent.</p>';
+    if (!quotes.length) return '<div class="card"><h2>No quotes sent</h2><p>Win a top-3 place, then send one quote. The client compares up to three.</p></div>';
     return '<div class="stack">' + quotes.map((q) => {
       const item = MQ.lead(q.leadId);
       return '<article class="card"><h3>' + esc(item ? item.title : 'Quote') + '</h3><p class="price">' + formatR(q.total) + '</p>' +
-        '<p class="pill">' + esc(statusLabel(q.status)) + '</p></article>';
+        '<p class="pill">' + esc(statusLabel(q.status)) + '</p>' +
+        (item ? statusTimeline(item) : '') + '</article>';
     }).join('') + '</div>';
+  }
+
+  function historyRand(h) {
+    if (h.type === 'vip' && (h.rand === null || typeof h.rand === 'undefined')) return 'R X';
+    if (h.rand != null) return formatR(h.rand);
+    return formatR((Number(h.amount) || 0) * MQ.TOKEN_RAND);
   }
 
   function walletPage() {
     const co = activeCo();
     const w = MQ.wallet(co.id);
-    return '<section data-screen="wallet"><h1>Token wallet</h1><p class="tiny">1 token = R20. Bids are held until you are pushed out, then released. If you finish in the top 3, the held tokens are spent.</p>' +
+    return '<section data-screen="wallet"><h1>Token wallet</h1>' +
+      (co.vip
+        ? '<p class="vip-line" data-testid="vip-wallet">VIP: unlimited (fair-play cap ' + MQ.VIP_MAX_BID + ' per lead)</p><p class="tiny">New bids cost nothing, up to ' + MQ.VIP_MAX_BID + ' tokens a lead and ' + MQ.VIP_MAX_ACTIVE + ' open top-3 places. Tokens already held stay held until that auction ends. <a href="#/contractor/vip">Manage VIP</a></p>'
+        : '<p class="tiny">1 token = R20. Bids are held until you are pushed out, then released. If you finish in the top 3, the held tokens are spent. <a href="#/contractor/vip">VIP is ' + vipPriceLabel() + ' (price TBC)</a></p>') +
       '<div class="wallet-hero"><div class="card"><span class="tiny">Available</span><strong>' + w.available + '</strong><span class="tiny">' + formatR(w.available * MQ.TOKEN_RAND) + '</span></div>' +
       '<div class="card"><span class="tiny">Held</span><strong>' + w.held + '</strong><span class="tiny">' + formatR(w.held * MQ.TOKEN_RAND) + '</span></div></div>' +
-      '<h2>Buy tokens</h2><p class="tiny">DEMO checkout. Nothing is charged.</p>' +
+      '<h2>Buy tokens</h2><p class="tiny">DEMO checkout. Nothing is charged. Packs are for non-VIP bids, or if you cancel VIP.</p>' +
       '<div class="pack-grid stack">' + MQ.PACKS.map((p) =>
         '<article class="card pack"><span class="demo-tag">DEMO</span><h3>' + p.tokens + ' tokens</h3><p class="rand">' + formatR(p.rand) + '</p>' +
         '<p class="tiny">R20 a token</p><button type="button" class="btn btn-orange btn-block" data-action="open-buy" data-pack="' + p.id + '">Buy ' + p.tokens + ' tokens</button></article>'
       ).join('') + '</div>' +
-      '<h2>History</h2><ul class="history">' + w.history.slice(0, 12).map((h) =>
-        '<li><strong>' + esc(h.note) + '</strong><div class="tiny">' + (h.leadTitle ? esc(h.leadTitle) + ' · ' : '') + new Date(h.at).toLocaleString('en-ZA', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) + '</div></li>'
+      '<h2>History</h2><ul class="history" data-testid="wallet-history">' + w.history.slice(0, 30).map((h) =>
+        '<li><div class="between"><strong>' + esc(h.note) + '</strong><span>' + historyRand(h) + '</span></div><div class="tiny">' + esc(h.type || 'entry') + (h.leadTitle ? ' · ' + esc(h.leadTitle) : '') + ' · ' + new Date(h.at).toLocaleString('en-ZA', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) + '</div></li>'
       ).join('') + '</ul></section>';
   }
 
@@ -658,8 +842,11 @@
     const rating = MQ.ratingOf(co);
     return '<section data-screen="profile"><div class="pro"><div class="avatar">' + esc(initials(co.business)) + '</div><div><h1>' + esc(co.business) + '</h1>' +
       '<p class="tiny">' + esc(co.name) + ' · ' + esc(co.phone) + '</p></div></div>' +
+      '<p>' + vipBadge(co) + '</p>' +
       '<p class="stars">' + (rating == null ? 'New on Multiquoters' : stars(rating) + ' ' + rating.toFixed(1)) + '</p>' +
-      '<p>' + (co.verified ? '<span class="pill">Verified</span> ' : '') + co.years + ' years in business</p>' +
+      '<p>' + (co.verified ? '<span class="pill">Verified</span> Verified means the business name and areas were checked. Reviews come only from accepted jobs. Demo check.' : 'Not verified yet.') + ' · ' + co.years + ' years in business</p>' +
+      '<p><strong>VAT.</strong> ' + (co.vatRegistered ? 'Registered — quote totals include VAT.' : 'Not registered — quote totals exclude VAT.') + '</p>' +
+      '<p>' + (co.vip ? 'You are a VIP member. <a href="#/contractor/vip">Manage VIP</a>' : '<a class="btn btn-teal" href="#/contractor/vip">Become VIP</a>') + '</p>' +
       '<p>' + esc(co.about) + '</p>' +
       '<p><strong>Trades.</strong> ' + esc(co.trades.join(', ')) + '</p>' +
       '<p><strong>Areas.</strong> ' + esc(co.areas.join(', ')) + '</p>' +
@@ -679,9 +866,66 @@
       stat('Quotes per lead', s.quotesPerLead.toFixed(1), s.quotes + ' quotes', 'quotes-per', s.quotesPerLead.toFixed(2)) +
       stat('Quotes accepted', String(s.accepted), 'of ' + s.quotes + ' sent', 'accepted', s.accepted) +
       stat('Acceptance rate', pct + '%', 'Accepted quotes ÷ quotes sent', 'rate', pct) +
+      stat('VIP members', String(s.vipMembers), 'VIP revenue ' + vipRevenueLabel(), 'vip-members', s.vipMembers) +
+      stat('VIP revenue', vipRevenueLabel(), 'Yearly price is TBC in this demo', 'vip-revenue', vipRevenueLabel()) +
       '</div>' +
-      '<div class="card"><h2>The model</h2><p>A lead opens at 1 token. Contractors bid for 12 hours. The three highest each pay whatever they bid (R20 a token) and unlock the client. Everyone else is released. The client compares up to three quotes and accepts one.</p>' +
+      '<div class="card"><h2>The model</h2><p>A lead opens at 1 token. Contractors bid for 12 hours. The three highest each pay whatever they bid (R20 a token) and unlock the client. Everyone else is released. VIP bids cost no tokens, but a VIP can bid at most ' + MQ.VIP_MAX_BID + ' tokens per lead and hold a top-3 place on at most ' + MQ.VIP_MAX_ACTIVE + ' open leads. The client compares up to three quotes and accepts one.</p>' +
       '<p class="tiny">' + s.leads + ' leads in this demo, including open auctions.</p></div></section>';
+  }
+
+  function fairPlayCard() {
+    return '<div class="card fair-play" data-testid="fair-play"><h2>Fair-play rule</h2>' +
+      '<p>Unlimited tokens would let a VIP outbid everyone. A VIP’s bids cost no tokens, and:</p><ul>' +
+      '<li>A VIP can bid at most ' + MQ.VIP_MAX_BID + ' tokens per lead.</li>' +
+      '<li>Non-VIP contractors can bid more than ' + MQ.VIP_MAX_BID + ' and outbid a VIP.</li>' +
+      '<li>A VIP can hold a top-3 place on at most ' + MQ.VIP_MAX_ACTIVE + ' open leads at a time.</li>' +
+      '</ul><p class="tiny">These caps are config constants VIP_MAX_BID and VIP_MAX_ACTIVE.</p></div>';
+  }
+
+  function pricingPage() {
+    return '<section data-screen="pricing"><span class="demo-tag">DEMO</span>' +
+      '<p class="tiny">Demo / draft text. This page states the rules of the demo. It is not a live contract.</p>' +
+      '<h1>Pricing &amp; fees</h1>' +
+      '<div class="card"><h2>Homeowners</h2><p>Free for you. Up to 3 vetted contractors will quote. You choose; there is no obligation. Your number stays hidden until a contractor wins a top-3 place.</p></div>' +
+      '<div class="card"><h2>Tokens</h2><p><strong>1 token = R20.</strong> Packs in this demo: 10 tokens for R200, 25 for R500, 50 for R1,000.</p>' +
+      '<p>Every lead opens at 1 token. You see live bids as Contractor A, B or C, plus your own. The minimum bid is the 3rd-place bid plus 1 token, or 1 token while fewer than 3 people have bid.</p>' +
+      '<p>Tokens are held when you bid and released if you are pushed out. You only pay if you win a top-3 place. There is no subscription and there are no hidden fees.</p></div>' +
+      '<div class="card vip-offer"><span class="demo-tag">DEMO</span><h2>VIP: unlimited tokens for ' + vipPriceLabel() + '</h2>' +
+      '<p class="price" data-testid="vip-price">' + vipPriceLabel() + '</p><p class="tiny">price TBC</p>' +
+      '<p>Optional yearly membership. Checkout here is pretend.</p></div>' +
+      fairPlayCard() +
+      '<p><a class="btn btn-teal" href="#/contractor/vip">Become VIP</a> <a class="btn btn-ghost" href="#/trust">Trust &amp; safety</a></p></section>';
+  }
+
+  function trustPage() {
+    return '<section data-screen="trust"><span class="demo-tag">DEMO</span>' +
+      '<p class="tiny">Demo / draft text. Trust wording for this prototype, not a legal policy.</p>' +
+      '<h1>Trust &amp; safety</h1>' +
+      '<div class="card"><h2>Verification</h2><p>A verified badge means the business name and the areas they work in were checked. In this demo that check is pretend.</p></div>' +
+      '<div class="card"><h2>Reviews</h2><p>Reviews come only from jobs the client accepted. A contractor cannot review their own lead.</p></div>' +
+      '<div class="card"><h2>Who sees a lead</h2><p>At most 3 contractors win each lead. Everyone else is released. The client’s name, number and street note are shown only to those winners.</p></div>' +
+      '<div class="card"><h2>Your information</h2><p>This demo stores everything in your browser. We do not send jobs to a server. In a live service we would collect only what is needed to match a job, share contact details only with the winning contractors, and handle personal information in line with POPIA: a clear purpose, limited sharing, and a way to ask for deletion.</p></div>' +
+      '<p><a href="#/pricing">Pricing &amp; fees</a></p></section>';
+  }
+
+  function vipPage() {
+    const co = activeCo();
+    return '<section data-screen="vip" data-testid="vip-page"><span class="demo-tag">DEMO</span>' +
+      '<h1>' + (co.vip ? 'Your VIP membership' : 'Become VIP') + '</h1>' +
+      '<p class="lede">VIP: unlimited tokens for ' + vipPriceLabel() + '</p>' +
+      '<p class="price" data-testid="vip-price">' + vipPriceLabel() + '</p>' +
+      '<p class="tiny">price TBC</p>' +
+      '<div class="card"><h2>What you get</h2><ul>' +
+      '<li>Unlimited tokens within the fair-play rule. Bids cost no tokens.</li>' +
+      '<li>A VIP badge on your profile and on lead cards. Clients see it as VIP member.</li>' +
+      '<li>Priority alerts on new leads that match your trades and suburbs. Demo notice only.</li>' +
+      '<li>A profile highlight in the client compare view, next to price and rating.</li>' +
+      '</ul></div>' +
+      fairPlayCard() +
+      (co.vip
+        ? '<p class="pill pill-good">You are a VIP member</p><button type="button" class="btn btn-ghost btn-block" data-action="cancel-vip">Cancel VIP</button>'
+        : '<button type="button" class="btn btn-orange btn-block" data-action="become-vip"><span class="demo-tag">DEMO</span> Become VIP</button><p class="tiny">Pretend checkout. No card is charged.</p>') +
+      '</section>';
   }
 
   function stat(label, value, note, id, raw) {
@@ -754,8 +998,11 @@
       memory.wizard.step = 2;
       memory.wizard.error = '';
       render(true);
+    } else if (action === 'wizard-next') {
+      advanceWizard();
     } else if (action === 'wizard-back') {
-      memory.wizard.step = 1;
+      if (memory.wizard && memory.wizard.step > 1) memory.wizard.step -= 1;
+      if (memory.wizard) memory.wizard.error = '';
       render(true);
     } else if (action === 'post-job') {
       postJob();
@@ -766,12 +1013,46 @@
       memory.showCreate = !memory.showCreate;
       memory.create = memory.create || { name: '', business: '', phone: '', trades: [], areas: [], error: '' };
       render(true);
-    } else if (action === 'place-bid') {
+    } else if (action === 'pick-bid') {
       const item = MQ.lead(t.dataset.lead);
-      const amount = Number(memory.bidDraft[item.id] != null ? memory.bidDraft[item.id] : MQ.minBid(item, activeCo().id));
-      const res = MQ.placeBid(activeCo().id, item.id, amount);
-      memory.bidError = res.ok ? '' : res.error;
-      if (!res.ok) render(true);
+      const co = activeCo();
+      const min = MQ.minBid(item, co.id);
+      const amount = min + Number(t.dataset.extra) - 1;
+      memory.bidError = '';
+      if (co.vip && amount > MQ.VIP_MAX_BID) {
+        memory.confirmBid = null;
+        memory.bidError = 'VIP fair-play cap is ' + MQ.VIP_MAX_BID + ' tokens per lead. A non-VIP can bid higher and outbid you.';
+        render(true);
+        return;
+      }
+      memory.confirmBid = { leadId: item.id, amount: amount };
+      render(true);
+    } else if (action === 'confirm-bid') {
+      const chosen = memory.confirmBid;
+      if (!chosen) return;
+      const co = activeCo();
+      const res = MQ.placeBid(co.id, chosen.leadId, chosen.amount);
+      if (!res.ok) {
+        memory.bidError = res.error;
+        render(true);
+        return;
+      }
+      memory.confirmBid = null;
+      memory.bidError = '';
+      toast(co.vip
+        ? 'VIP bid of ' + chosen.amount + ' tokens placed. No tokens held. Fair-play cap is ' + MQ.VIP_MAX_BID + ' per lead.'
+        : bidSentence(chosen.amount, false) + ' Released if you are pushed out.');
+      render(true);
+    } else if (action === 'cancel-bid') {
+      memory.confirmBid = null;
+      memory.bidError = '';
+      render(true);
+    } else if (action === 'become-vip') {
+      const res = MQ.becomeVip(activeCo().id);
+      if (!res.ok) toast(res.error);
+    } else if (action === 'cancel-vip') {
+      const res = MQ.cancelVip(activeCo().id);
+      if (!res.ok) toast(res.error);
     } else if (action === 'end-auction') {
       MQ.endAuction(t.dataset.lead);
     } else if (action === 'open-buy') {
@@ -833,6 +1114,27 @@
     render(true);
   }
 
+  function advanceWizard() {
+    const w = memory.wizard || blankWizard();
+    memory.wizard = w;
+    w.error = '';
+    if (w.step === 3) {
+      if (!w.title || w.title.trim().length < 4) return failW('Add a short job title.');
+      if (!w.description || w.description.trim().length < 15) return failW('Describe the job in a sentence or two.');
+    }
+    if (w.step === 4) {
+      if (!w.suburb) return failW('Choose a suburb.');
+      if (!w.timing) w.timing = 'week';
+    }
+    if (w.step === 5) {
+      const phone = String(w.phone || '').replace(/\D/g, '');
+      if (!w.name || w.name.trim().length < 2) return failW('Add your name.');
+      if (phone.length < 10) return failW('Add a mobile number so a winner can call you.');
+    }
+    if (w.step < 6) w.step += 1;
+    render(true);
+  }
+
   function submitQuote() {
     const q = memory.quote;
     const lines = q.lineItems.filter((li) => String(li.description || '').trim() && Number(li.price) >= 0 && Number(li.qty) > 0)
@@ -848,6 +1150,7 @@
       labour: q.labour,
       callout: q.callout,
       included: q.included.trim(),
+      excluded: (q.excluded || '').trim(),
       validUntil: q.validUntil,
       timeline: q.timeline.trim(),
       notes: q.notes.trim()
@@ -934,6 +1237,8 @@
     memory.quote = null;
     memory.modal = null;
     memory.bidDraft = {};
+    memory.confirmBid = null;
+    memory.bidError = '';
     memory.moreError = '';
     MQ.reset();
     if (location.hash && location.hash !== '#/') location.hash = '#/';

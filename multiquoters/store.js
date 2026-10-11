@@ -1,9 +1,12 @@
 /* Multiquoters demo store. All data lives in localStorage. */
 (function (root) {
-  const KEY = 'mq-demo-v1';
+  const KEY = 'mq-demo-v3';
   const TOKEN_RAND = 20;
   const AUCTION_MS = 12 * 60 * 60 * 1000;
   const PLACES_MAX = 3;
+  const VIP_PRICE_YEARLY = null;
+  const VIP_MAX_BID = 5;
+  const VIP_MAX_ACTIVE = 10;
   const BOTS = ['co-kabelo', 'co-elize', 'co-sipho'];
 
   const TRADES = [
@@ -91,6 +94,15 @@
     const pos = ranked.findIndex((b) => b.contractorId === contractorId);
     if (pos < 0) return 'none';
     return pos < placesOf(item) ? 'in' : 'out';
+  }
+
+  function isVip(contractorId) {
+    const co = contractor(contractorId);
+    return !!(co && co.vip && !co.bot);
+  }
+
+  function vipActiveCount(contractorId) {
+    return state.leads.filter((item) => item.status === 'open' && standing(item, contractorId) === 'in').length;
   }
 
   function quotesFor(leadId) {
@@ -182,12 +194,16 @@
     }
   }
 
-  function syncTop(item) {
+  function syncTop(item, wasIn) {
     const keep = new Set(topBidders(item).map((b) => b.contractorId));
     (item.retained || []).forEach((id) => keep.add(id));
     const ids = new Set(item.bids.map((b) => b.contractorId));
     ids.forEach((id) => {
-      if (!keep.has(id)) releaseHold(id, item, 'pushed');
+      if (keep.has(id)) return;
+      const released = releaseHold(id, item, 'pushed');
+      if (!released && wasIn && wasIn.has(id) && isVip(id)) {
+        notify(id, 'You were pushed out of the top 3 on “' + item.title + '”. VIP bids are free, so no tokens were held.');
+      }
     });
   }
 
@@ -220,25 +236,60 @@
     if (!Number.isFinite(amount)) return { ok: false, error: 'Enter a whole number of tokens.' };
     const min = minBid(item, contractorId);
     if (amount < min) return { ok: false, error: `Bid at least ${min} ${min === 1 ? 'token' : 'tokens'}.` };
+    const vip = isVip(contractorId);
+    if (vip && amount > VIP_MAX_BID) {
+      return { ok: false, error: `VIP fair-play cap is ${VIP_MAX_BID} tokens per lead, so non-VIP contractors can still outbid you.` };
+    }
+    const alreadyIn = standing(item, contractorId) === 'in';
+    if (vip && !alreadyIn && vipActiveCount(contractorId) >= VIP_MAX_ACTIVE) {
+      return { ok: false, error: `VIP fair-play limit: a VIP can hold a top-3 place on at most ${VIP_MAX_ACTIVE} open leads.` };
+    }
+    const wasIn = new Set(topBidders(item).map((b) => b.contractorId));
     const w = wallet(contractorId);
     const prev = w.holds[item.id] || 0;
-    const extra = amount - prev;
-    if (extra > w.available) {
-      return { ok: false, error: `You need ${extra} tokens but only ${w.available} are available.` };
+    if (vip) {
+      if (prev) {
+        delete w.holds[item.id];
+        w.available += prev;
+        syncHeld(w);
+        history(contractorId, {
+          type: 'release',
+          amount: prev,
+          rand: prev * TOKEN_RAND,
+          leadId: item.id,
+          leadTitle: item.title,
+          note: `VIP membership · ${prev} tokens released`
+        });
+      }
+      history(contractorId, {
+        type: 'vip-bid',
+        amount: 0,
+        rand: 0,
+        total: amount,
+        leadId: item.id,
+        leadTitle: item.title,
+        note: `VIP bid · ${amount} tokens · no tokens held`
+      });
+    } else {
+      const extra = amount - prev;
+      if (extra > w.available) {
+        return { ok: false, error: `You need ${extra} tokens but only ${w.available} are available. Add tokens in the wallet.` };
+      }
+      w.available -= extra;
+      w.holds[item.id] = amount;
+      syncHeld(w);
+      history(contractorId, {
+        type: prev ? 'raise' : 'hold',
+        amount: extra,
+        rand: extra * TOKEN_RAND,
+        total: amount,
+        leadId: item.id,
+        leadTitle: item.title,
+        note: prev ? `Raised bid to ${amount} tokens` : `Bid held · ${amount} tokens`
+      });
     }
-    w.available -= extra;
-    w.holds[item.id] = amount;
-    syncHeld(w);
-    history(contractorId, {
-      type: prev ? 'raise' : 'hold',
-      amount: extra,
-      total: amount,
-      leadId: item.id,
-      leadTitle: item.title,
-      note: prev ? `Raised bid to ${amount} tokens` : `Bid held · ${amount} tokens`
-    });
     item.bids.push({ contractorId, amount, at: Date.now() });
-    syncTop(item);
+    syncTop(item, wasIn);
     save();
     const toast = state.pendingToast;
     state.pendingToast = '';
@@ -259,6 +310,22 @@
   function spendHold(contractorId, item, amount) {
     const w = wallet(contractorId);
     const held = w.holds[item.id] || 0;
+    if (isVip(contractorId)) {
+      if (held) {
+        delete w.holds[item.id];
+        w.available += held;
+        syncHeld(w);
+      }
+      history(contractorId, {
+        type: 'win',
+        amount: 0,
+        rand: 0,
+        leadId: item.id,
+        leadTitle: item.title,
+        note: `Won a place · VIP bid of ${amount} tokens · no tokens spent`
+      });
+      return;
+    }
     if (held) {
       delete w.holds[item.id];
       syncHeld(w);
@@ -268,6 +335,7 @@
     history(contractorId, {
       type: 'win',
       amount: held || amount,
+      rand: (held || amount) * TOKEN_RAND,
       leadId: item.id,
       leadTitle: item.title,
       note: `Won a place · ${held || amount} tokens spent`
@@ -309,6 +377,7 @@
     });
     fresh.forEach((b) => {
       if (contractor(b.contractorId)?.bot) autoQuote(item, b.contractorId, b.amount);
+      else if (isVip(b.contractorId)) notify(b.contractorId, `You finished in the top 3 for “${item.title}”. Your VIP bid was ${b.amount} tokens and cost nothing. Send your quote.`);
       else notify(b.contractorId, `You finished in the top 3 for “${item.title}”. ${b.amount} tokens were spent. The client’s contact is unlocked — send your quote.`);
     });
     save();
@@ -330,7 +399,8 @@
       lineItems: [{ description: `${item.trade} work as described`, qty: 1, price }],
       labour,
       callout,
-      included: 'Labour, standard materials for the job described, and a site clean-up. Excludes structural work that is not visible in the photos.',
+      included: 'Labour, standard materials for the job described, and a site clean-up.',
+      excluded: 'Structural work that is not visible in the photos.',
       validUntil: isoDays(14),
       timeline: bid >= 4 ? 'Within 2 working days' : 'This week',
       notes: `${co ? co.business : 'We'} can start once you accept. Price assumes normal weekday access.`,
@@ -372,6 +442,40 @@
     return { ok: true };
   }
 
+  function becomeVip(contractorId) {
+    const co = contractor(contractorId);
+    if (!co || co.bot) return { ok: false, error: 'VIP is for contractor accounts.' };
+    if (co.vip) return { ok: false, error: 'You are already a VIP member.' };
+    co.vip = true;
+    co.vipSince = Date.now();
+    if (!state.vipSales) state.vipSales = [];
+    state.vipSales.push({ id: uid('v'), contractorId, rand: VIP_PRICE_YEARLY, at: Date.now() });
+    history(contractorId, {
+      type: 'vip',
+      amount: 0,
+      rand: VIP_PRICE_YEARLY,
+      note: 'Became VIP · DEMO checkout · price TBC'
+    });
+    save();
+    emit({ toast: 'DEMO checkout: you are a VIP member. No card was charged. Price is TBC.' });
+    return { ok: true };
+  }
+
+  function cancelVip(contractorId) {
+    const co = contractor(contractorId);
+    if (!co || !co.vip) return { ok: false, error: 'You are not a VIP member.' };
+    co.vip = false;
+    history(contractorId, {
+      type: 'vip-cancel',
+      amount: 0,
+      rand: 0,
+      note: 'VIP cancelled · future bids use tokens'
+    });
+    save();
+    emit({ toast: 'VIP cancelled. New bids hold tokens again.' });
+    return { ok: true };
+  }
+
   function saveQuote(input) {
     const item = lead(input.leadId);
     if (!item) return { ok: false, error: 'Lead not found.' };
@@ -387,6 +491,7 @@
       labour: Number(input.labour) || 0,
       callout: Number(input.callout) || 0,
       included: input.included,
+      excluded: input.excluded || 'No further exclusions.',
       validUntil: input.validUntil,
       timeline: input.timeline,
       notes: input.notes || '',
@@ -499,8 +604,14 @@
     state.leads.unshift(item);
     state.client.name = item.contactName;
     state.client.phone = item.contactPhone;
+    state.contractors.forEach((co) => {
+      if (co.vip && !co.bot && matches(item, co)) {
+        notify(co.id, 'Priority alert (demo): new ' + item.trade + ' lead in ' + item.suburb + ' — “' + item.title + '”. VIP members are told first.');
+      }
+    });
+    state.pendingToast = '';
     save();
-    emit({ toast: 'Your job is live for 12 hours. The top 3 bidders will quote.' });
+    emit({ toast: 'Your job is live for 12 hours. Up to 3 contractors will quote. It is free for you.' });
     return item;
   }
 
@@ -529,6 +640,8 @@
       areas: input.areas.slice(),
       years: 1,
       verified: false,
+      vatRegistered: !!input.vatRegistered,
+      vip: false,
       about: 'New on Multiquoters. Buy tokens to bid for leads in your trades and areas.',
       reviews: []
     };
@@ -564,7 +677,9 @@
       quotes: quoteCount,
       quotesPerLead: auctions ? quoteCount / auctions : 0,
       accepted,
-      acceptanceRate: quoteCount ? accepted / quoteCount : 0
+      acceptanceRate: quoteCount ? accepted / quoteCount : 0,
+      vipMembers: state.contractors.filter((c) => c.vip).length,
+      vipRevenue: VIP_PRICE_YEARLY
     };
   }
 
@@ -621,7 +736,7 @@
       {
         id: 'co-molefe', bot: false, name: 'Thabo Molefe', business: 'Molefe Plumbing & Solar',
         phone: '083 415 2208', trades: ['Plumbing', 'Solar', 'Pool', 'Gardening/Landscaping'],
-        areas: ['Krugersdorp', 'Roodepoort', 'Randburg'], years: 14, verified: true,
+        areas: ['Krugersdorp', 'Roodepoort', 'Randburg'], years: 14, verified: true, vatRegistered: true,
         about: 'West Rand plumber. Geysers, leaks, solar geysers and pool pumps.',
         reviews: [
           { name: 'Henk V.', area: 'Roodepoort', score: 5, text: 'Arrived when he said he would. The geyser has been perfect since.' },
@@ -632,7 +747,7 @@
       {
         id: 'co-ayesha', bot: false, name: 'Ayesha Patel', business: 'BrightSpark Electrical',
         phone: '082 673 4410', trades: ['Electrical', 'Aircon', 'Solar'],
-        areas: ['Centurion', 'Pretoria', 'Midrand', 'Randburg'], years: 9, verified: true,
+        areas: ['Centurion', 'Pretoria', 'Midrand', 'Randburg'], years: 9, verified: true, vatRegistered: true,
         about: 'Certificate of compliance on every job. DB boards, inverter splits and rooftop solar.',
         reviews: [
           { name: 'Caroline M.', area: 'Centurion', score: 5, text: 'The oven no longer trips the house, and the DB is labelled.' },
@@ -643,7 +758,7 @@
       {
         id: 'co-johan', bot: false, name: 'Johan van der Merwe', business: 'Van der Merwe Building',
         phone: '072 558 9033', trades: ['Building', 'Painting', 'Roofing', 'Tiling', 'Carpentry', 'Handyman'],
-        areas: ['Krugersdorp', 'Roodepoort', 'Randburg'], years: 21, verified: true,
+        areas: ['Krugersdorp', 'Roodepoort', 'Randburg'], years: 21, verified: true, vatRegistered: true,
         about: 'Family building firm. Roofs, paint, tiling and built-in cupboards.',
         reviews: [
           { name: 'Susan M.', area: 'Krugersdorp', score: 5, text: 'Roof team was done in a morning. No more drips.' },
@@ -654,7 +769,7 @@
       },
       {
         id: 'co-kabelo', bot: true, name: 'Kabelo Mokoena', business: "Kabelo's Home Services",
-        phone: '071 334 8821', trades: TRADES.slice(), areas: AREAS.slice(), years: 7, verified: true,
+        phone: '071 334 8821', trades: TRADES.slice(), areas: AREAS.slice(), years: 7, verified: true, vatRegistered: false,
         about: 'General contractor covering Gauteng. Bids widely in this demo.',
         reviews: [
           { name: 'Nomsa D.', area: 'Roodepoort', score: 4, text: 'Cleared the yard as promised and took the green waste away.' },
@@ -665,7 +780,7 @@
       {
         id: 'co-elize', bot: true, name: 'Elize Botha', business: 'West Rand Plumbing',
         phone: '082 990 1145', trades: ['Plumbing', 'Pool', 'Handyman', 'Gardening/Landscaping'],
-        areas: ['Krugersdorp', 'Roodepoort', 'Randburg', 'Honeydew'], years: 16, verified: true,
+        areas: ['Krugersdorp', 'Roodepoort', 'Randburg', 'Honeydew'], years: 16, verified: true, vatRegistered: true,
         about: 'Owner-run plumbing firm. Geysers, drains and general water work.',
         reviews: [
           { name: 'Lerato K.', area: 'Krugersdorp', score: 5, text: 'Best geyser install we have had. Tidy and certified.' },
@@ -675,7 +790,7 @@
       },
       {
         id: 'co-sipho', bot: true, name: 'Sipho Dlamini', business: 'Rapid Response Trades',
-        phone: '073 220 6674', trades: TRADES.slice(), areas: AREAS.slice(), years: 11, verified: true,
+        phone: '073 220 6674', trades: TRADES.slice(), areas: AREAS.slice(), years: 11, verified: true, vatRegistered: false,
         about: 'Fast call-outs across Johannesburg and Pretoria.',
         reviews: [
           { name: 'Naledi M.', area: 'Centurion', score: 5, text: 'DB fault found quickly.' },
@@ -823,7 +938,8 @@
     const geyserQuote = (id, contractorId, lines, labour, callout, timeline, notes) => {
       const quote = {
         id, leadId: 'lead-geyser', contractorId, lineItems: lines, labour, callout,
-        included: 'Remove and dispose of the old geyser, install the new unit, reconnect water and electrics, and issue a certificate of compliance for the electrical connection. Ceiling repairs stay with the insurer.',
+        included: 'Remove and dispose of the old geyser, install the new unit, reconnect water and electrics, and issue a certificate of compliance for the electrical connection.',
+        excluded: 'Ceiling repairs, painting, and moving the geyser to another wall.',
         validUntil: isoDays(7), timeline, notes, status: 'sent', createdAt: now - 90 * min
       };
       quote.total = quoteTotal(quote);
@@ -848,7 +964,8 @@
       id: 'q-cupboard', leadId: 'lead-cupboard', contractorId: 'co-johan',
       lineItems: [{ description: 'Melamine built-in cupboard, 2.4m, white', qty: 1, price: 7800 }],
       labour: 2200, callout: 0,
-      included: 'Measure, manufacture, deliver and fit. Handles included. Making good the wall is excluded.',
+      included: 'Measure, manufacture, deliver and fit. Handles included.',
+      excluded: 'Making good the wall, and painting.',
       validUntil: isoDays(-2), timeline: 'Manufacture 7 working days, fit in one day',
       notes: 'Doors were refit after a hinge adjustment.',
       status: 'accepted', createdAt: now - 18 * day, acceptedAt: now - 12 * day
@@ -894,6 +1011,7 @@
         }
       ],
       wallets: {},
+      vipSales: [],
       pendingToast: '',
       saveError: ''
     };
@@ -972,12 +1090,14 @@
   }
 
   root.MQ = {
-    TOKEN_RAND, AUCTION_MS, PLACES_MAX, TRADES, AREAS, PACKS, BUDGETS, BOTS,
+    TOKEN_RAND, AUCTION_MS, PLACES_MAX, VIP_PRICE_YEARLY, VIP_MAX_BID, VIP_MAX_ACTIVE,
+    TRADES, AREAS, PACKS, BUDGETS, BOTS,
     init, reset, subscribe, save,
     get state() { return state; },
     contractor, lead, wallet, quotesFor, rank, topBidders, minBid, standing, matches,
-    ratingOf, quoteTotal, illustration, stats,
+    ratingOf, quoteTotal, illustration, stats, isVip, vipActiveCount,
     signIn, setRole, createContractor, createLead, placeBid, endAuction, buyPack,
+    becomeVip, cancelVip,
     saveQuote, markViewed, acceptQuote, declineQuote, requestMore, sendMessage,
     dismissNotice, tick
   };
