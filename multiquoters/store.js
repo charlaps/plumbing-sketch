@@ -1,12 +1,12 @@
 /* Multiquoters demo store. All data lives in localStorage. */
 (function (root) {
-  const KEY = 'mq-demo-v3';
+  const KEY = 'mq-demo-v4';
   const TOKEN_RAND = 20;
   const AUCTION_MS = 12 * 60 * 60 * 1000;
   const PLACES_MAX = 3;
-  const VIP_PRICE_YEARLY = null;
-  const VIP_MAX_BID = 5;
-  const VIP_MAX_ACTIVE = 10;
+  const VIP_PRICE = { yearly: 9999, monthly: 999 };
+  const VIP_FREE_TOKENS = 5;
+  const VIP_EARLY_MS = 15 * 60 * 1000;
   const BOTS = ['co-kabelo', 'co-elize', 'co-sipho'];
 
   const TRADES = [
@@ -98,11 +98,24 @@
 
   function isVip(contractorId) {
     const co = contractor(contractorId);
-    return !!(co && co.vip && !co.bot);
+    return !!(co && co.vip);
   }
 
-  function vipActiveCount(contractorId) {
-    return state.leads.filter((item) => item.status === 'open' && standing(item, contractorId) === 'in').length;
+  function tokensDue(contractorId, amount) {
+    if (!isVip(contractorId)) return amount;
+    return Math.max(0, amount - VIP_FREE_TOKENS);
+  }
+
+  function coveredTokens(contractorId, amount) {
+    if (!isVip(contractorId)) return 0;
+    return Math.min(amount, VIP_FREE_TOKENS);
+  }
+
+  function renewalAt(from, plan) {
+    const d = new Date(from);
+    if (plan === 'monthly') d.setMonth(d.getMonth() + 1);
+    else d.setFullYear(d.getFullYear() + 1);
+    return d.getTime();
   }
 
   function quotesFor(leadId) {
@@ -237,46 +250,21 @@
     const min = minBid(item, contractorId);
     if (amount < min) return { ok: false, error: `Bid at least ${min} ${min === 1 ? 'token' : 'tokens'}.` };
     const vip = isVip(contractorId);
-    if (vip && amount > VIP_MAX_BID) {
-      return { ok: false, error: `VIP fair-play cap is ${VIP_MAX_BID} tokens per lead, so non-VIP contractors can still outbid you.` };
-    }
-    const alreadyIn = standing(item, contractorId) === 'in';
-    if (vip && !alreadyIn && vipActiveCount(contractorId) >= VIP_MAX_ACTIVE) {
-      return { ok: false, error: `VIP fair-play limit: a VIP can hold a top-3 place on at most ${VIP_MAX_ACTIVE} open leads.` };
-    }
-    const wasIn = new Set(topBidders(item).map((b) => b.contractorId));
     const w = wallet(contractorId);
     const prev = w.holds[item.id] || 0;
-    if (vip) {
-      if (prev) {
-        delete w.holds[item.id];
-        w.available += prev;
-        syncHeld(w);
-        history(contractorId, {
-          type: 'release',
-          amount: prev,
-          rand: prev * TOKEN_RAND,
-          leadId: item.id,
-          leadTitle: item.title,
-          note: `VIP membership · ${prev} tokens released`
-        });
-      }
-      history(contractorId, {
-        type: 'vip-bid',
-        amount: 0,
-        rand: 0,
-        total: amount,
-        leadId: item.id,
-        leadTitle: item.title,
-        note: `VIP bid · ${amount} tokens · no tokens held`
-      });
-    } else {
-      const extra = amount - prev;
-      if (extra > w.available) {
-        return { ok: false, error: `You need ${extra} tokens but only ${w.available} are available. Add tokens in the wallet.` };
-      }
+    const due = tokensDue(contractorId, amount);
+    const covered = coveredTokens(contractorId, amount);
+    const extra = due - prev;
+    if (extra > w.available) {
+      const why = vip
+        ? `This bid is ${amount} tokens. VIP covers ${covered}, so you pay ${due}. You need ${extra} more tokens and only ${w.available} are available.`
+        : `You need ${extra} tokens but only ${w.available} are available. Add tokens in the wallet.`;
+      return { ok: false, error: why };
+    }
+    const wasIn = new Set(topBidders(item).map((b) => b.contractorId));
+    if (extra > 0) {
       w.available -= extra;
-      w.holds[item.id] = amount;
+      w.holds[item.id] = due;
       syncHeld(w);
       history(contractorId, {
         type: prev ? 'raise' : 'hold',
@@ -285,7 +273,35 @@
         total: amount,
         leadId: item.id,
         leadTitle: item.title,
-        note: prev ? `Raised bid to ${amount} tokens` : `Bid held · ${amount} tokens`
+        note: prev ? `Raised bid to ${amount} tokens` : `Bid held · ${extra} tokens`
+      });
+    } else if (extra < 0) {
+      w.available += -extra;
+      if (due === 0) delete w.holds[item.id];
+      else w.holds[item.id] = due;
+      syncHeld(w);
+      history(contractorId, {
+        type: 'release',
+        amount: -extra,
+        rand: -extra * TOKEN_RAND,
+        leadId: item.id,
+        leadTitle: item.title,
+        note: `Released ${-extra} tokens`
+      });
+    } else if (due === 0) {
+      delete w.holds[item.id];
+      syncHeld(w);
+    }
+    if (covered > 0) {
+      history(contractorId, {
+        type: 'vip-bid',
+        amount: 0,
+        rand: 0,
+        vipCovered: true,
+        total: amount,
+        leadId: item.id,
+        leadTitle: item.title,
+        note: 'R0 (VIP)'
       });
     }
     item.bids.push({ contractorId, amount, at: Date.now() });
@@ -310,36 +326,36 @@
   function spendHold(contractorId, item, amount) {
     const w = wallet(contractorId);
     const held = w.holds[item.id] || 0;
-    if (isVip(contractorId)) {
-      if (held) {
-        delete w.holds[item.id];
-        w.available += held;
-        syncHeld(w);
-      }
-      history(contractorId, {
-        type: 'win',
-        amount: 0,
-        rand: 0,
-        leadId: item.id,
-        leadTitle: item.title,
-        note: `Won a place · VIP bid of ${amount} tokens · no tokens spent`
-      });
-      return;
-    }
+    const due = tokensDue(contractorId, amount);
+    const covered = coveredTokens(contractorId, amount);
     if (held) {
       delete w.holds[item.id];
+      if (held > due) w.available += held - due;
       syncHeld(w);
-    } else if (w.available >= amount) {
-      w.available -= amount;
+    } else if (due > 0 && w.available >= due) {
+      w.available -= due;
     }
-    history(contractorId, {
-      type: 'win',
-      amount: held || amount,
-      rand: (held || amount) * TOKEN_RAND,
-      leadId: item.id,
-      leadTitle: item.title,
-      note: `Won a place · ${held || amount} tokens spent`
-    });
+    if (covered > 0) {
+      history(contractorId, {
+        type: 'vip-bid',
+        amount: 0,
+        rand: 0,
+        vipCovered: true,
+        leadId: item.id,
+        leadTitle: item.title,
+        note: 'R0 (VIP)'
+      });
+    }
+    if (due > 0) {
+      history(contractorId, {
+        type: 'win',
+        amount: due,
+        rand: due * TOKEN_RAND,
+        leadId: item.id,
+        leadTitle: item.title,
+        note: `Won a place · ${due} tokens spent`
+      });
+    }
   }
 
   function settle(item, force) {
@@ -377,7 +393,13 @@
     });
     fresh.forEach((b) => {
       if (contractor(b.contractorId)?.bot) autoQuote(item, b.contractorId, b.amount);
-      else if (isVip(b.contractorId)) notify(b.contractorId, `You finished in the top 3 for “${item.title}”. Your VIP bid was ${b.amount} tokens and cost nothing. Send your quote.`);
+      else if (isVip(b.contractorId)) {
+        const due = tokensDue(b.contractorId, b.amount);
+        const msg = due === 0
+          ? `You finished in the top 3 for “${item.title}”. Your VIP bid of ${b.amount} tokens cost R0 (VIP). Send your quote.`
+          : `You finished in the top 3 for “${item.title}”. VIP covered ${VIP_FREE_TOKENS} tokens. ${due} tokens were spent. Send your quote.`;
+        notify(b.contractorId, msg);
+      }
       else notify(b.contractorId, `You finished in the top 3 for “${item.title}”. ${b.amount} tokens were spent. The client’s contact is unlocked — send your quote.`);
     });
     save();
@@ -442,22 +464,27 @@
     return { ok: true };
   }
 
-  function becomeVip(contractorId) {
+  function becomeVip(contractorId, plan) {
     const co = contractor(contractorId);
     if (!co || co.bot) return { ok: false, error: 'VIP is for contractor accounts.' };
     if (co.vip) return { ok: false, error: 'You are already a VIP member.' };
+    if (plan !== 'monthly' && plan !== 'yearly') plan = 'yearly';
+    const rand = VIP_PRICE[plan];
+    const now = Date.now();
     co.vip = true;
-    co.vipSince = Date.now();
+    co.vipPlan = plan;
+    co.vipSince = now;
+    co.vipRenewsAt = renewalAt(now, plan);
     if (!state.vipSales) state.vipSales = [];
-    state.vipSales.push({ id: uid('v'), contractorId, rand: VIP_PRICE_YEARLY, at: Date.now() });
+    state.vipSales.push({ id: uid('v'), contractorId, plan, rand, at: now });
     history(contractorId, {
       type: 'vip',
       amount: 0,
-      rand: VIP_PRICE_YEARLY,
-      note: 'Became VIP · DEMO checkout · price TBC'
+      rand,
+      note: `Joined VIP · ${plan} · DEMO checkout`
     });
     save();
-    emit({ toast: 'DEMO checkout: you are a VIP member. No card was charged. Price is TBC.' });
+    emit({ toast: `DEMO checkout: VIP ${plan} membership added. No card was charged.` });
     return { ok: true };
   }
 
@@ -606,7 +633,7 @@
     state.client.phone = item.contactPhone;
     state.contractors.forEach((co) => {
       if (co.vip && !co.bot && matches(item, co)) {
-        notify(co.id, 'Priority alert (demo): new ' + item.trade + ' lead in ' + item.suburb + ' — “' + item.title + '”. VIP members are told first.');
+        notify(co.id, 'VIP early access: new ' + item.trade + ' lead in ' + item.suburb + ' — “' + item.title + '”. You are alerted 15 minutes earlier than other contractors.');
       }
     });
     state.pendingToast = '';
@@ -679,7 +706,7 @@
       accepted,
       acceptanceRate: quoteCount ? accepted / quoteCount : 0,
       vipMembers: state.contractors.filter((c) => c.vip).length,
-      vipRevenue: VIP_PRICE_YEARLY
+      vipRevenue: (state.vipSales || []).reduce((sum, sale) => sum + (Number(sale.rand) || 0), 0)
     };
   }
 
@@ -1011,7 +1038,7 @@
         }
       ],
       wallets: {},
-      vipSales: [],
+      vipSales: [{ id: 'v-elize', contractorId: 'co-elize', plan: 'yearly', rand: VIP_PRICE.yearly, at: now - 40 * day }],
       pendingToast: '',
       saveError: ''
     };
@@ -1029,28 +1056,40 @@
         note: `Bought ${sale.tokens} tokens · DEMO checkout`
       });
     });
+    const elize = contractors.find((c) => c.id === 'co-elize');
+    elize.vip = true;
+    elize.vipPlan = 'yearly';
+    elize.vipSince = now - 40 * day;
+    elize.vipRenewsAt = renewalAt(elize.vipSince, 'yearly');
+
     leads.forEach((item) => {
-      if (item.status === 'open') {
-        topBidders(item).forEach((b) => {
-          const w = wallet(b.contractorId);
-          w.holds[item.id] = b.amount;
-          w.available -= b.amount;
+      const rows = item.status === 'open' ? topBidders(item) : (item.winningBids || []);
+      rows.forEach((b) => {
+        const due = tokensDue(b.contractorId, b.amount);
+        const w = wallet(b.contractorId);
+        if (isVip(b.contractorId) && coveredTokens(b.contractorId, b.amount) > 0) {
+          w.history.unshift({
+            id: uid('h'), type: 'vip-bid', amount: 0, rand: 0, vipCovered: true,
+            at: b.at || item.wonAt, leadId: item.id, leadTitle: item.title, note: 'R0 (VIP)'
+          });
+        }
+        if (due <= 0) return;
+        if (item.status === 'open') {
+          w.holds[item.id] = due;
+          w.available -= due;
           syncHeld(w);
           w.history.unshift({
-            id: uid('h'), type: 'hold', amount: b.amount, at: b.at, leadId: item.id, leadTitle: item.title,
-            note: `Bid held · ${b.amount} tokens`
+            id: uid('h'), type: 'hold', amount: due, rand: due * TOKEN_RAND, at: b.at, leadId: item.id, leadTitle: item.title,
+            note: `Bid held · ${due} tokens`
           });
-        });
-      } else {
-        (item.winningBids || []).forEach((b) => {
-          const w = wallet(b.contractorId);
-          w.available -= b.amount;
+        } else {
+          w.available -= due;
           w.history.unshift({
-            id: uid('h'), type: 'win', amount: b.amount, at: item.wonAt, leadId: item.id, leadTitle: item.title,
-            note: `Won a place · ${b.amount} tokens spent`
+            id: uid('h'), type: 'win', amount: due, rand: due * TOKEN_RAND, at: item.wonAt, leadId: item.id, leadTitle: item.title,
+            note: `Won a place · ${due} tokens spent`
           });
-        });
-      }
+        }
+      });
     });
     history('co-molefe', {
       type: 'release', amount: 2, leadId: 'lead-leak', leadTitle: 'Kitchen sink leaking into the cupboard',
@@ -1090,12 +1129,12 @@
   }
 
   root.MQ = {
-    TOKEN_RAND, AUCTION_MS, PLACES_MAX, VIP_PRICE_YEARLY, VIP_MAX_BID, VIP_MAX_ACTIVE,
+    TOKEN_RAND, AUCTION_MS, PLACES_MAX, VIP_PRICE, VIP_FREE_TOKENS, VIP_EARLY_MS,
     TRADES, AREAS, PACKS, BUDGETS, BOTS,
     init, reset, subscribe, save,
     get state() { return state; },
     contractor, lead, wallet, quotesFor, rank, topBidders, minBid, standing, matches,
-    ratingOf, quoteTotal, illustration, stats, isVip, vipActiveCount,
+    ratingOf, quoteTotal, illustration, stats, isVip, tokensDue, renewalAt,
     signIn, setRole, createContractor, createLead, placeBid, endAuction, buyPack,
     becomeVip, cancelVip,
     saveQuote, markViewed, acceptQuote, declineQuote, requestMore, sendMessage,

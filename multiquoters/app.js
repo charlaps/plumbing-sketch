@@ -10,6 +10,7 @@
     create: null,
     bidDraft: {},
     confirmBid: null,
+    vipPlan: 'yearly',
     threadFor: ''
   };
   let lastRoute = '';
@@ -216,7 +217,7 @@
       step(1, 'Buy tokens', 'R20 each. No subscription and no hidden fees.') +
       step(2, 'Bid for a place', 'Top 3 win. Held tokens come back if you are pushed out.') +
       step(3, 'Send one quote', 'You only pay the tokens if you keep a top-3 place.') +
-      '</div><p class="tiny">Optional VIP: unlimited tokens for R X / year <span class="tbc">price TBC</span>. Fair-play caps still apply.</p></section></div>' +
+      '</div><p class="tiny">Optional VIP: ' + formatR(MQ.VIP_PRICE.yearly) + '/year or ' + formatR(MQ.VIP_PRICE.monthly) + '/month. Bids are free up to ' + MQ.VIP_FREE_TOKENS + ' tokens a lead. VIP can\'t buy unlimited bids.</p></section></div>' +
       '<p class="tiny">Krugersdorp, Roodepoort, Randburg, Centurion, Pretoria and nearby.</p>' +
       '<p class="row"><a href="#/pricing">Pricing &amp; fees</a> · <a href="#/trust">Trust &amp; safety</a> · <a href="#/admin">Overview</a></p></section>';
   }
@@ -448,14 +449,27 @@
     return '<span class="vip-badge">VIP member</span>';
   }
 
-  function vipPriceLabel() {
-    if (MQ.VIP_PRICE_YEARLY == null) return 'R X / year';
-    return formatR(MQ.VIP_PRICE_YEARLY) + ' / year';
+  function niceWhen(ts) {
+    if (!ts) return '';
+    return new Date(ts).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
-  function vipRevenueLabel() {
-    if (MQ.VIP_PRICE_YEARLY == null) return 'R X';
-    return formatR((MQ.stats().vipMembers || 0) * MQ.VIP_PRICE_YEARLY);
+  function vipPay(amount) {
+    const covered = Math.min(amount, MQ.VIP_FREE_TOKENS);
+    const due = Math.max(0, amount - MQ.VIP_FREE_TOKENS);
+    return { covered, due };
+  }
+
+  function vipRules() {
+    const free = MQ.VIP_FREE_TOKENS;
+    return '<p data-testid="vip-prices"><strong>' + formatR(MQ.VIP_PRICE.yearly) + '/year</strong> or <strong>' + formatR(MQ.VIP_PRICE.monthly) + '/month</strong>.</p>' +
+      '<ul>' +
+      '<li>VIP bids cost no tokens up to ' + free + ' tokens per lead, so a VIP can join every auction for free, up to a ' + free + '-token bid.</li>' +
+      '<li>Above ' + free + ' tokens, the VIP pays the difference in normal tokens. A bid of 7 charges 2 tokens.</li>' +
+      '<li>A VIP badge on bids and quotes.</li>' +
+      '<li>New-lead alerts 15 minutes earlier. Fresh leads are tagged VIP early access.</li>' +
+      '</ul>' +
+      '<p><strong>VIP can\'t buy unlimited bids.</strong> The free portion stops at ' + free + ' tokens per lead, so it stays fair for everyone.</p>';
   }
 
   function proHead(co, rating) {
@@ -560,7 +574,7 @@
     const notes = MQ.state.notices.filter((n) => n.contractorId === co.id && !n.read).slice(0, 2);
     const cards = won.map((item) => leadCard(item, co)).concat(open.map((item) => leadCard(item, co)));
     return '<section data-screen="leads"><div class="between"><h1>Leads</h1><a href="#/contractor/wallet">' + w.available + ' free</a></div>' +
-      '<p class="fee-note">R20 per token. Live bids show as Contractor A, B or C. You only pay if you win a top-3 place. No subscription and no hidden fees. <a href="#/pricing">Pricing &amp; fees</a> · <a href="#/contractor/vip">VIP ' + vipPriceLabel() + '</a></p>' +
+      '<p class="fee-note">R20 per token. Live bids show as Contractor A, B or C. You only pay if you win a top-3 place. No hidden fees. <a href="#/pricing">Pricing &amp; fees</a> · <a href="#/contractor/vip">Go VIP</a></p>' +
       notes.map((n) => '<div class="notice"><p>' + esc(n.text) + '</p><button type="button" class="btn btn-small btn-ghost" data-action="dismiss" data-id="' + n.id + '">Dismiss</button></div>').join('') +
       '<div class="lead-grid stack">' + (cards.length ? cards.join('') : '<div class="card"><h2>No leads in your area yet</h2><p>Jobs appear here when they match your trades and suburbs. You can add areas on your profile.</p><a class="btn btn-teal" href="#/contractor/profile">Check profile</a></div>') + '</div></section>';
   }
@@ -583,39 +597,48 @@
     const word = statusWord(place === 'won' ? 'won' : place, won);
     const standing = won ? 'won' : place;
     const mine = ownBid(item, co.id);
-    const held = (MQ.wallet(co.id).holds || {})[item.id] || 0;
     const vipBid = co.vip && mine && item.status === 'open';
+    const pay = co.vip ? vipPay(min) : null;
+    const getIn = !co.vip
+      ? min + ' tokens · ' + formatR(min * MQ.TOKEN_RAND)
+      : (pay.due === 0 ? min + ' tokens · R0 (VIP)' : min + ' tokens · pay ' + pay.due + ' after VIP');
+    const minePay = mine ? vipPay(mine.amount) : null;
     return '<article class="card glance' + (co.vip ? ' is-vip' : '') + '" data-lead="' + item.id + '"' + (co.vip ? ' data-vip="yes"' : '') + '><a class="glance-main" href="#/contractor/lead/' + item.id + '">' +
       '<div class="between">' + tradeMark(item.trade) + '<span class="sr">' + esc(item.trade) + '</span>' + (co.vip ? vipBadge(co) : '') + countHtml(item.auctionEndsAt) + '</div>' +
+      earlyTag(item) +
       '<h3>' + esc(item.suburb) + '</h3>' +
       '<p class="tiny">' + esc(item.title) + '</p>' +
-      (item.status === 'open' ? '<p class="getin">Get in at <strong>' + min + ' tokens' + (co.vip ? (min > MQ.VIP_MAX_BID ? ' · over the VIP cap' : ' · VIP pays R0') : ' · ' + formatR(min * MQ.TOKEN_RAND)) + '</strong></p>' : '') +
-      (vipBid ? '<p class="tiny" data-testid="vip-bid">Your VIP bid: ' + mine.amount + ' tokens' + (held ? '' : ' · no tokens held') + '</p>' : '') +
+      (item.status === 'open' ? '<p class="getin">Get in at <strong>' + getIn + '</strong></p>' : '') +
+      (vipBid ? '<p class="tiny" data-testid="vip-bid">Your VIP bid: ' + mine.amount + ' tokens · ' + (minePay.due === 0 ? 'R0 (VIP)' : minePay.due + ' tokens held') + '</p>' : '') +
       '<p class="standing ' + standing + '" data-standing="' + standing + '">' + word + '</p></a>' +
       (item.status === 'open' ? bidTaps(item, min) + confirmBox(item) : '<a class="btn btn-teal btn-block" href="#/contractor/lead/' + item.id + '">View and bid</a>') +
       '</article>';
   }
 
+  function earlyTag(item) {
+    if (!item.createdAt || Date.now() - item.createdAt >= MQ.VIP_EARLY_MS) return '';
+    return '<p class="early"><span class="pill pill-orange" data-testid="vip-early">VIP early access</span> <span class="tiny">VIP alerts go out 15 minutes earlier.</span></p>';
+  }
+
   function bidTaps(item, min) {
-    const co = activeCo();
-    const vip = !!(co && co.vip);
-    if (vip && min > MQ.VIP_MAX_BID) {
-      return '<p class="form-error" data-testid="vip-cap">Fair-play cap is ' + MQ.VIP_MAX_BID + ' tokens per lead. This lead needs ' + min + '. A non-VIP can outbid you.</p>';
-    }
+    const vip = !!(activeCo() && activeCo().vip);
     return '<div class="bid-taps" aria-label="One-tap bid">' +
       [1, 2, 5].map((extra) => {
         const amount = min + extra - 1;
-        if (vip && amount > MQ.VIP_MAX_BID) {
-          return '<button type="button" class="btn btn-ghost" disabled>+' + extra + '<span class="tiny">Over VIP cap</span></button>';
-        }
-        const price = vip ? 'R0' : formatR(amount * MQ.TOKEN_RAND);
+        const price = vip
+          ? (vipPay(amount).due === 0 ? 'R0 (VIP)' : formatR(vipPay(amount).due * MQ.TOKEN_RAND))
+          : formatR(amount * MQ.TOKEN_RAND);
         return '<button type="button" class="btn btn-teal" data-action="pick-bid" data-lead="' + item.id + '" data-extra="' + extra + '">+' + extra + '<span class="tiny">' + amount + ' · ' + price + '</span></button>';
       }).join('') + '</div>';
   }
 
   function bidSentence(amount, vip) {
     const word = Number(amount) === 1 ? 'token' : 'tokens';
-    if (vip) return 'Bid ' + amount + ' ' + word + '. VIP: no tokens held (fair-play cap ' + MQ.VIP_MAX_BID + ' per lead).';
+    if (vip) {
+      const pay = vipPay(amount);
+      if (pay.due === 0) return 'Bid ' + amount + ' ' + word + ' = R0 (VIP). Nothing is held.';
+      return 'Bid ' + amount + ' tokens. VIP covers ' + pay.covered + '. You pay ' + pay.due + ' tokens = ' + formatR(pay.due * MQ.TOKEN_RAND) + ', held until the auction ends.';
+    }
     return 'Bid ' + amount + ' ' + word + ' = ' + formatR(amount * MQ.TOKEN_RAND) + ', held until the auction ends.';
   }
 
@@ -625,7 +648,7 @@
     const vip = !!(activeCo() && activeCo().vip);
     return '<div class="confirm" data-testid="bid-confirm"><p><strong>' + bidSentence(c.amount, vip) + '</strong></p>' +
       (vip
-        ? '<p>This bid costs nothing. You only take a place if you stay in the top 3. Cap: ' + MQ.VIP_MAX_BID + ' tokens per lead, and ' + MQ.VIP_MAX_ACTIVE + ' open top-3 places. Non-VIPs can outbid you.</p>'
+        ? '<p>VIP covers the first ' + MQ.VIP_FREE_TOKENS + ' tokens on this lead. Above that, the difference is held until the auction ends. VIP can\'t buy unlimited bids.</p>'
         : '<p>Released if you are pushed out. You only pay if you win a top-3 place.</p>') +
       (memory.bidError ? '<p class="form-error" role="alert">' + esc(memory.bidError) + '</p>' : '') +
       '<button type="button" class="btn btn-orange btn-block" data-action="confirm-bid">Confirm bid</button>' +
@@ -646,7 +669,9 @@
         const beat = i === places - 1 && top.length >= places;
         const who = MQ.contractor(b.contractorId);
         const vip = who && who.vip ? ' · VIP member' : '';
-        const cost = who && who.vip ? b.amount + ' · R0' : b.amount + ' · ' + formatR(b.amount * MQ.TOKEN_RAND);
+        const cost = who && who.vip
+          ? (b.amount <= MQ.VIP_FREE_TOKENS ? b.amount + ' · R0 (VIP)' : b.amount + ' · pay ' + (b.amount - MQ.VIP_FREE_TOKENS))
+          : b.amount + ' · ' + formatR(b.amount * MQ.TOKEN_RAND);
         html += '<li class="' + (beat ? 'beat' : '') + '"><span>' + (i + 1) + '. ' + esc(you ? 'You' : anonName(item, b.contractorId)) + vip +
           (beat ? ' · bid to beat' : '') + '</span><span class="token">' + cost + '</span></li>';
       }
@@ -697,7 +722,7 @@
       '<p>' + esc(won ? item.description : item.description.slice(0, 220)) + '</p>' +
       (won ? '<div class="gallery">' + (item.photos || []).map((src) => '<img src="' + src + '" alt="Job photo">').join('') + '</div>' : thumbs(item.photos)) +
       (won ? contactBlock(item) : '<div class="card"><h2>Contact hidden</h2><p>' + esc(maskName(item.contactName)) + ' · ' + esc(maskPhone(item.contactPhone)) + '</p><p class="tiny">The top 3 see the full number and the street note when the auction ends.</p></div>') +
-      (item.status === 'open' ? '<p class="fee-note">' + (co.vip ? 'You are a VIP member. Bids cost no tokens, up to ' + MQ.VIP_MAX_BID + ' per lead, and at most ' + MQ.VIP_MAX_ACTIVE + ' open top-3 places. Non-VIPs can bid higher.' : 'Minimum bid to get in is ' + randTokens(min) + '. Held tokens are released if you are pushed out. You only pay if you win a top-3 place.') + '</p>' + topList(item) + standingBlock(item, co, place, min) + bidTaps(item, min) + confirmBox(item) + '<p class="tiny">Demo only — skip the countdown.</p><button type="button" class="btn btn-ghost btn-block" data-action="end-auction" data-lead="' + item.id + '">End auction now</button>' : '') +
+      (item.status === 'open' ? earlyTag(item) + '<p class="fee-note">' + (co.vip ? 'You are a VIP member. The first ' + MQ.VIP_FREE_TOKENS + ' tokens on this lead are free. Above that you pay the difference. VIP can\'t buy unlimited bids.' : 'Minimum bid to get in is ' + randTokens(min) + '. Held tokens are released if you are pushed out. You only pay if you win a top-3 place.') + '</p>' + topList(item) + standingBlock(item, co, place, min) + bidTaps(item, min) + confirmBox(item) + '<p class="tiny">Demo only — skip the countdown.</p><button type="button" class="btn btn-ghost btn-block" data-action="end-auction" data-lead="' + item.id + '">End auction now</button>' : '') +
       (won ? '<div class="card"><h2>You won a place</h2><p>Your bid has been spent. Send the client a quote.</p>' +
         (mineQuote ? '<p class="pill">Quote ' + esc(statusLabel(mineQuote.status)) + ' · ' + formatR(mineQuote.total) + '</p>' : '<a class="btn btn-orange btn-block" data-testid="send-quote" href="#/contractor/quote/' + item.id + '">Send quote</a>') +
         '</div>' + contractorThread(item) : '') +
@@ -813,18 +838,27 @@
   }
 
   function historyRand(h) {
-    if (h.type === 'vip' && (h.rand === null || typeof h.rand === 'undefined')) return 'R X';
+    if (h.vipCovered) return 'R0 (VIP)';
     if (h.rand != null) return formatR(h.rand);
     return formatR((Number(h.amount) || 0) * MQ.TOKEN_RAND);
+  }
+
+  function goVipCard(co) {
+    const status = co.vip
+      ? '<p class="pill pill-good" data-testid="vip-status">VIP member · ' + (co.vipPlan === 'monthly' ? 'Monthly' : 'Yearly') + '</p>' +
+        '<p data-testid="vip-renewal">Renews ' + esc(niceWhen(co.vipRenewsAt)) + '</p>' +
+        '<a class="btn btn-ghost btn-block" href="#/contractor/vip">VIP details</a>'
+      : '<a class="btn btn-orange btn-block" href="#/contractor/vip">Go VIP</a>';
+    return '<article class="card vip-offer" data-testid="go-vip"><span class="demo-tag">DEMO</span><h2>Go VIP</h2>' +
+      vipRules() + status + '</article>';
   }
 
   function walletPage() {
     const co = activeCo();
     const w = MQ.wallet(co.id);
     return '<section data-screen="wallet"><h1>Token wallet</h1>' +
-      (co.vip
-        ? '<p class="vip-line" data-testid="vip-wallet">VIP: unlimited (fair-play cap ' + MQ.VIP_MAX_BID + ' per lead)</p><p class="tiny">New bids cost nothing, up to ' + MQ.VIP_MAX_BID + ' tokens a lead and ' + MQ.VIP_MAX_ACTIVE + ' open top-3 places. Tokens already held stay held until that auction ends. <a href="#/contractor/vip">Manage VIP</a></p>'
-        : '<p class="tiny">1 token = R20. Bids are held until you are pushed out, then released. If you finish in the top 3, the held tokens are spent. <a href="#/contractor/vip">VIP is ' + vipPriceLabel() + ' (price TBC)</a></p>') +
+      goVipCard(co) +
+      '<p class="tiny">1 token = R20. Bids are held until you are pushed out, then released. If you finish in the top 3, the held tokens are spent. VIP-covered bids show as R0 (VIP).</p>' +
       '<div class="wallet-hero"><div class="card"><span class="tiny">Available</span><strong>' + w.available + '</strong><span class="tiny">' + formatR(w.available * MQ.TOKEN_RAND) + '</span></div>' +
       '<div class="card"><span class="tiny">Held</span><strong>' + w.held + '</strong><span class="tiny">' + formatR(w.held * MQ.TOKEN_RAND) + '</span></div></div>' +
       '<h2>Buy tokens</h2><p class="tiny">DEMO checkout. Nothing is charged. Packs are for non-VIP bids, or if you cancel VIP.</p>' +
@@ -846,7 +880,9 @@
       '<p class="stars">' + (rating == null ? 'New on Multiquoters' : stars(rating) + ' ' + rating.toFixed(1)) + '</p>' +
       '<p>' + (co.verified ? '<span class="pill">Verified</span> Verified means the business name and areas were checked. Reviews come only from accepted jobs. Demo check.' : 'Not verified yet.') + ' · ' + co.years + ' years in business</p>' +
       '<p><strong>VAT.</strong> ' + (co.vatRegistered ? 'Registered — quote totals include VAT.' : 'Not registered — quote totals exclude VAT.') + '</p>' +
-      '<p>' + (co.vip ? 'You are a VIP member. <a href="#/contractor/vip">Manage VIP</a>' : '<a class="btn btn-teal" href="#/contractor/vip">Become VIP</a>') + '</p>' +
+      '<p>' + (co.vip
+        ? '<span data-testid="vip-status">VIP member · ' + (co.vipPlan === 'monthly' ? 'Monthly' : 'Yearly') + '</span> · <span data-testid="vip-renewal">Renews ' + esc(niceWhen(co.vipRenewsAt)) + '</span>'
+        : '<a class="btn btn-teal" href="#/contractor/vip">Go VIP</a>') + '</p>' +
       '<p>' + esc(co.about) + '</p>' +
       '<p><strong>Trades.</strong> ' + esc(co.trades.join(', ')) + '</p>' +
       '<p><strong>Areas.</strong> ' + esc(co.areas.join(', ')) + '</p>' +
@@ -866,20 +902,11 @@
       stat('Quotes per lead', s.quotesPerLead.toFixed(1), s.quotes + ' quotes', 'quotes-per', s.quotesPerLead.toFixed(2)) +
       stat('Quotes accepted', String(s.accepted), 'of ' + s.quotes + ' sent', 'accepted', s.accepted) +
       stat('Acceptance rate', pct + '%', 'Accepted quotes ÷ quotes sent', 'rate', pct) +
-      stat('VIP members', String(s.vipMembers), 'VIP revenue ' + vipRevenueLabel(), 'vip-members', s.vipMembers) +
-      stat('VIP revenue', vipRevenueLabel(), 'Yearly price is TBC in this demo', 'vip-revenue', vipRevenueLabel()) +
+      stat('VIP members', String(s.vipMembers), 'Alongside token revenue', 'vip-members', s.vipMembers) +
+      stat('VIP revenue', formatR(s.vipRevenue), 'Membership fees, separate from tokens', 'vip-revenue', s.vipRevenue) +
       '</div>' +
-      '<div class="card"><h2>The model</h2><p>A lead opens at 1 token. Contractors bid for 12 hours. The three highest each pay whatever they bid (R20 a token) and unlock the client. Everyone else is released. VIP bids cost no tokens, but a VIP can bid at most ' + MQ.VIP_MAX_BID + ' tokens per lead and hold a top-3 place on at most ' + MQ.VIP_MAX_ACTIVE + ' open leads. The client compares up to three quotes and accepts one.</p>' +
+      '<div class="card"><h2>The model</h2><p>A lead opens at 1 token. Contractors bid for 12 hours. The three highest each pay whatever they bid (R20 a token) and unlock the client. Everyone else is released. A VIP bid is free up to ' + MQ.VIP_FREE_TOKENS + ' tokens on that lead. Above that, the VIP pays the difference in tokens. VIP can\'t buy unlimited bids. The client compares up to three quotes and accepts one.</p>' +
       '<p class="tiny">' + s.leads + ' leads in this demo, including open auctions.</p></div></section>';
-  }
-
-  function fairPlayCard() {
-    return '<div class="card fair-play" data-testid="fair-play"><h2>Fair-play rule</h2>' +
-      '<p>Unlimited tokens would let a VIP outbid everyone. A VIP’s bids cost no tokens, and:</p><ul>' +
-      '<li>A VIP can bid at most ' + MQ.VIP_MAX_BID + ' tokens per lead.</li>' +
-      '<li>Non-VIP contractors can bid more than ' + MQ.VIP_MAX_BID + ' and outbid a VIP.</li>' +
-      '<li>A VIP can hold a top-3 place on at most ' + MQ.VIP_MAX_ACTIVE + ' open leads at a time.</li>' +
-      '</ul><p class="tiny">These caps are config constants VIP_MAX_BID and VIP_MAX_ACTIVE.</p></div>';
   }
 
   function pricingPage() {
@@ -889,12 +916,11 @@
       '<div class="card"><h2>Homeowners</h2><p>Free for you. Up to 3 vetted contractors will quote. You choose; there is no obligation. Your number stays hidden until a contractor wins a top-3 place.</p></div>' +
       '<div class="card"><h2>Tokens</h2><p><strong>1 token = R20.</strong> Packs in this demo: 10 tokens for R200, 25 for R500, 50 for R1,000.</p>' +
       '<p>Every lead opens at 1 token. You see live bids as Contractor A, B or C, plus your own. The minimum bid is the 3rd-place bid plus 1 token, or 1 token while fewer than 3 people have bid.</p>' +
-      '<p>Tokens are held when you bid and released if you are pushed out. You only pay if you win a top-3 place. There is no subscription and there are no hidden fees.</p></div>' +
-      '<div class="card vip-offer"><span class="demo-tag">DEMO</span><h2>VIP: unlimited tokens for ' + vipPriceLabel() + '</h2>' +
-      '<p class="price" data-testid="vip-price">' + vipPriceLabel() + '</p><p class="tiny">price TBC</p>' +
-      '<p>Optional yearly membership. Checkout here is pretend.</p></div>' +
-      fairPlayCard() +
-      '<p><a class="btn btn-teal" href="#/contractor/vip">Become VIP</a> <a class="btn btn-ghost" href="#/trust">Trust &amp; safety</a></p></section>';
+      '<p>Tokens are held when you bid and released if you are pushed out. You only pay if you win a top-3 place. There are no hidden fees on token bids.</p></div>' +
+      '<div class="card vip-offer" data-testid="vip-pricing"><span class="demo-tag">DEMO</span><h2>Go VIP</h2>' +
+      vipRules() +
+      '<p class="tiny">Checkout is pretend. Prices live in one config constant, VIP_PRICE.</p></div>' +
+      '<p><a class="btn btn-teal" href="#/contractor/vip">Go VIP</a> <a class="btn btn-ghost" href="#/trust">Trust &amp; safety</a></p></section>';
   }
 
   function trustPage() {
@@ -910,21 +936,21 @@
 
   function vipPage() {
     const co = activeCo();
+    const plan = memory.vipPlan === 'monthly' ? 'monthly' : 'yearly';
+    const price = MQ.VIP_PRICE[plan];
     return '<section data-screen="vip" data-testid="vip-page"><span class="demo-tag">DEMO</span>' +
-      '<h1>' + (co.vip ? 'Your VIP membership' : 'Become VIP') + '</h1>' +
-      '<p class="lede">VIP: unlimited tokens for ' + vipPriceLabel() + '</p>' +
-      '<p class="price" data-testid="vip-price">' + vipPriceLabel() + '</p>' +
-      '<p class="tiny">price TBC</p>' +
-      '<div class="card"><h2>What you get</h2><ul>' +
-      '<li>Unlimited tokens within the fair-play rule. Bids cost no tokens.</li>' +
-      '<li>A VIP badge on your profile and on lead cards. Clients see it as VIP member.</li>' +
-      '<li>Priority alerts on new leads that match your trades and suburbs. Demo notice only.</li>' +
-      '<li>A profile highlight in the client compare view, next to price and rating.</li>' +
-      '</ul></div>' +
-      fairPlayCard() +
+      '<h1>' + (co.vip ? 'Your VIP membership' : 'Go VIP') + '</h1>' +
+      '<div class="card vip-offer">' + vipRules() + '</div>' +
       (co.vip
-        ? '<p class="pill pill-good">You are a VIP member</p><button type="button" class="btn btn-ghost btn-block" data-action="cancel-vip">Cancel VIP</button>'
-        : '<button type="button" class="btn btn-orange btn-block" data-action="become-vip"><span class="demo-tag">DEMO</span> Become VIP</button><p class="tiny">Pretend checkout. No card is charged.</p>') +
+        ? '<p class="pill pill-good" data-testid="vip-status">VIP member · ' + (co.vipPlan === 'monthly' ? 'Monthly' : 'Yearly') + '</p>' +
+          '<p data-testid="vip-renewal">Renews ' + esc(niceWhen(co.vipRenewsAt)) + '</p>' +
+          '<button type="button" class="btn btn-ghost btn-block" data-action="cancel-vip">Cancel VIP</button>'
+        : '<div class="row plan-toggle" role="group" aria-label="VIP plan">' +
+          '<button type="button" class="btn ' + (plan === 'monthly' ? 'btn-teal' : 'btn-ghost') + '" data-action="vip-plan" data-plan="monthly">Monthly</button>' +
+          '<button type="button" class="btn ' + (plan === 'yearly' ? 'btn-teal' : 'btn-ghost') + '" data-action="vip-plan" data-plan="yearly">Yearly</button></div>' +
+          '<p class="price" data-testid="vip-plan-price">' + formatR(price) + (plan === 'monthly' ? '/month' : '/year') + '</p>' +
+          '<button type="button" class="btn btn-orange btn-block" data-action="become-vip"><span class="demo-tag">DEMO</span> Join VIP</button>' +
+          '<p class="tiny">Pretend checkout. No card is charged.</p>') +
       '</section>';
   }
 
@@ -1019,12 +1045,6 @@
       const min = MQ.minBid(item, co.id);
       const amount = min + Number(t.dataset.extra) - 1;
       memory.bidError = '';
-      if (co.vip && amount > MQ.VIP_MAX_BID) {
-        memory.confirmBid = null;
-        memory.bidError = 'VIP fair-play cap is ' + MQ.VIP_MAX_BID + ' tokens per lead. A non-VIP can bid higher and outbid you.';
-        render(true);
-        return;
-      }
       memory.confirmBid = { leadId: item.id, amount: amount };
       render(true);
     } else if (action === 'confirm-bid') {
@@ -1039,16 +1059,17 @@
       }
       memory.confirmBid = null;
       memory.bidError = '';
-      toast(co.vip
-        ? 'VIP bid of ' + chosen.amount + ' tokens placed. No tokens held. Fair-play cap is ' + MQ.VIP_MAX_BID + ' per lead.'
-        : bidSentence(chosen.amount, false) + ' Released if you are pushed out.');
+      toast(bidSentence(chosen.amount, co.vip) + (co.vip ? '' : ' Released if you are pushed out.'));
       render(true);
     } else if (action === 'cancel-bid') {
       memory.confirmBid = null;
       memory.bidError = '';
       render(true);
+    } else if (action === 'vip-plan') {
+      memory.vipPlan = t.dataset.plan === 'monthly' ? 'monthly' : 'yearly';
+      render(true);
     } else if (action === 'become-vip') {
-      const res = MQ.becomeVip(activeCo().id);
+      const res = MQ.becomeVip(activeCo().id, memory.vipPlan || 'yearly');
       if (!res.ok) toast(res.error);
     } else if (action === 'cancel-vip') {
       const res = MQ.cancelVip(activeCo().id);

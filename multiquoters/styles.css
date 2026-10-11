@@ -385,7 +385,10 @@ tr.vip td { background: #fff8e6; }
   background: #fff4d6; color: #6b4a00; font-weight: 800;
   border-radius: 12px; padding: 10px 12px;
 }
-.vip-offer .price { margin: 0; }
+.vip-offer .price { margin: 8px 0; }
+.plan-toggle { margin: 8px 0; }
+.plan-toggle .btn { flex: 1; }
+.early { margin: 8px 0; }
 .card ul { margin: 8px 0; padding-left: 18px; }
 .card li { margin: 4px 0; line-height: 1.4; }
 .wrap { overflow-x: clip; }
