@@ -12,6 +12,24 @@ The demo stays at:
 
 https://charlaps.github.io/plumbing-sketch/multiquoters/
 
+## Already done
+
+Checked on 11 October 2026. The live project ref is `uihcqmwcngpdyczzkjen`.
+
+- The Supabase project exists. `config.js` has its URL and the public anon key.
+- Both SQL files have been applied: `supabase/migrations/20261011120000_init.sql` and `supabase/migrations/20261011120100_cron.sql`.
+- pg_cron is enabled and `mq_close_auctions` is scheduled every minute.
+- Private buckets `job-photos` and `verification` exist. The anon key cannot list them, and an anonymous upload is refused by row level security.
+- Authentication Site URL and both redirect URLs point at this app (step 5).
+- Calling `public_settings` with the anon key returns 1 token = R20, auctions of 12 hours, 3 winners, VIP at R9,999 a year or R999 a month, and VIP cover of 5 tokens. The home page shows those figures from that call.
+- Sign-in and sign-up from the app reach Supabase Auth. Confirm email is on. The built-in inbox is limited to about 2 messages an hour. The connection check did not create an account.
+
+Still open:
+
+- EFT bank details. `config.js` still has the placeholders (`Your business name`, `Your bank`, `0000000000`, `000000`). Wallet, VIP, and Pricing say **Bank details coming soon** and do not print those numbers. Replace the four EFT lines when you have the real account, then commit again.
+- An admin login (step 7). Sign-up cannot choose admin.
+- Card payments. Still manual EFT only. See `payments.js`.
+
 ## 1. Create a free Supabase project
 
 1. Go to [https://supabase.com](https://supabase.com) and create a free account.
@@ -67,31 +85,22 @@ Open **Authentication → URL configuration**.
   - `https://charlaps.github.io/plumbing-sketch/multiquoters/app/`
   - `https://charlaps.github.io/plumbing-sketch/multiquoters/app/index.html`
 
-The app uses Supabase’s built-in email (magic link, or email plus password). That inbox is free and **heavily rate-limited** — often only a few messages an hour, and Supabase has at times delivered them only to addresses on your own project team. Check **Authentication → Email** for the current rule.
+The app uses Supabase’s built-in email (magic link, or email plus password). That inbox is free and **heavily rate-limited** — about 2 messages an hour on this project, and Supabase has at times delivered them only to addresses on your own project team. Check **Authentication → Email** for the current rule. Confirm email is on.
 
 For your own testing, you can turn **Confirm email** off so a password sign-up does not need a message. Turn it back on before real customers join, and expect to add your own free SMTP later if the built-in limit is too low. Magic links use the same limit.
 
 ## 6. Paste the public keys
 
-In the dashboard open **Project Settings → API**.
+This step is done for the current project. `config.js` already has:
 
-Copy:
-
-- Project URL
+- Project URL `https://uihcqmwcngpdyczzkjen.supabase.co`
 - the `anon` `public` key
 
-Edit `config.js` in this folder:
-
-```javascript
-SUPABASE_URL: 'https://YOUR-PROJECT.supabase.co',
-SUPABASE_ANON_KEY: 'the-anon-key',
-```
-
-Also replace the EFT lines with your real bank details. Those details are **public** (they appear on the website so contractors can pay). That is normal for EFT.
+The four EFT lines are still the placeholders. Real bank details are not available yet. Until you replace them, the site says **Bank details coming soon** and does not show the placeholder account number. When you have the account, put the real name, bank, account number, and branch in `config.js`. Those details are **public** (they appear on the website so contractors can pay). That is normal for EFT.
 
 Leave `EFT_CREDIT_HOURS` at 24, or change the number if you want a different promise.
 
-Commit that file and push it to the `main` branch so GitHub Pages publishes it. Until those two keys are filled in, the site shows **Backend not connected yet** and links to the demo.
+If the URL or the anon key is emptied again, the site shows **Backend not connected yet** and links to the demo. Commit `config.js` and push it to the `main` branch so GitHub Pages publishes a change.
 
 ### Keys you must not paste
 
