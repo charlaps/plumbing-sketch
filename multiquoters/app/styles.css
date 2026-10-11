@@ -334,6 +334,7 @@ tr.best { background: #fffaf0; }
 hr.sep { border: 0; border-top: 1px solid var(--line); margin: 12px 0; }
 .msg { background: var(--sand); border-radius: 12px; padding: 8px 10px; margin: 6px 0; }
 .msg.mine { background: var(--teal-soft); }
+.thread h3 { margin: 0 0 8px; font-size: 16px; }
 
 .viewing-as {
   background: #083f3c;
