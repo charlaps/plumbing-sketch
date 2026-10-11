@@ -1,0 +1,31 @@
+{
+  "name": "Multiquoters",
+  "short_name": "Multiquoters",
+  "description": "Post a home job once. South African contractors bid for the exclusive lead.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0B5F59",
+  "theme_color": "#0B5F59",
+  "lang": "en-ZA",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

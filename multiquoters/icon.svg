@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Multiquoters">
+  <rect width="64" height="64" rx="16" fill="#0B5F59"/>
+  <path fill="#F7F4EE" d="M13 46V18h7.4l11.6 17.2L43.6 18H51v28h-6.6V29.6L33.6 46h-3.2L19.6 29.6V46H13z"/>
+  <circle cx="50" cy="14" r="6" fill="#F26B1D"/>
+</svg>
