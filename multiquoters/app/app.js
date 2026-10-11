@@ -62,6 +62,33 @@
     return { yearly: num(p.yearly) || 9999, monthly: num(p.monthly) || 999 };
   }
   function hours() { return num(CFG.EFT_CREDIT_HOURS) || 24; }
+  function auctionHours() { return num(settings.auction_hours) || 12; }
+  function winnerPlaces() { return num(settings.places) || 3; }
+
+  function looksLikePlaceholder(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return true;
+    if (/^(your|placeholder|tbc|todo|coming soon)\b/i.test(raw)) return true;
+    if (/^0+$/.test(raw.replace(/\s+/g, ''))) return true;
+    return false;
+  }
+
+  function bankDetailsReady() {
+    return !looksLikePlaceholder(CFG.EFT_ACCOUNT_NAME)
+      && !looksLikePlaceholder(CFG.EFT_BANK)
+      && !looksLikePlaceholder(CFG.EFT_ACCOUNT_NO)
+      && !looksLikePlaceholder(CFG.EFT_BRANCH);
+  }
+
+  function bankDetailsBlock() {
+    if (bankDetailsReady()) {
+      return '<p>Account name: ' + esc(CFG.EFT_ACCOUNT_NAME) + '</p>' +
+        '<p>Bank: ' + esc(CFG.EFT_BANK) + '</p>' +
+        '<p>Account: ' + esc(CFG.EFT_ACCOUNT_NO) + '</p>' +
+        '<p>Branch: ' + esc(CFG.EFT_BRANCH) + '</p>';
+    }
+    return '<p class="bank-pending" data-testid="bank-pending"><strong>Bank details coming soon.</strong> The account is not published yet, so this page does not show a placeholder number.</p>';
+  }
 
   function isVip(p) {
     return !!(p && p.vip_until && new Date(p.vip_until).getTime() > Date.now());
@@ -230,14 +257,14 @@
     return '<div class="how-grid">' +
       '<article class="card"><h2>For clients</h2><ol>' +
       '<li>Post the job once: trade, photos, where and when.</li>' +
-      '<li>Contractors bid tokens for 12 hours. The top 3 win a place.</li>' +
-      '<li>Compare up to three quotes and accept one. The others are not selected.</li>' +
+      '<li>Contractors bid tokens for ' + auctionHours() + ' hours. The top ' + winnerPlaces() + ' win a place.</li>' +
+      '<li>Compare up to ' + winnerPlaces() + ' quotes and accept one. The others are not selected.</li>' +
       '<li>Message the winners here, or open WhatsApp. Your number stays hidden until then.</li>' +
       '</ol></article>' +
       '<article class="card"><h2>For contractors</h2><ol>' +
       '<li>Sign up, add your trades and areas, and upload your ID and trade certificate.</li>' +
       '<li>An admin checks them. You can browse leads before that, and bid after you are verified.</li>' +
-      '<li>Bid from 1 token. Tokens are held, and returned if you finish outside the top 3.</li>' +
+      '<li>Bid from 1 token. Tokens are held, and returned if you finish outside the top ' + winnerPlaces() + '.</li>' +
       '<li>Win a place, send one itemised quote, and you get the client’s number.</li>' +
       '</ol></article></div>' +
       '<p class="promise-line">You pay tokens only if you win a place. VIP covers bids up to 5 tokens on a lead. VIP can’t buy unlimited bids.</p>';
@@ -246,19 +273,19 @@
   function pagePricing() {
     const price = vipPrice();
     return '<h1>Pricing & fees</h1>' +
-      '<p class="lede">1 token = ' + formatR(tokenRand()) + '. A lead opens at 1 token. The top 3 bidders each pay their own bid. Everyone else is released.</p>' +
+      '<p class="lede">1 token = ' + formatR(tokenRand()) + '. A lead opens at 1 token. The top ' + winnerPlaces() + ' bidders each pay their own bid. Everyone else is released.</p>' +
       '<div class="pack-grid">' +
       PAY.packs.map(function (pack) {
         return '<article class="card pack"><p class="rand">' + formatR(pack.rand) + '</p><p>' + pack.tokens + ' tokens</p></article>';
       }).join('') +
       '</div>' +
       '<article class="card"><h2>How a bid works</h2><ul>' +
-      '<li>While fewer than 3 contractors have bid, the minimum is 1 token.</li>' +
-      '<li>After that, the minimum is the 3rd-place bid plus 1. That is the bid to beat.</li>' +
-      '<li>If you are already in the top 3, your next bid is your own bid plus 1.</li>' +
+      '<li>While fewer than ' + winnerPlaces() + ' contractors have bid, the minimum is 1 token.</li>' +
+      '<li>After that, the minimum is the lowest winning bid plus 1. That is the bid to beat.</li>' +
+      '<li>If you are already in the top ' + winnerPlaces() + ', your next bid is your own bid plus 1.</li>' +
       '<li>If two bids are equal, the earlier one stays ahead.</li>' +
-      '<li>The auction runs for 12 hours. If nobody bids, it extends twice, then closes.</li>' +
-      '<li>If fewer than 3 bid, everyone who bid wins a place.</li>' +
+      '<li>The auction runs for ' + auctionHours() + ' hours. If nobody bids, it extends twice, then closes.</li>' +
+      '<li>If fewer than ' + winnerPlaces() + ' bid, everyone who bid wins a place.</li>' +
       '</ul></article>' +
       '<article class="card vip-offer"><h2>VIP membership</h2>' +
       '<p class="price">' + formatR(price.yearly) + ' a year <span class="muted">or ' + formatR(price.monthly) + ' a month</span></p>' +
@@ -270,7 +297,8 @@
       '<li>VIP can’t buy unlimited bids. That keeps the auction fair.</li>' +
       '</ul></article>' +
       '<article class="card"><h2>Paying</h2>' +
-      '<p class="eft">Pay by EFT — tokens credited within ' + hours() + ' hours. Your reference is your user code, like MQ-1A2B3C4D. Card payments are not switched on. Nothing is taken from your bank by this website.</p></article>';
+      '<p class="eft">Pay by EFT — tokens credited within ' + hours() + ' hours. Your reference is your user code, like MQ-1A2B3C4D. Card payments are not switched on. Nothing is taken from your bank by this website.</p>' +
+      bankDetailsBlock() + '</article>';
   }
 
   function pageTrust() {
@@ -280,7 +308,7 @@
       '<article class="card"><h2>Who sees your details</h2><ul>' +
       '<li>Clients see a lead’s suburb and description. The phone number is stored separately.</li>' +
       '<li>Contractors see anonymised bids (Contractor A, B, C) until the auction ends.</li>' +
-      '<li>Only the top 3 see the client’s number and the full photos.</li>' +
+      '<li>Only the top ' + winnerPlaces() + ' see the client’s number and the full photos.</li>' +
       '<li>ID and certificates sit in a private folder. Other contractors cannot open them.</li>' +
       '<li>Reviews can be left only after a quote is accepted.</li>' +
       '</ul></article>' +
@@ -313,7 +341,7 @@
     return '<h1>Terms of use</h1><p data-testid="draft-banner"><span class="draft-flag">DRAFT</span> These terms have not been reviewed by a lawyer. Do not treat them as the final contract.</p>' +
       '<article class="card"><ul>' +
       '<li>Multiquoters introduces a client and up to three contractors. The building work, if any, is a contract between them. Multiquoters is not the contractor.</li>' +
-      '<li>1 token is ' + formatR(tokenRand()) + '. Tokens are held when you bid and spent only if you finish in the top 3. Other holds are released.</li>' +
+      '<li>1 token is ' + formatR(tokenRand()) + '. Tokens are held when you bid and spent only if you finish in the top ' + winnerPlaces() + '. Other holds are released.</li>' +
       '<li>VIP is ' + formatR(vipPrice().yearly) + ' a year or ' + formatR(vipPrice().monthly) + ' a month. It covers up to 5 tokens on a lead. It does not buy unlimited bids.</li>' +
       '<li>Paying is by EFT for now. Tokens or VIP are credited by an admin after the payment arrives, aimed within ' + hours() + ' hours. Use your user code as the reference. The site does not take card payments yet.</li>' +
       '<li>A quote you accept is between you and that contractor. Check the price, what is included, VAT, and the timeline yourself.</li>' +
@@ -325,13 +353,17 @@
   function pageHome() {
     if (!configured()) return offlineCard() + '<h2>How it works</h2>' + howBlocks();
     return '<section class="hero-grid"><div><div class="hero-mark"><img src="icon.svg" alt=""><h1>Post a job once. Compare up to three quotes.</h1></div>' +
-      '<p class="lede">Contractors in your area bid tokens for the lead. The top 3 pay their own bids and send quotes. Your phone number stays hidden until then.</p>' +
+      '<p class="lede">Contractors in your area bid tokens for the lead. The top ' + winnerPlaces() + ' pay their own bids and send quotes. Your phone number stays hidden until then.</p>' +
       '<div class="row">' +
       (profile ? '' : '<a class="btn btn-teal" href="#/signup">Create an account</a>') +
       '<a class="btn btn-orange" href="' + (profile && profile.role === 'contractor' ? '#/contractor/leads' : '#/client/new') + '">' +
       (profile && profile.role === 'contractor' ? 'See leads' : 'Post a job') + '</a></div>' +
       '<p class="tiny">Prefer to click around with pretend money first? <a href="../">Try the demo</a>.</p></div>' +
-      '<article class="card"><h2>At a glance</h2><p>1 token = ' + formatR(tokenRand()) + '.</p><p>Auction: 12 hours.</p><p>Winners: top 3, each pays their own bid.</p></article></section>' +
+      '<article class="card" data-testid="settings-glance"><h2>At a glance</h2>' +
+      '<p data-testid="token-price">1 token = ' + formatR(tokenRand()) + '.</p>' +
+      '<p data-testid="auction-hours">Auction: ' + auctionHours() + ' hours.</p>' +
+      '<p data-testid="winners">Winners: top ' + winnerPlaces() + ', each pays their own bid.</p>' +
+      '<p data-testid="vip-price">VIP: ' + formatR(vipPrice().yearly) + ' a year or ' + formatR(vipPrice().monthly) + ' a month.</p></article></section>' +
       '<h2>How it works</h2>' + howBlocks();
   }
 
@@ -405,7 +437,7 @@
         '<li>' + esc(wizard.suburb) + ', ' + esc(wizard.area) + '</li>' +
         '<li>' + esc(wizard.contact_name) + ' · ' + esc(wizard.phone) + '</li>' +
         '<li>' + wizard.files.length + ' photo(s)</li></ul>' +
-        '<p class="tiny">Auction length: 12 hours. Up to 3 contractors win a place.</p>';
+        '<p class="tiny">Auction length: ' + auctionHours() + ' hours. Up to ' + winnerPlaces() + ' contractors win a place.</p>';
     }
     return '<h1>Post a job</h1><p class="tiny">Step ' + step + ' of 6</p>' +
       '<div class="progress" aria-hidden="true"><span style="width:' + (step / 6 * 100) + '%"></span></div>' +
@@ -574,7 +606,7 @@
       cards.push('<a class="card glance-main" href="#/contractor/lead/' + job.id + '">' + earlyTag(job) +
         '<div class="between"><strong>' + esc(job.title) + '</strong><span class="pill">' + left(job.auction_ends_at) + '</span></div>' +
         '<p class="tiny">' + esc(job.trade) + ' · ' + esc(job.suburb) + ', ' + esc(job.area) + '</p>' +
-        '<ul class="topbids">' + boardHtml((board.data || []).filter(function (row) { return row.place <= 3; })) + '</ul></a>');
+        '<ul class="topbids">' + boardHtml((board.data || []).filter(function (row) { return row.place <= winnerPlaces(); })) + '</ul></a>');
     }
     return '<h1>Leads</h1>' + note + '<div class="lead-grid stack">' + cards.join('') + '</div>';
   }
@@ -600,7 +632,7 @@
     let standing = 'You have not bid';
     let standingClass = 'none';
     if (won) { standing = 'You won a place'; standingClass = 'in'; }
-    else if (mine && mine.place <= 3 && job.status === 'open') { standing = 'In the top 3'; standingClass = 'in'; }
+    else if (mine && mine.place <= winnerPlaces() && job.status === 'open') { standing = 'In the top ' + winnerPlaces(); standingClass = 'in'; }
     else if (mine) { standing = 'Outbid'; standingClass = 'out'; }
     const min = num(preview.min) || 1;
     const taps = job.status === 'open' && profile.verified ? '<div class="bid-taps">' + [1, 2, 5].map(function (extra) {
@@ -626,7 +658,7 @@
       '<p>' + esc(job.description) + '</p><p class="tiny">' + esc(job.suburb) + ', ' + esc(job.area) + (job.when_needed ? ' · ' + esc(job.when_needed) : '') + '</p>' +
       photoBlock +
       '<p class="standing ' + standingClass + '">' + standing + '</p>' +
-      '<ul class="topbids">' + boardHtml(board.filter(function (row) { return row.place <= 3 || row.is_you; })) + '</ul>' +
+      '<ul class="topbids">' + boardHtml(board.filter(function (row) { return row.place <= winnerPlaces() || row.is_you; })) + '</ul>' +
       taps + '<p class="form-error" data-error></p>' + quoteLink + '</article>' +
       (clientContact ? '<article class="card"><h2>Client</h2><p>' + esc(clientContact.name) + '</p><p>' + esc(clientContact.phone) + '</p>' + wa + '</article>' : '') +
       (canMessage ? '<h2>Messages</h2>' + msgs + '<form class="stack" data-form="message" data-id="' + id + '"><label class="field">Message<textarea name="body" required></textarea></label><button class="btn btn-teal" type="submit">Send</button></form>' : '');
@@ -673,13 +705,9 @@
 
   function eftHtml() {
     if (!eft) return '';
-    const vipWord = eft.kind === 'vip' ? 'VIP is marked' : 'tokens are credited';
     return '<article class="card eft"><h2>' + esc(eft.message) + '</h2>' +
       '<p>Pay <strong>' + formatR(eft.amountRand) + '</strong> for ' + esc(eft.label) + '.</p>' +
-      '<p>Account name: ' + esc(eft.accountName) + '</p>' +
-      '<p>Bank: ' + esc(eft.bank) + '</p>' +
-      '<p>Account: ' + esc(eft.accountNo) + '</p>' +
-      '<p>Branch: ' + esc(eft.branch) + '</p>' +
+      bankDetailsBlock() +
       '<p>Reference: <strong>' + esc(eft.reference) + '</strong></p>' +
       '<p class="tiny">Use that reference so the admin can match your payment. ' + (eft.kind === 'vip' ? 'VIP is marked' : 'Tokens are credited') + ' by an admin within ' + eft.hours + ' hours. This page does not grant them by itself.</p></article>';
   }
@@ -1171,7 +1199,8 @@
 
   async function loadSettings() {
     const res = await sb.rpc('public_settings');
-    settings = (res && res.data) || {};
+    if (!res || res.error) throw new Error((res && res.error && res.error.message) || 'Could not load settings');
+    settings = res.data || {};
   }
 
   function subscribe() {
@@ -1205,7 +1234,7 @@
       go();
     } catch (err) {
       ready = true;
-      view.innerHTML = '<section class="card stack" data-screen="offline"><h1>Backend not connected yet</h1><p>The database library did not load. Check the connection, then reload.</p><a class="btn btn-teal" data-testid="try-demo" href="../">Try the demo</a></section>';
+      view.innerHTML = '<section class="card stack" data-screen="offline"><h1>Backend not connected yet</h1><p>' + esc(err && err.message ? err.message : 'The database library did not load. Check the connection, then reload.') + '</p><a class="btn btn-teal" data-testid="try-demo" href="../">Try the demo</a></section>';
     }
   }
 
