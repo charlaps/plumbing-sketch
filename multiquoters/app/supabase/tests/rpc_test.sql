@@ -11,6 +11,10 @@ BEGIN
 END;
 $$;
 
+-- The security migration stops new public functions being granted to the API
+-- roles. This helper is part of the test, not the app.
+GRANT EXECUTE ON FUNCTION public._assert(boolean, text) TO authenticated, anon;
+
 CREATE TABLE IF NOT EXISTS public._t (
   name text PRIMARY KEY,
   id uuid
@@ -665,8 +669,12 @@ SELECT public._assert(
 -- Messages open after the auction.
 SELECT set_config('request.jwt.claim.sub', '11111111-1111-4111-8111-111111111111', false);
 SELECT public._assert(
-  (public.send_message((SELECT id FROM public._t WHERE name = 'job1'), 'Thanks, see you Tuesday') ->> 'ok')::boolean,
-  'client can message after contractors are chosen'
+  (public.send_message(
+    (SELECT id FROM public._t WHERE name = 'job1'),
+    'Thanks, see you Tuesday',
+    '33333333-3333-4333-8333-333333333333'
+  ) ->> 'ok')::boolean,
+  'client can message the accepted contractor'
 );
 
 -- Race fixtures: one contractor, 3 tokens, two open jobs.

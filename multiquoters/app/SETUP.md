@@ -17,7 +17,8 @@ https://charlaps.github.io/plumbing-sketch/multiquoters/
 Checked on 11 October 2026. The live project ref is `uihcqmwcngpdyczzkjen`.
 
 - The Supabase project exists. `config.js` has its URL and the public anon key.
-- Both SQL files have been applied: `supabase/migrations/20261011120000_init.sql` and `supabase/migrations/20261011120100_cron.sql`.
+- Both original SQL files have been applied: `supabase/migrations/20261011120000_init.sql` and `supabase/migrations/20261011120100_cron.sql`.
+- `supabase/migrations/20261011190000_security_fixes.sql` still needs to be run on the live project. It is not applied until you paste it into the SQL editor (step 2).
 - pg_cron is enabled and `mq_close_auctions` is scheduled every minute.
 - Private buckets `job-photos` and `verification` exist. The anon key cannot list them, and an anonymous upload is refused by row level security.
 - Authentication Site URL and both redirect URLs point at this app (step 5).
@@ -42,12 +43,15 @@ In the Supabase dashboard open **SQL Editor → New query**.
 
 1. Open `supabase/migrations/20261011120000_init.sql` from this folder. Select all, paste it into the query, and run it.
 2. Open `supabase/migrations/20261011120100_cron.sql`, paste it, and run it.
+3. Open `supabase/migrations/20261011190000_security_fixes.sql`, paste it, and run it.
 
-If the second script says pg_cron is not installed, that is expected until the extension is on. Do step 3, then run `20261011120100_cron.sql` again.
+If the second script says pg_cron is not installed, that is expected until the extension is on. Turn the extension on in the next section, then run `20261011120100_cron.sql` again, and then run the security script.
+
+The security script is also the one to run on a database where the first two scripts were applied earlier. It is safe to run once. It stops anonymous calls to internal functions, makes the contractor directory read-only, keeps one accepted quote per job, and gives each contractor a private message thread with the client.
 
 You can instead use the Supabase CLI (`supabase db query --file ...`) if you install it later. The SQL editor is enough.
 
-Do **not** run `supabase/tests/00_local_auth.sql` on Supabase. That file is only for a Postgres installed on a computer.
+Do **not** run `supabase/tests/00_local_auth.sql` or `supabase/tests/01_supabase_grants.sql` on Supabase. Those files are only for a Postgres installed on a computer.
 
 ## 3. Turn on the minute timer
 
@@ -178,4 +182,4 @@ If you have PostgreSQL installed:
 bash supabase/tests/run.sh
 ```
 
-That creates a throwaway database, applies the scripts, and checks the auction rules (top 3, releasing tokens, VIP cover, closing twice, and two bids at the same moment). It does not need a Supabase account. The app screens themselves still need the keys from step 6 before they can save anything.
+That creates a throwaway database, applies the scripts (including `20261011190000_security_fixes.sql` on top of the first two), and checks the auction rules (top 3, releasing tokens, VIP cover, closing twice, and two bids at the same moment). It also checks that the reviewed security holes stay closed. It does not need a Supabase account. The app screens themselves still need the keys from step 6 before they can save anything.

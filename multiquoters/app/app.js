@@ -500,6 +500,42 @@
       }).join('') + '</div>';
   }
 
+  function threadPeople(contacts, quotes, cards) {
+    const people = [];
+    const seen = {};
+    (contacts || []).forEach(function (c) {
+      if (c.who !== 'contractor' || !c.person_id || seen[c.person_id]) return;
+      seen[c.person_id] = true;
+      people.push({ id: c.person_id, name: c.business_name || c.name || 'Contractor' });
+    });
+    (quotes || []).forEach(function (q) {
+      if (!q.contractor_id || seen[q.contractor_id]) return;
+      seen[q.contractor_id] = true;
+      const card = (cards || []).filter(function (c) { return c.id === q.contractor_id; })[0] || {};
+      people.push({ id: q.contractor_id, name: card.business_name || card.full_name || 'Contractor' });
+    });
+    return people;
+  }
+
+  function messageThreads(job, people, messages, acceptedId) {
+    const openJob = job.status === 'matched' || job.status === 'quoting';
+    if (!people.length) return '';
+    return '<h2>Messages</h2>' + people.map(function (person) {
+      const rows = (messages || []).filter(function (m) { return m.contractor_id === person.id; });
+      const canPost = openJob || (job.status === 'accepted' && person.id === acceptedId);
+      const body = rows.map(function (m) {
+        const mine = m.sender_id === profile.id;
+        return '<div class="msg' + (mine ? ' mine' : '') + '"><strong>' + (mine ? 'You' : esc(person.name)) + '</strong><p>' + esc(m.body) + '</p></div>';
+      }).join('');
+      return '<article class="card thread"><h3>' + esc(person.name) + '</h3>' +
+        (body || '<p class="tiny">No messages yet.</p>') +
+        (canPost
+          ? '<form class="stack" data-form="message" data-id="' + job.id + '" data-contractor="' + person.id + '"><label class="field">Message<textarea name="body" required></textarea></label><button class="btn btn-teal" type="submit">Send</button><p class="form-error" data-error></p></form>'
+          : '<p class="tiny">This conversation is closed.</p>') +
+        '</article>';
+    }).join('');
+  }
+
   async function pageRequest(id) {
     const jobRes = await sb.from('job_requests').select('*').eq('id', id).maybeSingle();
     if (jobRes.error || !jobRes.data) return '<p class="form-error">That request is not available.</p>';
@@ -563,9 +599,8 @@
     const chats = contacts.filter(function (c) { return c.who === 'contractor' && c.phone; }).map(function (c) {
       return '<a class="btn btn-ghost" href="' + esc(waChat(c.phone, 'Hi, this is about my Multiquoters job: ' + job.title)) + '" target="_blank" rel="noopener">WhatsApp ' + esc(c.business_name || c.name || 'contractor') + '</a>';
     }).join('');
-    const msgs = (msgRes.data || []).map(function (m) {
-      return '<div class="msg' + (m.sender_id === profile.id ? ' mine' : '') + '"><strong>' + (m.sender_id === profile.id ? 'You' : 'Them') + '</strong><p>' + esc(m.body) + '</p></div>';
-    }).join('');
+    const acceptedQuote = quotes.filter(function (q) { return q.status === 'accepted'; })[0];
+    const acceptedId = acceptedQuote ? acceptedQuote.contractor_id : '';
     const photoHtml = photos.length ? '<div class="thumbs">' + photos.map(function (src) { return '<img src="' + esc(src) + '" alt="Job photo">'; }).join('') + '</div>' : '<p class="tiny">No photos yet.</p>';
     const canMessage = ['matched', 'quoting', 'accepted'].indexOf(job.status) >= 0;
     return '<h1>' + esc(job.title) + '</h1>' + timeline(job.status) + earlyTag(job) +
@@ -575,14 +610,17 @@
       '<h2>Bids</h2><ul class="topbids">' + boardHtml(boardRes.data) + '</ul>' +
       (quotes.length ? '<h2>Quotes</h2><div class="quote-cards stack">' + quoteCards + '</div>' + table : '<p class="tiny">Quotes appear here after contractors are chosen and they send prices.</p>') +
       (chats ? '<h2>Contact</h2><div class="stack">' + chats + '</div>' : '') +
-      (canMessage ? '<h2>Messages</h2>' + msgs + '<form class="stack" data-form="message" data-id="' + job.id + '"><label class="field">Message<textarea name="body" required></textarea></label><button class="btn btn-teal" type="submit">Send</button></form>' : '') +
-      (job.status === 'accepted' ? reviewForm(job, contacts) : '');
+      (canMessage ? messageThreads(job, threadPeople(contacts, quotes, cards), msgRes.data, acceptedId) : '') +
+      (job.status === 'accepted' ? reviewForm(job, quotes, cards) : '');
   }
 
-  function reviewForm(job, contacts) {
-    const winner = contacts.filter(function (c) { return c.who === 'contractor'; })[0];
-    if (!winner) return '';
-    return '<h2>Review</h2><form class="card stack" data-form="review" data-id="' + job.id + '" data-contractor="' + winner.person_id + '">' +
+  function reviewForm(job, quotes, cards) {
+    const accepted = (quotes || []).filter(function (q) { return q.status === 'accepted'; })[0];
+    if (!accepted) return '';
+    const card = (cards || []).filter(function (c) { return c.id === accepted.contractor_id; })[0] || {};
+    const name = card.business_name || card.full_name || 'the contractor';
+    return '<h2>Review</h2><form class="card stack" data-form="review" data-id="' + job.id + '" data-contractor="' + accepted.contractor_id + '">' +
+      '<p>How was ' + esc(name) + '?</p>' +
       '<label class="field">Rating (1–5)<input name="rating" type="number" min="1" max="5" value="5" required></label>' +
       '<label class="field">Comment<textarea name="body"></textarea></label>' +
       '<button class="btn btn-teal" type="submit">Send review</button><p class="form-error" data-error></p></form>';
@@ -649,10 +687,14 @@
       ? '<a class="btn btn-teal" href="#/contractor/quote/' + id + '">Send a quote</a>' : '';
     const wa = clientContact && clientContact.phone
       ? '<a class="btn btn-ghost" target="_blank" rel="noopener" href="' + esc(waChat(clientContact.phone, 'Hi, I won a place on your Multiquoters job: ' + job.title)) + '">WhatsApp the client</a>' : '';
-    const msgs = (msgRes.data || []).map(function (m) {
+    const myQuote = quoteRes.data || null;
+    const quotingOpen = job.status === 'matched' || job.status === 'quoting';
+    const chosen = job.status === 'accepted' && myQuote && myQuote.status === 'accepted';
+    const showMessages = won && (quotingOpen || job.status === 'accepted');
+    const canPost = won && (quotingOpen || chosen);
+    const msgs = (msgRes.data || []).filter(function (m) { return m.contractor_id === profile.id; }).map(function (m) {
       return '<div class="msg' + (m.sender_id === profile.id ? ' mine' : '') + '"><p>' + esc(m.body) + '</p></div>';
     }).join('');
-    const canMessage = won && ['matched', 'quoting', 'accepted'].indexOf(job.status) >= 0;
     return '<h1>' + esc(job.title) + '</h1>' + earlyTag(job) +
       '<article class="card"><div class="between"><span class="pill">' + esc(job.trade) + '</span><span>' + left(job.auction_ends_at) + '</span></div>' +
       '<p>' + esc(job.description) + '</p><p class="tiny">' + esc(job.suburb) + ', ' + esc(job.area) + (job.when_needed ? ' · ' + esc(job.when_needed) : '') + '</p>' +
@@ -661,7 +703,12 @@
       '<ul class="topbids">' + boardHtml(board.filter(function (row) { return row.place <= winnerPlaces() || row.is_you; })) + '</ul>' +
       taps + '<p class="form-error" data-error></p>' + quoteLink + '</article>' +
       (clientContact ? '<article class="card"><h2>Client</h2><p>' + esc(clientContact.name) + '</p><p>' + esc(clientContact.phone) + '</p>' + wa + '</article>' : '') +
-      (canMessage ? '<h2>Messages</h2>' + msgs + '<form class="stack" data-form="message" data-id="' + id + '"><label class="field">Message<textarea name="body" required></textarea></label><button class="btn btn-teal" type="submit">Send</button></form>' : '');
+      (showMessages ? '<h2>Messages</h2><article class="card thread"><h3>Client</h3>' +
+        (msgs || '<p class="tiny">No messages yet.</p>') +
+        (canPost
+          ? '<form class="stack" data-form="message" data-id="' + id + '" data-contractor="' + profile.id + '"><label class="field">Message<textarea name="body" required></textarea></label><button class="btn btn-teal" type="submit">Send</button><p class="form-error" data-error></p></form>'
+          : '<p class="tiny">The client chose another contractor. This conversation is closed.</p>') +
+        '</article>' : '');
   }
 
   function pageQuote(id) {
@@ -966,7 +1013,11 @@
         return;
       }
       if (kind === 'message') {
-        const res = await sb.rpc('send_message', { p_job: form.getAttribute('data-id'), p_body: form.body.value });
+        const res = await sb.rpc('send_message', {
+          p_job: form.getAttribute('data-id'),
+          p_body: form.body.value,
+          p_contractor: form.getAttribute('data-contractor')
+        });
         const err = rpcFail(res);
         if (err) return fail(err);
         go();
