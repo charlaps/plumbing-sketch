@@ -49,9 +49,11 @@ If the second script says pg_cron is not installed, that is expected until the e
 
 The security script is also the one to run on a database where the first two scripts were applied earlier. It is safe to run once. It stops anonymous calls to internal functions, makes the contractor directory read-only, keeps one accepted quote per job, and gives each contractor a private message thread with the client.
 
+Run that script as the usual SQL editor role, postgres. A notice that default privileges for `supabase_admin` were skipped, or that the event trigger was not installed, is expected. The functions that already exist are still locked.
+
 You can instead use the Supabase CLI (`supabase db query --file ...`) if you install it later. The SQL editor is enough.
 
-Do **not** run `supabase/tests/00_local_auth.sql` or `supabase/tests/01_supabase_grants.sql` on Supabase. Those files are only for a Postgres installed on a computer.
+Do **not** run `supabase/tests/00_local_auth.sql`, `supabase/tests/01_supabase_grants.sql`, `supabase/tests/02_hosted_postgres.sql`, or `supabase/tests/03_apply_security_migration.sql` on Supabase. Those files are only for a Postgres installed on a computer.
 
 ## 3. Turn on the minute timer
 
@@ -182,4 +184,4 @@ If you have PostgreSQL installed:
 bash supabase/tests/run.sh
 ```
 
-That creates a throwaway database, applies the scripts (including `20261011190000_security_fixes.sql` on top of the first two), and checks the auction rules (top 3, releasing tokens, VIP cover, closing twice, and two bids at the same moment). It also checks that the reviewed security holes stay closed. It does not need a Supabase account. The app screens themselves still need the keys from step 6 before they can save anything.
+That creates a throwaway database, applies the scripts (including `20261011190000_security_fixes.sql` on top of the first two), and checks the auction rules (top 3, releasing tokens, VIP cover, closing twice, and two bids at the same moment). The security script is applied as a non-superuser stand-in for the hosted postgres role, then again after the auction checks. It also checks that the reviewed security holes stay closed. It does not need a Supabase account. The app screens themselves still need the keys from step 6 before they can save anything.

@@ -75,14 +75,41 @@ SELECT public._assert(
   'write grants are limited to the photo upload the website performs'
 );
 
+SELECT public._assert(
+  NOT (SELECT rolsuper FROM pg_roles WHERE rolname = 'mq_postgres')
+  AND NOT pg_has_role('mq_postgres', 'supabase_admin', 'MEMBER')
+  AND NOT pg_has_role('mq_postgres', 'postgres', 'MEMBER')
+  AND (
+    SELECT pg_get_userbyid(proowner)
+    FROM pg_proc
+    WHERE oid = 'public.send_message(uuid, text, uuid)'::regprocedure
+  ) = 'mq_postgres'
+  AND NOT EXISTS (SELECT 1 FROM pg_event_trigger WHERE evtname = 'mq_revoke_public_execute'),
+  'the security migration was applied by a non-superuser who is not supabase_admin'
+);
+
+-- Hosted postgres cannot install this trigger. The migration notices and
+-- continues. Create it here, as the superuser running the tests, so a
+-- function added afterwards stays locked.
+CREATE EVENT TRIGGER mq_revoke_public_execute
+  ON ddl_command_end
+  WHEN TAG IN ('CREATE FUNCTION')
+  EXECUTE FUNCTION mq_guard.revoke_public_execute();
+
+-- Created by the same role that owns the app. The event trigger runs as that
+-- role and can revoke the new function.
+SET ROLE mq_postgres;
 CREATE FUNCTION public._mq_should_not_leak() RETURNS integer
 LANGUAGE sql AS $$ SELECT 1 $$;
+RESET ROLE;
 SELECT public._assert(
   NOT has_function_privilege('anon', 'public._mq_should_not_leak()', 'EXECUTE')
   AND NOT has_function_privilege('authenticated', 'public._mq_should_not_leak()', 'EXECUTE'),
   'a function created later is not granted to anon or authenticated'
 );
+SET ROLE mq_postgres;
 DROP FUNCTION public._mq_should_not_leak();
+RESET ROLE;
 
 -- ---------------------------------------------------------------------------
 -- Directory view cannot rename, wipe, or delete a contractor
@@ -763,7 +790,7 @@ VALUES
     'legacy from client'
   );
 
-\i ../migrations/20261011190000_security_fixes.sql
+\i 03_apply_security_migration.sql
 
 SELECT public._assert(
   (SELECT contractor_id FROM public.messages WHERE body = 'legacy from lerato')

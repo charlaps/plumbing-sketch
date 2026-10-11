@@ -12,8 +12,34 @@ PSQL=(sudo -u postgres psql -v ON_ERROR_STOP=1)
 "${PSQL[@]}" -d mq_test -f ../migrations/20261011120000_init.sql
 "${PSQL[@]}" -d mq_test -f ../migrations/20261011120100_cron.sql
 "${PSQL[@]}" -d mq_test -f 01_supabase_grants.sql
-"${PSQL[@]}" -d mq_test -f ../migrations/20261011190000_security_fixes.sql
-"${PSQL[@]}" -d mq_test -f ../migrations/20261011190000_security_fixes.sql
+# Hosted Supabase applies the security script as non-superuser postgres.
+"${PSQL[@]}" -d mq_test -f 03_apply_security_migration.sql
+"${PSQL[@]}" -d mq_test -f 03_apply_security_migration.sql
+"${PSQL[@]}" -d mq_test -v ON_ERROR_STOP=1 -c "
+DO \$\$
+BEGIN
+  IF (SELECT rolsuper FROM pg_roles WHERE rolname = 'mq_postgres') THEN
+    RAISE EXCEPTION 'mq_postgres must not be a superuser';
+  END IF;
+  IF pg_has_role('mq_postgres', 'supabase_admin', 'MEMBER') THEN
+    RAISE EXCEPTION 'mq_postgres must not be a member of supabase_admin';
+  END IF;
+  IF pg_has_role('mq_postgres', 'postgres', 'MEMBER') THEN
+    RAISE EXCEPTION 'mq_postgres must not be a member of postgres';
+  END IF;
+  IF (
+    SELECT pg_get_userbyid(proowner)
+    FROM pg_proc
+    WHERE oid = 'public.send_message(uuid, text, uuid)'::regprocedure
+  ) IS DISTINCT FROM 'mq_postgres' THEN
+    RAISE EXCEPTION 'security migration was not applied as mq_postgres';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_event_trigger WHERE evtname = 'mq_revoke_public_execute') THEN
+    RAISE EXCEPTION 'non-superuser migration must not install the event trigger';
+  END IF;
+END
+\$\$;
+"
 "${PSQL[@]}" -d mq_test -f rpc_test.sql
 "${PSQL[@]}" -d mq_test -f security_test.sql
 
@@ -49,7 +75,7 @@ SELECT public._assert(
 "
 
 BEFORE=$("${PSQL[@]}" -d mq_test -tA -c "SELECT count(*) FROM public.messages")
-"${PSQL[@]}" -d mq_test -f ../migrations/20261011190000_security_fixes.sql
+"${PSQL[@]}" -d mq_test -f 03_apply_security_migration.sql
 AFTER=$("${PSQL[@]}" -d mq_test -tA -c "SELECT count(*) FROM public.messages")
 if [ "$BEFORE" != "$AFTER" ]; then
   echo "security migration changed message count from $BEFORE to $AFTER" >&2

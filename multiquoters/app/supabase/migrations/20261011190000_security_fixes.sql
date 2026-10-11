@@ -2,6 +2,11 @@
 -- Apply once, in the Supabase SQL editor, after 20261011120000_init.sql
 -- and 20261011120100_cron.sql. Safe to run again.
 --
+-- Hosted Supabase runs this as postgres. That role owns the app, is not a
+-- superuser, and is not a member of supabase_admin. Statements that need a
+-- superuser or another role raise a notice, and the rest of the script still
+-- applies.
+--
 -- 1. Internal functions are no longer callable by anon or authenticated.
 --    Triggers, pg_cron, and SECURITY DEFINER RPCs still run as the owner.
 --    Row policies use mq_guard views instead of those functions, so revoking
@@ -560,28 +565,47 @@ GRANT EXECUTE ON FUNCTION public.mark_notifications_read() TO authenticated;
 DO $auth_admin$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'supabase_auth_admin') THEN
-    GRANT EXECUTE ON FUNCTION public.handle_new_user() TO supabase_auth_admin;
+    BEGIN
+      GRANT EXECUTE ON FUNCTION public.handle_new_user() TO supabase_auth_admin;
+    EXCEPTION
+      WHEN insufficient_privilege THEN
+        RAISE NOTICE 'Could not grant handle_new_user to supabase_auth_admin (%). The sign-up trigger still runs as the function owner.', SQLERRM;
+    END;
   END IF;
 END
 $auth_admin$;
 
--- New functions in public are not executable by the API roles.
+-- Default privileges for roles this session is allowed to change. postgres
+-- owns the app objects, so its own defaults are the ones that matter. Changing
+-- supabase_admin fails on hosted Supabase and must not roll the script back.
 DO $defaults$
 DECLARE
   r name;
 BEGIN
   FOR r IN
-    SELECT rolname FROM pg_roles
-    WHERE rolname IN ('postgres', 'supabase_admin') OR rolname = current_user
+    SELECT DISTINCT rolname
+    FROM pg_roles
+    WHERE rolname IN ('postgres', 'supabase_admin')
+       OR rolname = current_user
   LOOP
-    EXECUTE format(
-      'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC, anon, authenticated',
-      r
-    );
-    EXECUTE format(
-      'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLES FROM anon, authenticated',
-      r
-    );
+    BEGIN
+      EXECUTE format(
+        'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC, anon, authenticated',
+        r
+      );
+    EXCEPTION
+      WHEN insufficient_privilege THEN
+        RAISE NOTICE 'Skipped default function privileges for role % (%).', r, SQLERRM;
+    END;
+    BEGIN
+      EXECUTE format(
+        'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLES FROM anon, authenticated',
+        r
+      );
+    EXCEPTION
+      WHEN insufficient_privilege THEN
+        RAISE NOTICE 'Skipped default table privileges for role % (%).', r, SQLERRM;
+    END;
   END LOOP;
 END
 $defaults$;
