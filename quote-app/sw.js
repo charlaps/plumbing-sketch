@@ -1,8 +1,11 @@
 /* APS Quote Finale — cache-first app shell. Scoped to this folder so /plumbing-sketch/quote-app/ stays offline. */
-var CACHE = 'aps-quote-finale-v4';
+var CACHE = 'aps-quote-finale-v5';
 var SHELL = [
   './',
   './index.html',
+  './materials.js',
+  './aps-data.json',
+  './tank-booster.js',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',
