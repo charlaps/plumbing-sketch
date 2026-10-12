@@ -95,13 +95,6 @@
     return 'Updated';
   }
 
-  function quoteStatusLabel(status) {
-    if (status === 'accepted') return 'Accepted';
-    if (status === 'not_selected') return 'Not accepted';
-    if (status === 'submitted') return 'Quote in';
-    return 'Updated';
-  }
-
   function num(v) {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
@@ -648,6 +641,7 @@
       if (myQuote && myQuote.status === 'accepted') return { text: 'Quote accepted', cls: 'in' };
       if (won) return { text: 'Another quote was accepted', cls: 'out' };
     }
+    if (won && myQuote) return { text: 'Quote sent', cls: 'in' };
     if (won) return { text: 'You’re in the top ' + places + '. Send your quote.', cls: 'in' };
     if (job.status !== 'open' && mine) return { text: 'You didn’t make the top ' + places + '.', cls: 'out' };
     if (job.status !== 'open') return { text: jobStatusLabel(job.status), cls: 'none' };
@@ -657,6 +651,19 @@
     }
     if (mine.place <= places) return { text: 'You’re ' + ordinal(mine.place) + ' of ' + places + '.', cls: 'in' };
     return { text: 'You’re ' + ordinal(mine.place) + '. You’re outside the top ' + places + '.', cls: 'out' };
+  }
+
+  function contractorStatusLabel(job, won, myQuote) {
+    const places = winnerPlaces();
+    if (job.status === 'flagged') return 'Removed';
+    if (job.status === 'cancelled') return 'Cancelled';
+    if (job.status === 'accepted' && myQuote && myQuote.status === 'accepted') return 'Quote accepted';
+    if (job.status === 'accepted' && won) return 'Another quote was accepted';
+    if (myQuote) return 'Quote sent';
+    if (won) return 'Send your quote';
+    if (job.status === 'open') return 'Bidding';
+    if (job.status === 'closed' || job.status === 'accepted') return 'Outside the top ' + places;
+    return jobStatusLabel(job.status);
   }
 
   async function signedPhotos(rows) {
@@ -689,12 +696,35 @@
     return num(q.materials_rand) + num(q.labour_rand) + num(q.callout_rand) + num(q.other_rand);
   }
 
+  function kindLabel(kind) {
+    if (kind === 'material') return 'Material';
+    if (kind === 'labour') return 'Labour';
+    if (kind === 'callout') return 'Call-out';
+    if (kind === 'other') return 'Other';
+    return '';
+  }
+
   function lineText(item) {
     const qty = Number(item.qty);
     const unit = num(item.unit_rand);
     const total = formatR(item.rand);
-    if (unit > 0 && qty) return esc(item.label) + ' · ' + qty + ' × ' + formatR(unit) + ' = ' + total;
-    return esc(item.label) + ' · ' + total;
+    const kind = kindLabel(item.kind);
+    const name = (kind ? kind + ' · ' : '') + esc(item.label);
+    if (unit > 0 && qty) return name + ' · ' + qty + ' × ' + formatR(unit) + ' = ' + total;
+    return name + ' · ' + total;
+  }
+
+  function quoteMeta(included, excluded, timeline, validUntil) {
+    const until = validUntil ? '. Valid until ' + esc(validUntil) + '.' : '';
+    return '<p><strong>Included</strong> ' + esc(included || '—') + '</p>' +
+      '<p><strong>Excluded</strong> ' + esc(excluded || '—') + '</p>' +
+      '<p><strong>Timeline</strong> ' + esc(timeline || '—') + until + '</p>';
+  }
+
+  function quoteJobLine(job) {
+    if (!job) return '';
+    const ref = jobRef(job.id);
+    return '<p class="tiny" data-testid="quote-job">' + esc(job.title || '') + (ref ? ' · ' + esc(ref) : '') + '</p>';
   }
 
   function lineList(items) {
@@ -1006,8 +1036,6 @@
     const resultRes = await sb.from('auction_results').select('*').eq('job_id', id).maybeSingle();
     const quoteRes = await sb.from('quotes').select('*').eq('job_id', id).maybeSingle();
     const msgRes = await sb.from('messages').select('*').eq('job_id', id).order('created_at');
-    const reviewedRes = await sb.from('reviews').select('id').eq('job_id', id).limit(1);
-    const reviewed = !!(reviewedRes.data && reviewedRes.data.length);
     const board = boardRes.data || [];
     const mine = board.filter(function (row) { return row.is_you; })[0];
     const preview = previewRes.data || { min: 1 };
@@ -1021,6 +1049,7 @@
     const photos = won ? await signedPhotos(photosRes.data || []) : [];
     const clientContact = (contactsRes.data || []).filter(function (c) { return c.who === 'client'; })[0];
     const stand = standingText(job, mine, board, won, myQuote);
+    const statusLabel = contractorStatusLabel(job, won, myQuote);
     const lost = job.status === 'accepted' && won && !(myQuote && myQuote.status === 'accepted');
     const chosen = job.status === 'accepted' && myQuote && myQuote.status === 'accepted';
     const quotingOpen = job.status === 'matched' || job.status === 'quoting';
@@ -1031,12 +1060,10 @@
     const taps = job.status === 'open' && profile.verified ? bidControls(id, preview) : (job.status === 'open' ? '<p class="notice">An admin must verify your ID before you can bid.</p>' : '');
     const canEdit = myQuote && quotingOpen && myQuote.status === 'submitted';
     const quoteBlock = myQuote
-      ? '<article class="card" data-testid="quote-sent"><h2>Your quote</h2><p><span class="pill' + (myQuote.status === 'accepted' ? ' pill-good' : '') + '">' + esc(quoteStatusLabel(myQuote.status)) + '</span></p>' +
+      ? '<article class="card" data-testid="quote-sent"><h2>Your quote</h2>' +
         lineList(quoteItemsFor(myItems, myQuote.id)) +
         '<p class="price">' + formatR(quoteTotal(myQuote, myItems)) + '</p>' +
-        '<p><strong>Included.</strong> ' + esc(myQuote.included || '—') + '</p>' +
-        '<p><strong>Excluded.</strong> ' + esc(myQuote.excluded || '—') + '</p>' +
-        '<p><strong>Timeline.</strong> ' + esc(myQuote.timeline || '—') + '. Valid until ' + esc(fmtDate(myQuote.valid_until) || '—') + '.</p>' +
+        quoteMeta(myQuote.included, myQuote.excluded, myQuote.timeline, fmtDate(myQuote.valid_until) || '—') +
         '<p>' + (myQuote.vat_registered ? 'VAT included.' : 'No VAT.') + '</p>' +
         (canEdit ? '<a class="btn btn-ghost" href="#/contractor/quote/' + id + '/edit">Edit quote</a>' : '<p class="tiny">This quote can no longer be changed.</p>') +
         '</article>'
@@ -1044,8 +1071,8 @@
     const quoteLink = won && quotingOpen && !myQuote
       ? '<a class="btn btn-teal" href="#/contractor/quote/' + id + '">Send your quote</a>' : '';
     const next = chosen
-      ? '<article class="card"><h2>Quote accepted</h2><p>The client accepted your quote. Contact them to arrange the work. You can message them here, or open WhatsApp.</p></article>'
-      : (lost ? '<article class="card"><h2>Another quote was accepted</h2><p>The client accepted a different quote. Their name, phone and WhatsApp are no longer shown.</p></article>' : '');
+      ? '<article class="card" data-testid="quote-outcome"><p>The client accepted your quote. Contact them to arrange the work. You can message them here, or open WhatsApp.</p></article>'
+      : (lost ? '<article class="card" data-testid="quote-outcome"><p>The client accepted a different quote. Their name, phone and WhatsApp are no longer shown.</p></article>' : '');
     const wa = showContact && clientContact.phone
       ? '<a class="btn btn-ghost" data-phone="' + esc(clientContact.phone) + '" target="_blank" rel="noopener" href="' + esc(waChat(clientContact.phone, 'Hi, this is about your Multiquoters job: ' + job.title)) + '">WhatsApp the client</a>' : '';
     const showMessages = won && (quotingOpen || job.status === 'accepted');
@@ -1055,12 +1082,16 @@
       return messageBubble(m, m.sender_id === profile.id, clientName);
     }).join('');
     const auctionOpen = job.status === 'open';
-    return '<p class="tiny">' + esc(jobStatusLabel(job.status, reviewed)) + '</p><h1>' + esc(job.title) + '</h1>' + (auctionOpen ? earlyNote(job) : '') +
+    const sameStatus = stand.text === statusLabel;
+    return (sameStatus
+      ? '<p class="standing ' + stand.cls + '" data-testid="bid-standing">' + esc(statusLabel) + '</p>'
+      : '<p class="tiny" data-testid="lead-status">' + esc(statusLabel) + '</p>') +
+      '<h1>' + esc(job.title) + '</h1>' + (auctionOpen ? earlyNote(job) : '') +
       next +
       '<article class="card"><div class="between"><span class="pill">' + esc(job.trade) + '</span><span>' + esc(left(job.auction_ends_at)) + '</span></div>' +
       '<p>' + esc(job.description) + '</p><p class="tiny">' + esc(job.suburb) + ', ' + esc(job.area) + (job.when_needed ? ' · ' + esc(job.when_needed) : '') + '</p>' +
       photoBlock +
-      '<p class="standing ' + stand.cls + '" data-testid="bid-standing">' + esc(stand.text) + '</p>' +
+      (sameStatus ? '' : '<p class="standing ' + stand.cls + '" data-testid="bid-standing">' + esc(stand.text) + '</p>') +
       (auctionOpen ? '<ul class="topbids">' + boardHtml(board.filter(function (row) { return row.place <= winnerPlaces() || row.is_you; })) + '</ul>' : '') +
       taps + '<p class="form-error" data-error></p>' + quoteLink + '</article>' +
       quoteBlock +
@@ -1111,7 +1142,7 @@
     }).join('');
   }
 
-  function quoteFormHtml(id, draft) {
+  function quoteFormHtml(id, draft, job) {
     const lines = draft.lines.map(function (line, i) {
       return '<div class="line-edit" data-line="' + i + '">' +
         '<label class="field">Description<input name="line-description" value="' + esc(line.description) + '" required></label>' +
@@ -1121,7 +1152,7 @@
         (draft.lines.length > 1 ? '<button type="button" class="btn btn-ghost btn-small" data-action="remove-line" data-index="' + i + '">Remove</button>' : '') +
         '</div>';
     }).join('');
-    return '<h1>' + (draft.editing ? 'Edit your quote' : 'Send a quote') + '</h1>' +
+    return quoteJobLine(job) + '<h1>' + (draft.editing ? 'Edit your quote' : 'Send a quote') + '</h1>' +
       '<form class="card stack" data-form="quote" data-id="' + esc(id) + '" data-preview="0">' +
       '<div class="line-edits" data-testid="quote-lines">' + lines + '</div>' +
       '<button type="button" class="btn btn-ghost" data-action="add-line">Add a line</button>' +
@@ -1136,19 +1167,18 @@
       '<button class="btn btn-teal" type="submit">Preview quote</button><p class="form-error" data-error></p></form>';
   }
 
-  function quotePreviewHtml(id, draft) {
+  function quotePreviewHtml(id, draft, job) {
     const rows = draft.lines.map(function (line) {
       const lineTotal = Math.round((Number(line.qty) || 0) * num(line.unit));
-      return '<li>' + esc(line.description) + ' · ' + line.qty + ' × ' + formatR(line.unit) + ' = ' + formatR(lineTotal) + '</li>';
+      const kind = kindLabel(line.kind);
+      return '<li>' + (kind ? esc(kind) + ' · ' : '') + esc(line.description) + ' · ' + line.qty + ' × ' + formatR(line.unit) + ' = ' + formatR(lineTotal) + '</li>';
     }).join('');
     const until = new Date();
     until.setDate(until.getDate() + (num(draft.days) || 14));
-    return '<h1>Check your quote</h1><article class="card stack" data-testid="quote-preview">' +
+    return quoteJobLine(job) + '<h1>Check your quote</h1><article class="card stack" data-testid="quote-preview">' +
       '<ul class="line-list">' + rows + '</ul>' +
       '<p class="price">Total ' + formatR(quoteLinesTotal(draft.lines)) + '</p>' +
-      '<p><strong>Included.</strong> ' + esc(draft.included) + '</p>' +
-      '<p><strong>Excluded.</strong> ' + esc(draft.excluded) + '</p>' +
-      '<p><strong>Timeline.</strong> ' + esc(draft.timeline) + '. Valid until ' + esc(fmtDate(until.toISOString())) + '.</p>' +
+      quoteMeta(draft.included, draft.excluded, draft.timeline, fmtDate(until.toISOString())) +
       '<p>' + (profile.vat_registered ? 'VAT included.' : 'No VAT.') + '</p>' +
       '<form data-form="quote" data-id="' + esc(id) + '" data-preview="1" class="stack">' +
       '<button class="btn btn-teal" type="submit">Send quote</button>' +
@@ -1170,12 +1200,11 @@
     const open = job.status === 'matched' || job.status === 'quoting';
     const canEdit = !!(quote && open && quote.status === 'submitted');
     if (quote && !editing) {
-      return '<h1>Your quote</h1><p class="notice" data-testid="quote-sent">Quote sent. ' + esc(quoteStatusLabel(quote.status)) + '.</p>' +
+      const sent = quote.status === 'accepted' ? 'Quote accepted' : quote.status === 'not_selected' ? 'Not accepted' : 'Quote sent';
+      return quoteJobLine(job) + '<h1>Your quote</h1><p class="notice" data-testid="quote-sent">' + esc(sent) + '.</p>' +
         '<article class="card stack">' + lineList(quoteItemsFor(items, quote.id)) +
         '<p class="price">' + formatR(quoteTotal(quote, items)) + '</p>' +
-        '<p><strong>Included.</strong> ' + esc(quote.included || '—') + '</p>' +
-        '<p><strong>Excluded.</strong> ' + esc(quote.excluded || '—') + '</p>' +
-        '<p><strong>Timeline.</strong> ' + esc(quote.timeline || '—') + '. Valid until ' + esc(fmtDate(quote.valid_until) || '—') + '.</p>' +
+        quoteMeta(quote.included, quote.excluded, quote.timeline, fmtDate(quote.valid_until) || '—') +
         '<p>' + (quote.vat_registered ? 'VAT included.' : 'No VAT.') + '</p>' +
         (canEdit ? '<a class="btn btn-teal" href="#/contractor/quote/' + id + '/edit">Edit quote</a>' : '<p class="tiny">This quote can no longer be changed.</p>') +
         '<a class="btn btn-ghost" href="#/contractor/lead/' + id + '">Back to the lead</a></article>';
@@ -1186,8 +1215,8 @@
     }
     if (!quoteDraft || quoteDraft.jobId !== id) quoteDraft = seedQuote(id, quote, items);
     quoteDraft.editing = !!quote;
-    if (quoteDraft.preview) return quotePreviewHtml(id, quoteDraft);
-    return quoteFormHtml(id, quoteDraft);
+    if (quoteDraft.preview) return quotePreviewHtml(id, quoteDraft, job);
+    return quoteFormHtml(id, quoteDraft, job);
   }
 
   function ledgerTitle(type) {
@@ -1221,11 +1250,16 @@
     const vip = isVip(profile);
     const list = (rows.data || []).map(function (row) {
       const note = ledgerNote(row.note || '');
+      const ref = row.job_id ? jobRef(row.job_id) : '';
       const amount = row.entry_type === 'vip_cover'
         ? plural(row.tokens, 'token') + ' · no charge'
         : plural(row.tokens, 'token');
+      const detail = [];
+      if (note) detail.push(esc(note));
+      if (ref) detail.push(esc(ref));
+      detail.push(esc(fmtDate(row.created_at)));
       return '<li><div class="between"><strong>' + esc(ledgerTitle(row.entry_type)) + '</strong><span>' + esc(amount) + '</span></div>' +
-        '<p class="tiny">' + (note ? esc(note) + ' · ' : '') + esc(fmtDate(row.created_at)) + '</p></li>';
+        '<p class="tiny">' + detail.join(' · ') + '</p></li>';
     }).join('');
     return '<h1>Wallet</h1><div class="wallet-hero"><article class="card"><span class="tiny">Available</span><strong>' + plural(profile.token_available, 'token') + '</strong></article>' +
       '<article class="card"><span class="tiny">Held</span><strong>' + plural(profile.token_held, 'token') + '</strong></article></div>' +
@@ -1234,17 +1268,18 @@
       (vip ? '<p data-testid="vip-status">VIP member until <span data-testid="vip-renewal">' + fmtDate(profile.vip_until) + '</span></p>' : '<a class="btn btn-orange" href="#/contractor/vip">Go VIP</a>') +
       '</article>' +
       '<h2>Buy tokens</h2><p class="tiny">Pay by EFT. Tokens are added within ' + plural(hours(), 'hour') + '. Your reference: <strong>' + esc(profile.user_code) + '</strong></p>' +
-      '<div class="pack-grid">' + PAY.packs.map(function (pack) {
+      '<div class="buy-row"><div class="pack-grid">' + PAY.packs.map(function (pack) {
         return '<button type="button" class="card pack" data-action="buy-pack" data-tokens="' + pack.tokens + '" data-rand="' + pack.rand + '"><p class="rand">' + formatR(pack.rand) + '</p><p>' + plural(pack.tokens, 'token') + '</p></button>';
-      }).join('') + '</div>' + eftHtml() +
+      }).join('') + '</div>' +
+      '<article class="card bank-slot" data-testid="wallet-bank">' + bankDetailsBlock() + '</article></div>' + eftHtml(false) +
       '<h2>History</h2><ul class="history">' + (list || '<li>No token movements yet.</li>') + '</ul>';
   }
 
-  function eftHtml() {
+  function eftHtml(includeBank) {
     if (!eft) return '';
     return '<article class="card eft"><h2>' + esc(eft.message) + '</h2>' +
       '<p>Pay <strong>' + formatR(eft.amountRand) + '</strong> for ' + esc(eft.label) + '.</p>' +
-      bankDetailsBlock() +
+      (includeBank === false ? '' : bankDetailsBlock()) +
       '<p>Reference: <strong>' + esc(eft.reference) + '</strong></p>' +
       '<p class="tiny">Use that reference so the admin can match your payment. ' + (eft.kind === 'vip' ? 'VIP is marked' : 'Tokens are credited') + ' by an admin within ' + eft.hours + ' hours. This page does not grant them by itself.</p></article>';
   }
@@ -1344,8 +1379,13 @@
       const id = alertJobId(n.href);
       if (id && jobIds.indexOf(id) < 0) jobIds.push(id);
     });
+    const jobsById = {};
     const quotesByJob = {};
     const bidsByJob = {};
+    if (jobIds.length) {
+      const jobRes = await sb.from('job_requests').select('id, title').in('id', jobIds);
+      (jobRes.data || []).forEach(function (job) { jobsById[job.id] = job; });
+    }
     if (profile.role === 'client' && jobIds.length) {
       let quoteRes = await sb.from('quotes').select('id, job_id, contractor_id, materials_rand, labour_rand, callout_rand, other_rand').in('job_id', jobIds);
       if (quoteRes.error) {
@@ -1385,9 +1425,18 @@
     const grouped = [];
     const seenBids = {};
     const seenQuotes = {};
+    function withJobName(item, jobId) {
+      if (item.title !== 'Quote accepted' && item.title !== 'Another quote was accepted') return;
+      const job = jobsById[jobId];
+      if (!job || !job.title) return;
+      const ref = jobRef(job.id);
+      if (ref && String(item.body).indexOf(ref) !== -1) return;
+      item.body = job.title + (ref ? ' (' + ref + ')' : '') + '. ' + (item.body || '');
+    }
     rows.forEach(function (n) {
       const item = presentAlert(n);
       const jobId = alertJobId(item.href);
+      withJobName(item, jobId);
       if (item.title === 'New bid') {
         const key = item.href || jobId || 'bids';
         if (seenBids[key]) return;
@@ -1544,6 +1593,13 @@
     armPoll();
   }
 
+  function clearInvalid(form) {
+    form.querySelectorAll('.is-invalid').forEach(function (el) { el.classList.remove('is-invalid'); });
+    form.querySelectorAll('.field-error').forEach(function (el) { el.remove(); });
+    const errorEl = form.querySelector('[data-error]');
+    if (errorEl) errorEl.textContent = '';
+  }
+
   function markInvalid(name, msg) {
     const el = view.querySelector('[name="' + name + '"]');
     const field = el && el.closest('.field');
@@ -1656,6 +1712,25 @@
       if (kind === 'signup' || kind === 'signin') {
         const email = form.email.value.trim();
         const password = form.password.value;
+        if (kind === 'signin') {
+          clearInvalid(form);
+          let bad = false;
+          if (!emailOk(email)) {
+            markInvalid('email', 'Enter a valid email address, such as name@example.com.');
+            bad = true;
+          }
+          if (!password) {
+            markInvalid('password', 'Enter a password, or use the email link.');
+            bad = true;
+          }
+          if (bad) return;
+          const res = await sb.auth.signInWithPassword({ email: email, password: password });
+          if (res.error) return fail(friendlyAuthError(res.error.message));
+          session = res.data.session;
+          await loadProfile();
+          location.hash = profile && profile.role === 'contractor' ? '#/contractor/leads' : profile && profile.role === 'admin' ? '#/admin' : '#/client/requests';
+          return;
+        }
         if (!emailOk(email)) {
           markInvalid('email', 'Enter a valid email address, such as name@example.com.');
           return fail('Enter a valid email address, such as name@example.com.');
@@ -1694,12 +1769,6 @@
           }
           return;
         }
-        if (!password) return fail('Enter a password, or use the email link.');
-        const res = await sb.auth.signInWithPassword({ email: email, password: password });
-        if (res.error) return fail(friendlyAuthError(res.error.message));
-        session = res.data.session;
-        await loadProfile();
-        location.hash = profile && profile.role === 'contractor' ? '#/contractor/leads' : profile && profile.role === 'admin' ? '#/admin' : '#/client/requests';
         return;
       }
       if (kind === 'forgot') {
@@ -1768,13 +1837,34 @@
           go();
           return;
         }
-        const res = await sendQuote(jobId, draft);
+        const submit = form.querySelector('[type="submit"]');
+        if (submit) {
+          submit.disabled = true;
+          submit.textContent = 'Sending…';
+        }
+        function unlockSend() {
+          if (!submit) return;
+          submit.disabled = false;
+          submit.textContent = 'Send quote';
+        }
+        let res;
+        try {
+          res = await sendQuote(jobId, draft);
+        } catch (sendErr) {
+          unlockSend();
+          throw sendErr;
+        }
         let err = rpcFail(res);
         if (err === 'you already sent a quote') err = 'This quote was already sent. Open it from the lead to edit it, once the latest database update is applied.';
-        if (err) return fail(err);
+        if (err) {
+          unlockSend();
+          return fail(err);
+        }
         quoteDraft = null;
         toast(res.data && res.data.updated ? 'Quote updated' : 'Quote sent');
-        location.hash = '#/contractor/quote/' + jobId;
+        const target = '#/contractor/quote/' + jobId;
+        if ((location.hash || '').split('?')[0] === target) go();
+        else location.hash = target;
         return;
       }
       if (kind === 'message') {
