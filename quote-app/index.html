@@ -307,7 +307,7 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const r2=x=>Math.round((x+Number.EPSILON)*100)/100;
 const R=x=>'R '+(r2(x)<0?'-':'')+Math.abs(r2(x)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-const generic=n=>n.replace(/\s*\(.*$/,'').trim();
+const generic=n=>{const s=String(n??'');if(s.startsWith('Remove and refit wall-hung basin'))return 'Remove and refit wall-hung basin, incl. new angle valves and trap fitting';return s.replace(/\s*\(.*$/,'').trim()};
 const todayISO=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
 const fmtDate=s=>{if(!s)return'';const[y,m,d]=s.split('-');return `${d} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]} ${y}`};
 const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
