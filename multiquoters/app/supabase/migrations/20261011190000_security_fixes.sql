@@ -560,6 +560,18 @@ GRANT EXECUTE ON FUNCTION public.flag_job(uuid, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_snapshot() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.mark_notifications_read() TO authenticated;
 
+-- Later migrations add RPCs. Re-running this file must not leave them locked.
+DO $later_rpcs$
+BEGIN
+  IF to_regprocedure('public.save_quote_lines(uuid, jsonb, text, text, text, integer)') IS NOT NULL THEN
+    GRANT EXECUTE ON FUNCTION public.save_quote_lines(uuid, jsonb, text, text, text, integer) TO authenticated;
+  END IF;
+  IF to_regprocedure('public.bid_board(uuid)') IS NOT NULL THEN
+    GRANT EXECUTE ON FUNCTION public.bid_board(uuid) TO authenticated;
+  END IF;
+END
+$later_rpcs$;
+
 -- Sign-up inserts auth.users as supabase_auth_admin. The trigger fires without
 -- this grant on current Postgres; the grant keeps that role explicit.
 DO $auth_admin$

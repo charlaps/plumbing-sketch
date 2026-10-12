@@ -18,7 +18,8 @@ Checked on 11 October 2026. The live project ref is `uihcqmwcngpdyczzkjen`.
 
 - The Supabase project exists. `config.js` has its URL and the public anon key.
 - Both original SQL files have been applied: `supabase/migrations/20261011120000_init.sql` and `supabase/migrations/20261011120100_cron.sql`.
-- `supabase/migrations/20261011190000_security_fixes.sql` still needs to be run on the live project. It is not applied until you paste it into the SQL editor (step 2).
+- `supabase/migrations/20261011190000_security_fixes.sql` is already applied on the live project. Run it again only if you are setting up a new database.
+- `supabase/migrations/20261012180000_launch_fixes.sql` is the new script. Apply it in the SQL editor after the security script (step 2). The website still works before that, but line items, stable bid labels, hiding a non-chosen plumber’s view of the client’s number, the stored consent time, and one review per job need it.
 - pg_cron is enabled and `mq_close_auctions` is scheduled every minute.
 - Private buckets `job-photos` and `verification` exist. The anon key cannot list them, and an anonymous upload is refused by row level security.
 - Authentication Site URL and both redirect URLs point at this app (step 5).
@@ -44,6 +45,7 @@ In the Supabase dashboard open **SQL Editor → New query**.
 1. Open `supabase/migrations/20261011120000_init.sql` from this folder. Select all, paste it into the query, and run it.
 2. Open `supabase/migrations/20261011120100_cron.sql`, paste it, and run it.
 3. Open `supabase/migrations/20261011190000_security_fixes.sql`, paste it, and run it.
+4. Open `supabase/migrations/20261012180000_launch_fixes.sql`, paste it, and run it. This adds line-item quotes, stable anonymous bid labels, hiding the client’s number from plumbers who were not chosen, a terms-consent time, and one review per job. The website still sends a quote if this step has not been run yet, but line items, stable labels, and the hidden number need this script.
 
 If the second script says pg_cron is not installed, that is expected until the extension is on. Turn the extension on in the next section, then run `20261011120100_cron.sql` again, and then run the security script.
 
@@ -88,8 +90,10 @@ Open **Authentication → URL configuration**.
 
 - Site URL: `https://charlaps.github.io/plumbing-sketch/multiquoters/app/`
 - Redirect URLs, add both:
-  - `https://charlaps.github.io/plumbing-sketch/multiquoters/app/`
-  - `https://charlaps.github.io/plumbing-sketch/multiquoters/app/index.html`
+- `https://charlaps.github.io/plumbing-sketch/multiquoters/app/`
+- `https://charlaps.github.io/plumbing-sketch/multiquoters/app/index.html`
+
+Forgot password uses that same Site URL. The reset email opens the app, and the app then shows the new-password screen. You do not need a separate redirect path.
 
 The app uses Supabase’s built-in email (magic link, or email plus password). That inbox is free and **heavily rate-limited** — about 2 messages an hour on this project, and Supabase has at times delivered them only to addresses on your own project team. Check **Authentication → Email** for the current rule. Confirm email is on.
 
