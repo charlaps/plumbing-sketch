@@ -93,7 +93,7 @@ SELECT public._assert(
 SELECT public._assert(
   EXISTS (
     SELECT 1 FROM public.notifications
-    WHERE title = 'You won a place'
+    WHERE title = 'You are in the top 3'
       AND href LIKE '#/contractor/quote/%'
       AND body LIKE '%Send your quote%'
   ),

@@ -472,14 +472,23 @@ tr.vip td { background: #fff8e6; }
 }
 
 #top-actions { margin-left: auto; display: flex; gap: 4px; align-items: center; }
-#top-actions a {
+#top-actions a, #top-actions button.linkish {
   color: #fff;
+  background: transparent;
+  border: 0;
+  font: inherit;
   font-weight: 700;
   text-decoration: none;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   padding: 0 8px;
+  cursor: pointer;
+}
+.compare-hint { margin: 0 0 8px; color: var(--muted); font-weight: 700; }
+.compare-swipe { display: none; }
+@media (max-width: 800px) {
+  .compare-swipe { display: inline; }
 }
 .offline h1 { margin-bottom: 8px; }
 .draft-flag {

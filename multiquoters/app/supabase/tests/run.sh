@@ -41,6 +41,7 @@ END
 \$\$;
 "
 "${PSQL[@]}" -d mq_test -f 04_apply_launch_migration.sql
+"${PSQL[@]}" -d mq_test -f 05_apply_retest_migration.sql
 "${PSQL[@]}" -d mq_test -f rpc_test.sql
 "${PSQL[@]}" -d mq_test -f security_test.sql
 
@@ -95,6 +96,8 @@ SELECT public._assert(
 "
 
 "${PSQL[@]}" -d mq_test -f 04_apply_launch_migration.sql
+"${PSQL[@]}" -d mq_test -f 05_apply_retest_migration.sql
 "${PSQL[@]}" -d mq_test -f launch_test.sql
+"${PSQL[@]}" -d mq_test -f retest_test.sql
 
 echo "ALL TESTS PASSED"

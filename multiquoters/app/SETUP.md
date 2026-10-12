@@ -46,6 +46,7 @@ In the Supabase dashboard open **SQL Editor → New query**.
 2. Open `supabase/migrations/20261011120100_cron.sql`, paste it, and run it.
 3. Open `supabase/migrations/20261011190000_security_fixes.sql`, paste it, and run it.
 4. Open `supabase/migrations/20261012180000_launch_fixes.sql`, paste it, and run it. This adds line-item quotes, stable anonymous bid labels, hiding the client’s number from plumbers who were not chosen, a terms-consent time, and one review per job. The website still sends a quote if this step has not been run yet, but line items, stable labels, and the hidden number need this script.
+5. Open `supabase/migrations/20261012210000_retest_fixes.sql`, paste it, and run it. This sends an alert when a plumber’s place drops, including when they leave the top 3. It does not change what anyone pays.
 
 If the second script says pg_cron is not installed, that is expected until the extension is on. Turn the extension on in the next section, then run `20261011120100_cron.sql` again, and then run the security script.
 
@@ -55,7 +56,20 @@ Run that script as the usual SQL editor role, postgres. A notice that default pr
 
 You can instead use the Supabase CLI (`supabase db query --file ...`) if you install it later. The SQL editor is enough.
 
-Do **not** run `supabase/tests/00_local_auth.sql`, `supabase/tests/01_supabase_grants.sql`, `supabase/tests/02_hosted_postgres.sql`, or `supabase/tests/03_apply_security_migration.sql` on Supabase. Those files are only for a Postgres installed on a computer.
+Do **not** run `supabase/tests/00_local_auth.sql`, `supabase/tests/01_supabase_grants.sql`, `supabase/tests/02_hosted_postgres.sql`, `supabase/tests/03_apply_security_migration.sql`, `supabase/tests/04_apply_launch_migration.sql`, or `supabase/tests/05_apply_retest_migration.sql` on Supabase. Those files are only for a Postgres installed on a computer.
+
+To end one job’s auction early, in the SQL editor as postgres (so the normal close runs, including payment of the top 3):
+
+```sql
+UPDATE public.job_requests
+SET auction_ends_at = now() - interval '1 minute'
+WHERE id = 'c1f9a319-beb2-40ff-a85f-a1279e09cb0d'
+  AND status = 'open';
+
+SELECT public.close_auction('c1f9a319-beb2-40ff-a85f-a1279e09cb0d');
+```
+
+If nobody has bid, that close extends the auction instead, up to twice, which is the same rule as the minute timer. `close_expired_auctions()` closes every expired job, not just this one.
 
 ## 3. Turn on the minute timer
 
