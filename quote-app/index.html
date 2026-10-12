@@ -109,7 +109,21 @@ body:has(#s-quote.on) .draft-note{display:none}
 #quote .terms .cl{margin:0 0 1.6mm}
 #quote .terms .sub{display:block;margin:.4mm 0 .4mm 3.5mm}
 #quote .sigline{margin-top:6mm;font-size:10.5pt;font-weight:600}
-@media (max-width:820px){.qwrap #quote{zoom:.42}}
+@media screen and (max-width:820px){
+  .qwrap{padding:0;background:#fff}
+  .qwrap #quote{zoom:1;width:auto;min-height:0;padding:16px 14px 24px;font-size:15px}
+  #quote .hd{flex-wrap:wrap;gap:8px}
+  #quote .hd img{width:min(100%,240px)}
+  #quote .hd .r{text-align:left;font-size:14px}
+  #quote .hd .r .big{font-size:22px}
+  #quote .ft{grid-template-columns:1fr;gap:12px}
+  #quote .bar{font-size:14px;margin:14px 0 6px}
+  #quote .terms{font-size:14px;line-height:1.45}
+  #quote .terms .tc-co{font-size:15px}
+  #quote .terms .sub{margin-left:12px}
+  #quote .sigline{font-size:15px}
+  #quote table.pr td{padding:6px 2px}
+}
 @media print{
   @page{size:A4;margin:0}
   body{background:#fff}
