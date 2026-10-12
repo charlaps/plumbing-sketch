@@ -99,17 +99,6 @@ function build(){
   docs.push({type:'sc',s:s,units:units,f:{ti:F(s.title),ky:F(s.kw+' '+(s.sym||'')+' '+cats+' '+tabs.join(' ')),su:F(s.sum),sn:F(sn.join(' ')),tx:F(tx.join(' ')+' '+pl.join(' '))}})});
  if(typeof APS_TIPS!=='undefined')APS_TIPS.forEach(function(t){
   docs.push({type:'tip',t:t,units:[{k:'',t:t.b}],f:{ti:F(t.t),ky:F(t.kw+' '+t.topic),su:F(''),sn:F(t.ref),tx:F(t.b)}})});
- if(typeof APS_GUIDE!=='undefined')APS_GUIDE.forEach(function(sec){sec.pages.forEach(function(p){
-  var tx=[];
-  p.b.forEach(function(b){
-   if(b[0]==='p'||b[0]==='h'||b[0]==='note'||b[0]==='warn'||b[0]==='sans'||b[0]==='verify')tx.push(String(b[1]).replace(/\*\*/g,''));
-   else if(b[0]==='ul'||b[0]==='ol')b[1].forEach(function(x){tx.push(String(x).replace(/\*\*/g,''))});
-   else if(b[0]==='chk'){tx.push(b[2]);b[3].forEach(function(x){tx.push(String(x).replace(/\*\*/g,''))});}
-   else if(b[0]==='tpl')tx.push(b[2]+' '+String(b[3]).replace(/\*\*/g,''));
-  });
-  var body=tx.join(' ');
-  docs.push({type:'gd',g:{id:p.id,t:p.title,sec:sec.title},units:[{k:sec.title,t:body.slice(0,400)}],f:{ti:F(p.title),ky:F((p.kw||'')+' '+sec.title),su:F(sec.blurb||''),sn:F(''),tx:F(body)}});
- })})
  IDX={docs:docs,vocab:vocab,vlist:Object.keys(vocab)};
  return IDX}
 var WT={ti:6,ky:4,su:3,sn:1.5,tx:1.2};
@@ -155,21 +144,17 @@ function scoreDoc(d,q){
  if(inTitle===n){tot+=4;var tl=d.f.ti.l.length||1;tot+=2*Math.min(1,n/tl)}
  return tot}
 function search(raw,opts){
- var ix=build(),q=parse(raw||''),out={q:q,scs:[],tips:[],gds:[]};
+ var ix=build(),q=parse(raw||''),out={q:q,scs:[],tips:[]};
  if(!q.t.length)return out;
  var types=opts&&opts.types;
  ix.docs.forEach(function(d){
   if(types&&types.indexOf(d.type)<0)return;
   var sc=scoreDoc(d,q);if(!sc)return;
   var lr=String(raw).toLowerCase().trim();
-  var tt=d.type==='sc'?d.s.title:d.type==='tip'?d.t.t:d.g.t;
-  if(lr.length>2&&tt.toLowerCase().indexOf(lr)>=0)sc+=3;
-  if(d.type==='sc')out.scs.push({s:d.s,score:sc,d:d});
-  else if(d.type==='tip')out.tips.push({t:d.t,score:sc,d:d});
-  else out.gds.push({g:d.g,score:sc,d:d})});
+  if(lr.length>2){var tt=(d.type==='sc'?d.s.title:d.t.t).toLowerCase();if(tt.indexOf(lr)>=0)sc+=3}
+  if(d.type==='sc')out.scs.push({s:d.s,score:sc,d:d});else out.tips.push({t:d.t,score:sc,d:d})});
  out.scs.sort(function(a,b){return b.score-a.score||(a.s.title<b.s.title?-1:1)});
  out.tips.sort(function(a,b){return b.score-a.score});
- out.gds.sort(function(a,b){return b.score-a.score});
  return out}
 
 /* ---------- highlight / snippets ---------- */
@@ -228,10 +213,6 @@ function tipRow(r,q){
  var t=r.t,ttl=h('span',{class:'gt'});ttl.appendChild(hl(t.t,q));
  var sp=h('small',{class:'snip'}),sn=snippet(r.d,q);sp.appendChild(hl(sn?sn.t:t.b.slice(0,110)+(t.b.length>110?'\u2026':''),q));
  return h('a',{class:'row gtip',href:'#/tips/'+t.id,'data-tip':t.id},[h('span',{class:'t'},[ttl,sp,h('span',{class:'pills'},[h('span',{class:'pill',text:'SANS tip'}),t.chk?h('span',{class:'chk-flag',text:'Check the standard'}):null])]),h('span',{class:'chev',html:A.svg('back').replace('M15 5l-7 7 7 7','M9 5l7 7-7 7')})])}
-function gdRow(r,q){
- var g=r.g,ttl=h('span',{class:'gt'});ttl.appendChild(hl(g.t,q));
- var sp=h('small',{class:'snip'}),sn=snippet(r.d,q);sp.appendChild(hl(sn?sn.t:(g.sec),q));
- return h('a',{class:'row gguide',href:'#/guide/'+g.id,'data-guide':g.id},[h('span',{class:'t'},[ttl,sp,h('span',{class:'pills'},[h('span',{class:'pill',text:'Field guide'})])]),h('span',{class:'chev',html:A.svg('back').replace('M15 5l-7 7 7 7','M9 5l7 7-7 7')})])}
 function grp(title,count,id){return h('div',{class:'ghd','data-g':id},[h('h3',{text:title}),h('span',{class:'gc',text:count})])}
 function homeBox(v,tilesEl){
  var inp=h('input',{id:'gq',type:'search',class:'search gq',placeholder:'Search: geyser, no hot water, 22mm elbow\u2026',autocomplete:'off',autocapitalize:'off',spellcheck:'false',enterkeyhint:'search','aria-label':'Search the whole app',value:GQ});
@@ -243,16 +224,14 @@ function homeBox(v,tilesEl){
   v.classList.toggle('gs-on',!!q.trim());
   if(!q.trim())return;
   var t0=performance.now(),r=search(q);
-  var sc=r.scs,tp=r.tips,gd=r.gds||[],pt=partsFor(q);
-  var any=sc.length||tp.length||pt.length||gd.length;
+  var sc=r.scs,tp=r.tips,pt=partsFor(q);
+  var any=sc.length||tp.length||pt.length;
   if(sc.length){res.appendChild(grp('Scenarios',sc.length,'sc'));sc.slice(0,6).forEach(function(x){res.appendChild(scRow(x,r.q))});
    if(sc.length>6)res.appendChild(h('a',{class:'more-link',href:'#/book?q='+encodeURIComponent(q),text:'See all '+sc.length+' scenarios in Handbook'}))}
   if(pt.length){res.appendChild(grp('Parts',pt.length,'pt'));var box=h('div',{class:'list'});pt.slice(0,5).forEach(function(x){box.appendChild(A.partRow(x.it))});res.appendChild(box);
    res.appendChild(h('a',{class:'more-link',href:'#/parts?q='+encodeURIComponent(cleanForParts(q)),text:'See all '+pt.length+' parts'}))}
   if(tp.length){res.appendChild(grp('SANS tips',tp.length,'tip'));tp.slice(0,5).forEach(function(x){res.appendChild(tipRow(x,r.q))});
    if(tp.length>5)res.appendChild(h('a',{class:'more-link',href:'#/tips',text:'See all SANS tips'}))}
-  if(gd.length){res.appendChild(grp('Field guide',gd.length,'gd'));gd.slice(0,5).forEach(function(x){res.appendChild(gdRow(x,r.q))});
-   if(gd.length>5)res.appendChild(h('a',{class:'more-link',href:'#/guide',text:'See the field guide'}))}
   if(!any)res.appendChild(h('div',{class:'emptyph',id:'gnone',text:'Nothing found for "'+q.trim()+'". Try fewer words, or one word like geyser, leak, toilet or 22mm.'}));
   res.setAttribute('data-ms',Math.round(performance.now()-t0));
   if(!A.D.rows&&!again){again=true;A.loadData().then(function(){again=false;if(inp.value===q&&document.body.contains(inp))run()},function(){again=false})}}
