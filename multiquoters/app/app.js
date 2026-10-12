@@ -97,7 +97,7 @@
 
   function quoteStatusLabel(status) {
     if (status === 'accepted') return 'Accepted';
-    if (status === 'not_selected') return 'Not chosen';
+    if (status === 'not_selected') return 'Not accepted';
     if (status === 'submitted') return 'Quote in';
     return 'Updated';
   }
@@ -234,7 +234,7 @@
       cost = 'VIP covers ' + plural(pay.covered, 'token') + '. You pay ' + plural(pay.due, 'token') + ' (' + formatR(pay.due * pay.rand) + ').';
     } else cost = 'That is ' + formatR(amount * pay.rand) + '.';
     return 'Bid ' + plural(amount, 'token') + '. ' + cost +
-      ' You only pay if you finish in the top ' + winnerPlaces() + '. If you are outbid, the held tokens are released.';
+      ' You only pay if you finish in the top ' + winnerPlaces() + '. If you leave the top ' + winnerPlaces() + ', the held tokens are released.';
   }
 
   function bidLimits(preview) {
@@ -269,6 +269,18 @@
     return 'https://wa.me/?text=' + encodeURIComponent(text);
   }
 
+  function emailOk(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+  }
+
+  function friendlyAuthError(message) {
+    const text = String(message || '');
+    if (/email/i.test(text) && /invalid|unable to validate/i.test(text)) {
+      return 'Enter a valid email address, such as name@example.com.';
+    }
+    return text || 'Something went wrong. Try again.';
+  }
+
   function rpcFail(res) {
     if (!res) return 'Something went wrong';
     if (res.error) return res.error.message || 'Something went wrong';
@@ -284,7 +296,7 @@
     viewing.hidden = true;
     topActions.innerHTML =
       (logged ? '<span class="role-chip" data-testid="role-chip">' + esc(roleLabel(role)) + '</span>' : '<a href="../">Try the demo</a>') +
-      (logged ? '<a href="#/" data-action="sign-out">Sign out</a>' : '');
+      (logged ? '<button type="button" class="linkish" data-action="sign-out">Sign out</button>' : '');
     const links = [];
     if (!logged) {
       links.push(['#/', 'Home'], ['#/pricing', 'Pricing'], ['#/trust', 'Trust & safety']);
@@ -302,9 +314,12 @@
       return '<a href="' + pair[0] + '"' + (exact ? ' class="is-on"' : '') + '>' + esc(pair[1]) + '</a>';
     }).join('');
     subnav.innerHTML = html;
-    const bottomLinks = logged
-      ? links.filter(function (pair) { return pair[0].indexOf('#/pricing') !== 0 && pair[0].indexOf('#/trust') !== 0; })
-      : links;
+    const bottomLinks = links.filter(function (pair) {
+      if (!logged) return true;
+      if (pair[0].indexOf('#/trust') === 0) return false;
+      if (role !== 'client' && pair[0].indexOf('#/pricing') === 0) return false;
+      return true;
+    });
     bottom.innerHTML = bottomLinks.map(function (pair) {
       const exact = here === pair[0].slice(1) || here.indexOf(pair[0].slice(1) + '/') === 0;
       return '<a href="' + pair[0] + '"' + (exact ? ' class="is-on"' : '') + '>' + esc(pair[1].replace(/ \(.*\)/, '')) + '</a>';
@@ -404,7 +419,7 @@
       '<li>Verification: a photo of an ID and a trade certificate, for contractors. An admin reviews them.</li>' +
       '<li>Bids, token balances, quotes, messages and reviews.</li>' +
       '</ul>' +
-      '<h2>Why</h2><p>To run the auction, to show a client up to three quotes, to let winners contact each other, and to keep a record of token holds and releases. The legal bases to describe in the final notice are consent (the photos and ID you upload) and the contract (running the lead you asked for).</p>' +
+      '<h2>Why</h2><p>To run the auction, to show a client up to three quotes, to let the top 3 contact the client, and to keep a record of token holds and releases. The legal bases to describe in the final notice are consent (the photos and ID you upload) and the contract (running the lead you asked for).</p>' +
       '<h2>Who we share it with</h2><ul>' +
       '<li>Contractors in the top ' + winnerPlaces() + ' receive the client’s name and phone so they can quote. After one quote is accepted, the others no longer see that number.</li>' +
       '<li>The client receives the name and phone of the contractors in the top ' + winnerPlaces() + '. After one quote is accepted, only that contractor’s number stays available.</li>' +
@@ -412,7 +427,7 @@
       '<li>The database is hosted by Supabase. Photos are stored there in private buckets.</li>' +
       '<li>WhatsApp opens only if you tap a WhatsApp link. We do not run a WhatsApp bot.</li>' +
       '</ul>' +
-      '<h2>How long</h2><p>Keep job records while the quote is being decided and for a reasonable period afterwards so there is a record of who won the lead. Say the exact period in the final notice. You can ask for a copy, a correction, or deletion, subject to records we must keep.</p>' +
+      '<h2>How long</h2><p>Keep job records while the quote is being decided and for a reasonable period afterwards so there is a record of who was in the top 3 and which quote was accepted. Say the exact period in the final notice. You can ask for a copy, a correction, or deletion, subject to records we must keep.</p>' +
       '<h2>Your rights</h2><p>Under POPIA you can ask what we hold, ask for a correction, object, or complain to the Information Regulator. Contact details for the operator go here.</p></article>';
   }
 
@@ -453,7 +468,7 @@
     const signup = mode === 'signup';
     return '<h1>' + (signup ? 'Create an account' : 'Sign in') + '</h1>' +
       (signup ? '' : '<p class="lede">Use the email and password on your account.</p>') +
-      '<form class="card stack" data-form="' + (signup ? 'signup' : 'signin') + '">' +
+      '<form class="card stack" novalidate data-form="' + (signup ? 'signup' : 'signin') + '">' +
       (signup ? '<label class="field">Your name<input name="full_name" required autocomplete="name"></label>' +
         '<fieldset class="stack"><legend class="field-label">I am a</legend>' +
         '<label class="choice"><input type="radio" name="role" value="client" checked> Client — I need a quote</label>' +
@@ -478,7 +493,7 @@
     if (!configured()) return offlineCard();
     return '<h1>Reset your password</h1>' +
       '<p class="lede">We will email you a link. It opens this same app, where you can choose a new password.</p>' +
-      '<form class="card stack" data-form="forgot">' +
+      '<form class="card stack" novalidate data-form="forgot">' +
       '<label class="field">Email<input name="email" type="email" required autocomplete="email"></label>' +
       '<button class="btn btn-teal" type="submit">Send reset link</button>' +
       '<p class="tiny"><a href="#/signin">Back to sign in</a></p>' +
@@ -600,13 +615,10 @@
   }
 
   function earlyNote(job) {
-    if (!profile || profile.role !== 'contractor') return '';
+    if (!profile || profile.role !== 'contractor' || !isVip(profile)) return '';
     const age = Date.now() - new Date(job.created_at).getTime();
     if (!(age >= 0 && age < 15 * 60 * 1000)) return '';
-    if (isVip(profile)) {
-      return '<p class="early" data-testid="vip-early">VIP early access. You were told about this lead first. Other contractors can see it too.</p>';
-    }
-    return '<p class="early" data-testid="vip-early">VIP members were told about this lead a few minutes earlier. You can bid now.</p>';
+    return '<p class="early" data-testid="vip-early">You were told about this lead when it was posted. Every matching contractor can bid.</p>';
   }
 
   function boardHtml(rows) {
@@ -614,7 +626,7 @@
     const places = winnerPlaces();
     const inPlay = list.filter(function (row) { return row.place <= places; });
     const showBeat = inPlay.length >= places;
-    if (!list.length) return '<li class="open-slot">No bids yet. Minimum bid: 1 token.</li>';
+    if (!list.length) return '<li class="open-slot">No bids yet.</li>';
     const rowsHtml = list.map(function (row) {
       const beat = showBeat && row.place === places;
       const name = row.anon || row.label;
@@ -634,7 +646,7 @@
     const inPlay = (board || []).filter(function (row) { return row.place <= places; }).length;
     if (job.status === 'accepted') {
       if (myQuote && myQuote.status === 'accepted') return { text: 'Quote accepted', cls: 'in' };
-      if (won) return { text: 'Another quote was chosen', cls: 'out' };
+      if (won) return { text: 'Another quote was accepted', cls: 'out' };
     }
     if (won) return { text: 'You’re in the top ' + places + '. Send your quote.', cls: 'in' };
     if (job.status !== 'open' && mine) return { text: 'You didn’t make the top ' + places + '.', cls: 'out' };
@@ -751,6 +763,9 @@
 
   function comparisonTable(priced) {
     if (!priced.length) return '';
+    priced = priced.slice().sort(function (a, b) {
+      return a.total - b.total || String(a.q.id).localeCompare(String(b.q.id));
+    });
     const head = '<tr><th class="row-label"></th>' + priced.map(function (row) {
       const name = row.card.business_name || row.card.full_name || 'Contractor';
       return '<th>' + esc(name) +
@@ -781,12 +796,15 @@
       }],
       ['', function (row) {
         if (row.q.status === 'accepted') return '<span class="pill pill-good">Accepted</span>';
-        if (row.q.status === 'not_selected') return '<span class="pill">Not chosen</span>';
+        if (row.q.status === 'not_selected') return '<span class="pill">Not accepted</span>';
         const name = row.card.business_name || row.card.full_name || 'this contractor';
         return '<button class="btn btn-teal btn-small" type="button" data-action="accept-quote" data-id="' + row.q.id + '" data-name="' + esc(name) + '" data-total="' + row.total + '">Accept this quote</button>';
       }]
     ];
-    return '<div class="compare-scroll" data-testid="compare-quotes"><table class="compare-table"><thead>' + head + '</thead><tbody>' +
+    const hint = priced.length > 1
+      ? '<p class="compare-hint">Cheapest first. <span class="compare-swipe">Swipe sideways to see every quote.</span></p>'
+      : '';
+    return hint + '<div class="compare-scroll" data-testid="compare-quotes"><table class="compare-table"><thead>' + head + '</thead><tbody>' +
       rows.map(function (pair) {
         return '<tr><th class="row-label">' + pair[0] + '</th>' + cells(pair[1]) + '</tr>';
       }).join('') + '</tbody></table></div>' +
@@ -946,19 +964,30 @@
       return '<p class="notice">You need more tokens for the minimum bid of ' + plural(limits.min, 'token') + '. You have ' + plural(limits.available, 'token') + ' available. <a href="#/contractor/wallet">Buy tokens</a>.</p>';
     }
     const amount = Math.min(limits.max, Math.max(limits.min, wizard.bidAmount || limits.min));
-    const third = num(preview.third);
-    const places = winnerPlaces();
-    const beat = (preview && !preview.in_top && third)
-      ? '<p>Bid to beat ' + plural(third, 'token') + '.</p>'
-      : '';
-    return '<p data-testid="min-bid">Minimum bid: ' + plural(limits.min, 'token') + '.</p>' + beat +
+    const held = preview && preview.held != null
+      ? num(preview.held)
+      : num(preview && preview.due) - num(preview && preview.extra);
+    let wallet = 'You have ' + plural(limits.available, 'token') + ' available';
+    if (held > 0) {
+      wallet += '. ' + plural(held, 'token') + ' already held on this lead count towards this bid, so you can bid up to ' + plural(limits.max, 'token');
+    }
+    if (preview.vip) wallet += '. VIP covers up to ' + plural(vipFree(), 'token') + ' on this lead';
+    wallet += '.';
+    let rule;
+    if (preview && preview.in_top) {
+      rule = 'Your next bid must be at least ' + plural(limits.min, 'token') + ', one more than your current bid.';
+    } else if (preview && preview.third) {
+      rule = 'Bid at least ' + plural(limits.min, 'token') + ' to move into the top ' + winnerPlaces() + '.';
+    } else {
+      rule = 'Minimum bid: ' + plural(limits.min, 'token') + '.';
+    }
+    return '<p data-testid="min-bid">' + rule + '</p>' +
       '<div class="stepper" data-min="' + limits.min + '" data-max="' + limits.max + '">' +
       '<button type="button" class="btn btn-ghost" data-action="bid-step" data-dir="-1" aria-label="Lower bid">−</button>' +
       '<label class="field"><span class="sr">Tokens to bid</span>' +
       '<input name="bid-amount" data-testid="bid-amount" inputmode="numeric" type="number" min="' + limits.min + '" max="' + limits.max + '" step="1" value="' + amount + '"></label>' +
       '<button type="button" class="btn btn-ghost" data-action="bid-step" data-dir="1" aria-label="Raise bid">+</button></div>' +
-      '<p class="tiny">You have ' + plural(limits.available, 'token') + ' available' +
-      (preview.vip ? '. VIP covers up to ' + plural(vipFree(), 'token') + ' on this lead' : '') + '.</p>' +
+      '<p class="tiny" data-testid="token-available">' + wallet + '</p>' +
       '<button type="button" class="btn btn-teal" data-action="bid-review">Bid ' + plural(amount, 'token') + '</button>' +
       (wizard.confirmJob === id ? '<div class="confirm" data-testid="bid-confirm"><p>' + esc(bidSentence(wizard.confirmAmount)) + '</p>' +
         '<button type="button" class="btn btn-orange" data-action="confirm-bid" data-id="' + id + '" data-amount="' + wizard.confirmAmount + '">Confirm bid of ' + plural(wizard.confirmAmount, 'token') + '</button>' +
@@ -977,6 +1006,8 @@
     const resultRes = await sb.from('auction_results').select('*').eq('job_id', id).maybeSingle();
     const quoteRes = await sb.from('quotes').select('*').eq('job_id', id).maybeSingle();
     const msgRes = await sb.from('messages').select('*').eq('job_id', id).order('created_at');
+    const reviewedRes = await sb.from('reviews').select('id').eq('job_id', id).limit(1);
+    const reviewed = !!(reviewedRes.data && reviewedRes.data.length);
     const board = boardRes.data || [];
     const mine = board.filter(function (row) { return row.is_you; })[0];
     const preview = previewRes.data || { min: 1 };
@@ -1014,7 +1045,7 @@
       ? '<a class="btn btn-teal" href="#/contractor/quote/' + id + '">Send your quote</a>' : '';
     const next = chosen
       ? '<article class="card"><h2>Quote accepted</h2><p>The client accepted your quote. Contact them to arrange the work. You can message them here, or open WhatsApp.</p></article>'
-      : (lost ? '<article class="card"><h2>Another quote was chosen</h2><p>The client accepted a different quote. Their name, phone and WhatsApp are no longer shown.</p></article>' : '');
+      : (lost ? '<article class="card"><h2>Another quote was accepted</h2><p>The client accepted a different quote. Their name, phone and WhatsApp are no longer shown.</p></article>' : '');
     const wa = showContact && clientContact.phone
       ? '<a class="btn btn-ghost" data-phone="' + esc(clientContact.phone) + '" target="_blank" rel="noopener" href="' + esc(waChat(clientContact.phone, 'Hi, this is about your Multiquoters job: ' + job.title)) + '">WhatsApp the client</a>' : '';
     const showMessages = won && (quotingOpen || job.status === 'accepted');
@@ -1023,13 +1054,14 @@
     const msgs = (msgRes.data || []).filter(function (m) { return m.contractor_id === profile.id; }).map(function (m) {
       return messageBubble(m, m.sender_id === profile.id, clientName);
     }).join('');
-    return '<p class="tiny">' + esc(jobStatusLabel(job.status)) + '</p><h1>' + esc(job.title) + '</h1>' + earlyNote(job) +
+    const auctionOpen = job.status === 'open';
+    return '<p class="tiny">' + esc(jobStatusLabel(job.status, reviewed)) + '</p><h1>' + esc(job.title) + '</h1>' + (auctionOpen ? earlyNote(job) : '') +
       next +
       '<article class="card"><div class="between"><span class="pill">' + esc(job.trade) + '</span><span>' + esc(left(job.auction_ends_at)) + '</span></div>' +
       '<p>' + esc(job.description) + '</p><p class="tiny">' + esc(job.suburb) + ', ' + esc(job.area) + (job.when_needed ? ' · ' + esc(job.when_needed) : '') + '</p>' +
       photoBlock +
       '<p class="standing ' + stand.cls + '" data-testid="bid-standing">' + esc(stand.text) + '</p>' +
-      '<ul class="topbids">' + boardHtml(board.filter(function (row) { return row.place <= winnerPlaces() || row.is_you; })) + '</ul>' +
+      (auctionOpen ? '<ul class="topbids">' + boardHtml(board.filter(function (row) { return row.place <= winnerPlaces() || row.is_you; })) + '</ul>' : '') +
       taps + '<p class="form-error" data-error></p>' + quoteLink + '</article>' +
       quoteBlock +
       (showContact ? '<article class="card"><h2>Client</h2><p><span class="field-label">Name</span> ' + esc(clientContact.name) + '</p><p><span class="field-label">Phone</span> ' + esc(clientContact.phone) + '</p>' + wa + '</article>' : '') +
@@ -1271,11 +1303,34 @@
     let body = String(n.body || '').replace(/\s*Bids stay anonymous until the auction ends\.?/g, '').trim();
     let href = n.href || '';
     let title = n.title || '';
-    if (title === 'You won a place') {
+    const renamed = {
+      'You won a place': 'You are in the top 3',
+      'You were outbid': 'You dropped out of the top 3',
+      'Another quote was chosen': 'Another quote was accepted',
+      'Contractors chosen': 'Quotes due'
+    };
+    if (renamed[title]) title = renamed[title];
+    if (title === 'You are in the top 3') {
       if (href.indexOf('#/contractor/lead/') === 0) href = href.replace('#/contractor/lead/', '#/contractor/quote/');
       if (body.indexOf('Send your quote') === -1) body = (body ? body + ' ' : '') + 'Next step: send your quote.';
     }
+    if (title === 'Another quote was accepted' && /chose a different/i.test(body)) {
+      body = 'The client accepted a different quote. Their contact details are no longer shown here.';
+    }
     return { title: title, body: body, href: href, created_at: n.created_at };
+  }
+
+  function alertJobId(href) {
+    const match = String(href || '').match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+    return match ? match[0] : '';
+  }
+
+  function alertCard(n) {
+    const headline = n.body || n.title;
+    const kicker = n.body && n.title && n.body !== n.title ? n.title : '';
+    const inner = (kicker ? '<p class="tiny">' + esc(kicker) + '</p>' : '') +
+      '<strong>' + esc(headline) + '</strong><p class="tiny">' + esc(fmtWhen(n.created_at)) + '</p>';
+    return n.href ? '<a class="card" href="' + esc(n.href) + '">' + inner + '</a>' : '<article class="card">' + inner + '</article>';
   }
 
   async function pageNotifications() {
@@ -1284,21 +1339,87 @@
     unread = 0;
     const rows = res.data || [];
     if (!rows.length) return '<h1>Alerts</h1><article class="card"><p>Nothing yet. Bid updates and quotes show up here.</p></article>';
+    const jobIds = [];
+    rows.forEach(function (n) {
+      const id = alertJobId(n.href);
+      if (id && jobIds.indexOf(id) < 0) jobIds.push(id);
+    });
+    const quotesByJob = {};
+    const bidsByJob = {};
+    if (profile.role === 'client' && jobIds.length) {
+      let quoteRes = await sb.from('quotes').select('id, job_id, contractor_id, materials_rand, labour_rand, callout_rand, other_rand').in('job_id', jobIds);
+      if (quoteRes.error) {
+        quoteRes = await sb.from('quotes').select('id, job_id, contractor_id, materials_rand, labour_rand, callout_rand').in('job_id', jobIds);
+      }
+      const quotes = quoteRes.data || [];
+      const quoteIds = quotes.map(function (q) { return q.id; });
+      const contractorIds = quotes.map(function (q) { return q.contractor_id; });
+      let items = [];
+      let cards = [];
+      if (quoteIds.length) {
+        const itemRes = await sb.from('quote_items').select('quote_id, rand').in('quote_id', quoteIds);
+        items = itemRes.data || [];
+        const cardRes = await sb.from('contractor_cards').select('id, business_name, full_name').in('id', contractorIds);
+        cards = cardRes.data || [];
+      }
+      const feedRes = await sb.from('bid_feed').select('job_id, amount, created_at').in('job_id', jobIds).order('created_at');
+      (feedRes.data || []).forEach(function (row) {
+        if (!bidsByJob[row.job_id]) bidsByJob[row.job_id] = [];
+        bidsByJob[row.job_id].push(row.amount);
+      });
+      const linesByJob = {};
+      quotes.forEach(function (q) {
+        const card = cards.filter(function (c) { return c.id === q.contractor_id; })[0] || {};
+        const name = card.business_name || card.full_name || 'A contractor';
+        const total = quoteTotal(q, quoteItemsFor(items, q.id));
+        if (!linesByJob[q.job_id]) linesByJob[q.job_id] = [];
+        linesByJob[q.job_id].push({ total: total, text: name + ' quoted ' + formatR(total) + '.' });
+      });
+      Object.keys(linesByJob).forEach(function (jobId) {
+        quotesByJob[jobId] = linesByJob[jobId]
+          .sort(function (a, b) { return a.total - b.total; })
+          .map(function (line) { return line.text; })
+          .join(' ');
+      });
+    }
     const grouped = [];
+    const seenBids = {};
+    const seenQuotes = {};
     rows.forEach(function (n) {
       const item = presentAlert(n);
-      const prev = grouped[grouped.length - 1];
-      if (prev && prev.title === item.title && prev.body === item.body) {
-        prev.count += 1;
+      const jobId = alertJobId(item.href);
+      if (item.title === 'New bid') {
+        const key = item.href || jobId || 'bids';
+        if (seenBids[key]) return;
+        seenBids[key] = true;
+        const amounts = bidsByJob[jobId] || [];
+        const count = rows.filter(function (row) { return row.title === 'New bid' && row.href === n.href; }).length;
+        item.title = count === 1 ? 'New bid' : plural(count, 'bid');
+        if (amounts.length) {
+          item.body = 'Bids of ' + amounts.map(function (amount) { return plural(amount, 'token'); }).join(', ') + '. Names stay hidden until bidding ends.';
+        } else if (!/token/.test(item.body)) {
+          item.body = plural(count, 'bid') + ' on this job. Names stay hidden until bidding ends.';
+        }
+        grouped.push(item);
         return;
       }
-      item.count = 1;
+      if (item.title === 'Quote received' || item.title === 'Quote updated') {
+        const key = jobId || item.href || item.title;
+        if (seenQuotes[key]) return;
+        seenQuotes[key] = true;
+        if (quotesByJob[jobId]) item.body = quotesByJob[jobId];
+        const count = rows.filter(function (row) {
+          return (row.title === 'Quote received' || row.title === 'Quote updated') && alertJobId(row.href) === jobId;
+        }).length;
+        if (count > 1) item.title = plural(count, 'quote');
+        grouped.push(item);
+        return;
+      }
+      const prev = grouped[grouped.length - 1];
+      if (prev && prev.title === item.title && prev.body === item.body) return;
       grouped.push(item);
     });
-    return '<h1>Alerts</h1><div class="stack">' + grouped.map(function (n) {
-      const inner = '<strong>' + esc(n.title) + (n.count > 1 ? ' × ' + n.count : '') + '</strong><p>' + esc(n.body) + '</p><p class="tiny">' + esc(fmtWhen(n.created_at)) + '</p>';
-      return n.href ? '<a class="card" href="' + esc(n.href) + '">' + inner + '</a>' : '<article class="card">' + inner + '</article>';
-    }).join('') + '</div>';
+    return '<h1>Alerts</h1><div class="stack">' + grouped.map(alertCard).join('') + '</div>';
   }
 
   async function pageAdmin() {
@@ -1535,6 +1656,10 @@
       if (kind === 'signup' || kind === 'signin') {
         const email = form.email.value.trim();
         const password = form.password.value;
+        if (!emailOk(email)) {
+          markInvalid('email', 'Enter a valid email address, such as name@example.com.');
+          return fail('Enter a valid email address, such as name@example.com.');
+        }
         const redirect = location.origin + location.pathname;
         if (kind === 'signup') {
           if (!form.terms.checked) {
@@ -1559,7 +1684,7 @@
               }
             }
           });
-          if (res.error) return fail(res.error.message);
+          if (res.error) return fail(friendlyAuthError(res.error.message));
           if (res.data.session) {
             session = res.data.session;
             await loadProfile();
@@ -1571,7 +1696,7 @@
         }
         if (!password) return fail('Enter a password, or use the email link.');
         const res = await sb.auth.signInWithPassword({ email: email, password: password });
-        if (res.error) return fail(res.error.message);
+        if (res.error) return fail(friendlyAuthError(res.error.message));
         session = res.data.session;
         await loadProfile();
         location.hash = profile && profile.role === 'contractor' ? '#/contractor/leads' : profile && profile.role === 'admin' ? '#/admin' : '#/client/requests';
@@ -1579,9 +1704,13 @@
       }
       if (kind === 'forgot') {
         const email = form.email.value.trim();
+        if (!emailOk(email)) {
+          markInvalid('email', 'Enter a valid email address, such as name@example.com.');
+          return fail('Enter a valid email address, such as name@example.com.');
+        }
         const redirect = location.origin + location.pathname;
         const res = await sb.auth.resetPasswordForEmail(email, { redirectTo: redirect });
-        if (res.error) return fail(res.error.message);
+        if (res.error) return fail(friendlyAuthError(res.error.message));
         toast('Reset link sent. It opens this same app.');
         return;
       }
@@ -1735,21 +1864,23 @@
     const action = el.getAttribute('data-action');
     if (action === 'sign-out') {
       e.preventDefault();
+      e.stopPropagation();
+      if (signingOut) return;
       signingOut = true;
       session = null;
       profile = null;
       unread = 0;
       recovery = false;
+      quoteDraft = null;
+      pendingAccept = null;
       if (liveChannel && sb) {
         try { sb.removeChannel(liveChannel); } catch (err) { /* already gone */ }
         liveChannel = null;
       }
-      function finish() {
-        signingOut = false;
-        if ((location.hash || '#/') !== '#/') location.hash = '#/';
-        else go();
-      }
-      if (sb) sb.auth.signOut().then(finish, finish);
+      if ((location.hash || '#/') !== '#/') location.hash = '#/';
+      else go();
+      function finish() { signingOut = false; }
+      if (sb) sb.auth.signOut({ scope: 'local' }).then(finish, finish);
       else finish();
       return;
     }
@@ -1757,12 +1888,12 @@
       e.preventDefault();
       const form = el.closest('form');
       const email = form.email.value.trim();
-      if (!email) return toast('Enter your email first');
+      if (!emailOk(email)) return toast('Enter a valid email address, such as name@example.com.');
       const res = await sb.auth.signInWithOtp({
         email: email,
         options: { emailRedirectTo: location.origin + location.pathname }
       });
-      if (res.error) return toast(res.error.message);
+      if (res.error) return toast(friendlyAuthError(res.error.message));
       toast('Sign-in link sent. Check your email.');
       return;
     }
@@ -2072,16 +2203,18 @@
           else go();
           return;
         }
-        if (signingOut && event !== 'SIGNED_OUT') return;
+        if (signingOut) return;
         if (event === 'SIGNED_OUT' || !next) {
           session = null;
           profile = null;
-          signingOut = false;
           go();
           return;
         }
         session = next;
-        loadProfile().then(function () { if (!signingOut) go(); });
+        setTimeout(function () {
+          if (signingOut) return;
+          loadProfile().then(function () { if (!signingOut) go(); });
+        }, 0);
       });
       ready = true;
       go();

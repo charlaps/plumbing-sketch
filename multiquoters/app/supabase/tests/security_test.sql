@@ -560,14 +560,14 @@ SELECT public._assert(
   EXISTS (
     SELECT 1 FROM public.notifications
     WHERE profile_id = '66666666-6666-4666-8666-666666666666'
-      AND title = 'Another quote was chosen'
+      AND title = 'Another quote was accepted'
       AND href = '#/contractor/lead/' || (SELECT id FROM public._t WHERE name = 'sec_msg')
       AND body NOT ILIKE '%http%'
   )
   AND EXISTS (
     SELECT 1 FROM public.notifications
     WHERE profile_id = '55555555-5555-4555-8555-555555555555'
-      AND title = 'Another quote was chosen'
+      AND title = 'Another quote was accepted'
       AND href = '#/contractor/lead/' || (SELECT id FROM public._t WHERE name = 'sec_msg')
   )
   AND EXISTS (
@@ -579,7 +579,7 @@ SELECT public._assert(
   AND NOT EXISTS (
     SELECT 1 FROM public.notifications
     WHERE profile_id = '44444444-4444-4444-8444-444444444444'
-      AND title = 'Another quote was chosen'
+      AND title = 'Another quote was accepted'
       AND href = '#/contractor/lead/' || (SELECT id FROM public._t WHERE name = 'sec_msg')
   ),
   'the chosen contractor is told, and the other winners get a polite note'
@@ -591,7 +591,7 @@ SELECT public._assert(
   EXISTS (
     SELECT 1 FROM public.notifications
     WHERE profile_id = '55555555-5555-4555-8555-555555555555'
-      AND title = 'Another quote was chosen'
+      AND title = 'Another quote was accepted'
       AND href = '#/contractor/lead/' || (SELECT id FROM public._t WHERE name = 'job1')
   ),
   'a winner who did not quote is still told they were not chosen'
