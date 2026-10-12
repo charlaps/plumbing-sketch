@@ -2,15 +2,17 @@
    Scope = the folder this file sits in (.../plumbing-sketch/field/).
    - Shell, data and index: network-first (3 s timeout) so updates show up, cache fallback when offline.
    - Photo packs (pack-NN.bin): cache-first, filled on first use / background download.
-   - Only deletes caches that start with "aps-field-" – never other apps' caches on this origin. */
-var CACHE='aps-field-v1.2';
-var SHELL=['./','index.html','app.css','app.js','handbook-data.js','tips.js','gsearch.js','handbook.js','sans.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png','logo.png','logo-white.png','items.json','photos.idx'];
+   - Only deletes this app's own aps-field-v* caches. Leaves aps-field-sketch- and aps-field-jobs- alone.
+   - Sketch and the job register have their own service workers; this one does not cache them. */
+var CACHE='aps-field-v1.3';
+var SHELL=['./','index.html','app.css','app.js','handbook-data.js','tips.js','gsearch.js','handbook.js','sans.js','guide-data.js','guide.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png','logo.png','logo-white.png','items.json','photos.idx'];
+function isFieldCache(k){return k.indexOf('aps-field-')===0&&k.indexOf('aps-field-sketch-')!==0&&k.indexOf('aps-field-jobs-')!==0}
 self.addEventListener('install',function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){
     return Promise.all(SHELL.map(function(f){return c.add(new Request(f,{cache:'reload'})).catch(function(){})})).then(function(){
       /* v1.2: reuse the big photo packs already saved by an older version, so they do not have to be downloaded again */
       return caches.keys().then(function(ks){
-        var olds=ks.filter(function(k){return k.indexOf('aps-field-')===0&&k!==CACHE});
+        var olds=ks.filter(function(k){return isFieldCache(k)&&k!==CACHE});
         return Promise.all(olds.map(function(k){return caches.open(k).then(function(oc){return oc.keys().then(function(reqs){
           return Promise.all(reqs.filter(function(rq){return isPack(new URL(rq.url))}).map(function(rq){
             return c.match(rq).then(function(have){if(have)return;return oc.match(rq).then(function(resp){if(resp)return c.put(rq,resp)})})}))})})}))}).catch(function(){})});
@@ -18,7 +20,7 @@ self.addEventListener('install',function(e){
 });
 self.addEventListener('activate',function(e){
   e.waitUntil(caches.keys().then(function(ks){
-    return Promise.all(ks.filter(function(k){return k.indexOf('aps-field-')===0&&k!==CACHE}).map(function(k){return caches.delete(k)}));
+    return Promise.all(ks.filter(function(k){return isFieldCache(k)&&k!==CACHE}).map(function(k){return caches.delete(k)}));
   }).then(function(){return self.clients.claim()}));
 });
 function isPack(u){return /\/pack-\d+\.bin$/.test(u.pathname)}
@@ -52,5 +54,7 @@ self.addEventListener('fetch',function(e){
   if(r.method!=='GET')return;
   var u=new URL(r.url);
   if(u.origin!==location.origin||u.href.indexOf(self.registration.scope)!==0)return;
+  var rel=u.pathname.slice(new URL(self.registration.scope).pathname.length);
+  if(rel==='sketch'||rel.indexOf('sketch/')===0||rel==='jobs'||rel.indexOf('jobs/')===0)return;
   e.respondWith(isPack(u)?cacheFirst(r):netFirst(r));
 });

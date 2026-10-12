@@ -1,7 +1,7 @@
 /* APS Field App – core, Parts (Plumblink search), Settings. No secrets in this file. */
 var APSF=(function(){
 'use strict';
-var VERSION='1.1';var CACHE_NAME='aps-field-v1.1';
+var VERSION='1.3';var CACHE_NAME='aps-field-v1.3';
 var SNAP_FALLBACK='2026-10-04';
 var $=function(s,r){return (r||document).querySelector(s)};
 var view,barTitle;
@@ -27,7 +27,7 @@ var ICONS={
  trash:'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',share:'M4 12v7h16v-7M12 3v12M8 7l4-4 4 4',
  gear:'M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6',check:'M5 13l4 4 10-10',copy:'M9 9h11v11H9zM5 15V4h10',
  ext:'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',chat:'M4 20l1.5-4.5A8 8 0 1 1 9 18.5z',edit:'M4 20l4-1 11-11-3-3L5 16z',
- warn:'M12 3l10 18H2zM12 10v5M12 18h.01',lock:'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3',download:'M12 4v12M7 11l5 5 5-5M4 20h16',x:'M6 6l12 12M18 6L6 18',
+ warn:'M12 3l10 18H2zM12 10v5M12 18h.01',lock:'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3',shield:'M12 3l8 3v6c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6z',download:'M12 4v12M7 11l5 5 5-5M4 20h16',x:'M6 6l12 12M18 6L6 18',
  img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01',bolt:'M13 3L5 14h6l-1 7 8-11h-6z',pin:'M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11zM12 7v6M9 10h6',refresh:'M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7',star:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'};
 function svg(n){return '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="'+ICONS[n]+'"/></svg>'}
 function ic(n){return h('span',{html:svg(n),style:'display:inline-flex'})}
@@ -105,7 +105,7 @@ function route(keep){
  fn(r.args,r.q,view);
  if(!keep)window.scrollTo(0,0);
  view.focus({preventScroll:true})}
-var PARENT={parts:'#/',book:'#/',sans:'#/',settings:'#/',tips:'#/book'};
+var PARENT={parts:'#/',book:'#/',sans:'#/',settings:'#/',tips:'#/book',guide:'#/',admin:'#/'};
 function setBar(o){
  var back=$('#back'),homeb=$('#homeb'),logo=$('#blogo'),x=$('#barx');
  $('#title').textContent=o.title||'';
@@ -123,12 +123,12 @@ A.view=function(){return view};
 A.routes.home=function(a,q,v){
  setBar({title:'APS Field App',home:true});
  v.className='home';
- var tiles=[['#/parts','search','PARTS','Plumblink search, prices and photos'],['#/book','book','HANDBOOK','Scenarios: diagnose, repair, install'],['#/sans','camera','SANS PHOTO CHECK','Photo, mark-up and checklist']];
+ var tiles=[['#/parts','search','PARTS','Plumblink search, prices and photos'],['#/book','book','HANDBOOK','Scenarios: diagnose, repair, install'],['#/sans','camera','SANS PHOTO CHECK','Photo, mark-up and checklist'],['sketch/','edit','SKETCH','Draw the job and share it'],['#/guide','shield','FIELD GUIDE','Safety, daily routine, scripts, forms']];
  var tilesEl=h('div',{class:'homebtns'},tiles.map(function(t){
   return h('a',{class:'hbig',href:t[0],'data-home':t[2]},[h('span',{class:'hi',html:svg(t[1])}),h('span',null,[h('b',{text:t[2]}),h('small',{text:t[3]})])])}));
  v.appendChild(tilesEl);
  if(A.gs)A.gs.homeBox(v,tilesEl);
- v.appendChild(h('div',{class:'foot'},[h('span',{text:'APS Field App v'+VERSION}),h('a',{href:'#/settings','data-home':'settings'},[ic('gear'),'Settings'])]))};
+ v.appendChild(h('div',{class:'foot'},[h('span',{text:'APS Field App v'+VERSION}),h('a',{href:'#/admin','data-home':'admin'},[ic('lock'),'Admin']),h('a',{href:'#/settings','data-home':'settings'},[ic('gear'),'Settings'])]))};
 
 /* ---------------- Plumblink data & search ---------------- */
 var D={rows:null,loading:null,snap:SNAP_FALLBACK,cats:[],slugs:[],base:'',packs:0,byCode:{},c1:[],c2:{}};
@@ -642,9 +642,40 @@ A.routes.settings=function(a,q,v){
  var dlb=btn('Save all photos for offline use','',function(){dlb.disabled=true;downloadAll(function(i,n){off.textContent='Downloading photos\u2026 '+i+' of '+n}).then(function(){offStatus();dlb.disabled=false;toast('Photos saved')},function(){off.textContent='No connection. Try again online.';dlb.disabled=false})},{'data-act':'dlphotos'},'download');
  var clr=btn('Clear app cache and reload','dng',function(){
   if(!window.caches){location.reload();return}
-  caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k.indexOf('aps-field-')===0}).map(function(k){return caches.delete(k)}))}).then(function(){toast('Cache cleared');setTimeout(function(){location.reload()},500)})},{'data-act':'clearcache'},'trash');
+  caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k.indexOf('aps-field-')===0&&k.indexOf('aps-field-sketch-')!==0&&k.indexOf('aps-field-jobs-')!==0}).map(function(k){return caches.delete(k)}))}).then(function(){toast('Cache cleared');setTimeout(function(){location.reload()},500)})},{'data-act':'clearcache'},'trash');
  v.appendChild(card('Offline',[off,h('div',{class:'btns'},[dlb,clr]),h('p',{class:'hint',text:'Clearing the cache keeps your settings, materials list and saved photo checks. Only the downloaded app files and photos are removed.'})]));
  v.appendChild(h('p',{class:'snap'},'APS Field App v'+VERSION+' \u00B7 Prices as of '+fmtDate(D.snap)+' \u00B7 Everything is stored on this phone only.'))};
+
+/* ---------------- Admin (same PIN as cost price) ---------------- */
+A.routes.admin=function(a,q,v){
+ setBar({title:'Admin',back:'#/'});
+ var box=h('div');v.appendChild(box);
+ function draw(){
+  box.innerHTML='';
+  box.appendChild(h('p',{text:'Admin holds the job register. It uses the same PIN as Plumblink cost price.'}));
+  var msg=h('p',{class:'hint',role:'status'});
+  if(!hasPin()){
+   box.appendChild(h('p',{text:'Set a PIN first (4 to 8 digits). It also unlocks cost price in Settings.'}));
+   var a1=h('input',{type:'password',inputmode:'numeric',maxlength:8,placeholder:'New PIN','data-f':'adminpin1','aria-label':'New PIN'}),a2=h('input',{type:'password',inputmode:'numeric',maxlength:8,placeholder:'Repeat PIN','data-f':'adminpin2','aria-label':'Repeat PIN'});
+   box.appendChild(a1);box.appendChild(h('div',{style:'height:8px'}));box.appendChild(a2);
+   box.appendChild(h('div',{class:'btns'},btn('Set PIN','pri',function(){
+    if(!/^\d{4,8}$/.test(a1.value)){msg.textContent='Use 4 to 8 digits.';return}
+    if(a1.value!==a2.value){msg.textContent='The two PINs do not match.';return}
+    setPin(a1.value);toast('PIN set');draw()},{'data-act':'setadminpin'})));
+  }else if(!A._pinUnlocked()){
+   var pin=h('input',{type:'password',inputmode:'numeric',maxlength:8,placeholder:'Enter PIN','data-f':'adminpin','aria-label':'Admin PIN'});
+   var ok=function(){var r=tryUnlock(pin.value);if(r==='ok')draw();else{msg.textContent=r==='wait'?'Too many wrong tries. Wait a minute.':'Wrong PIN';pin.value=''}};
+   pin.addEventListener('keydown',function(ev){if(ev.key==='Enter')ok()});
+   box.appendChild(h('div',{class:'pinbox'},[pin,btn('Unlock','pri',ok,{'data-act':'unlockadmin'})]));
+  }else{
+   box.appendChild(h('p',{class:'hint',text:'Unlocked. It locks again after 5 minutes of no use.'}));
+   var jobs=h('a',{class:'btn pri',href:'jobs/','data-act':'openjobs'},[ic('list'),'Job register']);
+   jobs.addEventListener('click',function(){try{sessionStorage.setItem('apsf.admin',String(Date.now()))}catch(e){}});
+   box.appendChild(h('div',{class:'btns'},[jobs,btn('Lock now','sm',function(){lockNow();try{sessionStorage.removeItem('apsf.admin')}catch(e){}draw()},{'data-act':'lockadmin'},'lock')]));
+   box.appendChild(h('p',{class:'hint',text:'Jobs already saved on this phone stay in the register. The total is materials plus labour. VAT stays off unless you tick it on a job.'}));
+  }
+  box.appendChild(msg)}
+ draw()};
 function segCtl(opts,val,fn,id){var w=h('div',{class:'seg','data-seg':id});opts.forEach(function(o){var b=h('button',{type:'button',class:val===o[0]?'on':'','data-v':o[0],text:o[1]});b.addEventListener('click',function(){[].forEach.call(w.children,function(x){x.classList.toggle('on',x===b)});fn(o[0])});w.appendChild(b)});return w}
 A.segCtl=segCtl;
 

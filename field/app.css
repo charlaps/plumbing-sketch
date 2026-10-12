@@ -25,14 +25,14 @@ svg.ic{width:1.5rem;height:1.5rem;fill:none;stroke:currentColor;stroke-width:2;s
 .card>h3{margin:0 0 8px;font-size:1.1rem}
 /* home */
 .homebtns{flex:1;display:flex;flex-direction:column;gap:12px;padding:4px 0 8px}
-.hbig{flex:1;min-height:128px;display:flex;align-items:center;gap:16px;padding:14px 18px;border-radius:20px;background:var(--accent);color:var(--on-accent);text-decoration:none;box-shadow:var(--shadow);text-align:left;width:100%}
+.hbig{flex:1;min-height:72px;display:flex;align-items:center;gap:16px;padding:12px 16px;border-radius:20px;background:var(--accent);color:var(--on-accent);text-decoration:none;box-shadow:var(--shadow);text-align:left;width:100%}
 .hbig:active{transform:scale(.98)}
-.hbig .hi{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:none}
+.hbig .hi{width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:none}
 html[data-theme=dark] .hbig .hi{background:rgba(4,19,46,.18)}
 @media (prefers-color-scheme:dark){html[data-theme=auto] .hbig .hi{background:rgba(4,19,46,.18)}}
 .hbig .hi svg{width:34px;height:34px}
-.hbig b{display:block;font-size:1.5rem;line-height:1.15;letter-spacing:.02em}
-.hbig small{display:block;font-size:.95rem;opacity:.9;margin-top:2px;line-height:1.25}
+.hbig b{display:block;font-size:1.25rem;line-height:1.15;letter-spacing:.02em}
+.hbig small{display:block;font-size:.9rem;opacity:.9;margin-top:2px;line-height:1.25}
 .foot{color:var(--muted);font-size:.8rem;text-align:center;margin:10px 0 0;display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}
 .foot a{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 10px;color:var(--muted);font-weight:700}
 /* generic */
@@ -208,7 +208,7 @@ html[data-gloves="1"] body{font-size:1.25rem}
 html[data-gloves="1"] .btn,html[data-gloves="1"] .seg button,html[data-gloves="1"] .chip,html[data-gloves="1"] .tabs button,html[data-gloves="1"] .opt,html[data-gloves="1"] .ckb{min-height:60px;font-size:1.15rem;border-width:3px}
 html[data-gloves="1"] .row,html[data-gloves="1"] .pf{min-height:68px;border-width:3px}
 html[data-gloves="1"] .prow{min-height:88px;border-width:3px}
-html[data-gloves="1"] .hbig{min-height:140px}
+html[data-gloves="1"] .hbig{min-height:88px}
 html[data-gloves="1"] .ib{width:56px;height:56px}
 html[data-gloves="1"] input,html[data-gloves="1"] select,html[data-gloves="1"] textarea{min-height:60px;border-width:3px}
 html[data-gloves="1"] label.ci{min-height:68px}
@@ -265,3 +265,14 @@ html[data-theme=dark] mark{background:#e0b800;color:#111}
 html[data-gloves="1"] .cp{min-height:48px}
 
 #barx{display:flex;align-items:center;gap:0;flex:none}
+.tw{overflow-x:auto;margin:0 0 14px}
+table.ct{width:100%;border-collapse:collapse;font-size:.95rem;background:var(--surface)}
+table.ct th,table.ct td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+.fcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:0 0 12px;box-shadow:var(--shadow)}
+.fcard h3{margin:0 0 8px}
+.res{background:var(--surface2);border-radius:14px;padding:12px;margin:8px 0}
+.res .big{font-size:1.6rem;font-weight:800}
+.rrow{display:flex;justify-content:space-between;gap:8px;padding:4px 0}
+.bh{margin:16px 0 6px;font-size:1.15rem}
+.bl{margin:0 0 12px;padding-left:1.3em}
+.bl li{margin:0 0 6px}

@@ -1,7 +1,7 @@
 {
   "name": "APS Field App",
   "short_name": "APS Field",
-  "description": "Plumblink parts search, plumbing handbook scenarios and SANS photo check for the APS crew. Works offline.",
+  "description": "Parts search, handbook, SANS photo check, plumbing sketch, field guide and the job register for the APS crew. Works offline.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
@@ -20,6 +20,7 @@
   "shortcuts": [
     {"name":"Parts","short_name":"Parts","url":"./#/parts","icons":[{"src":"icon-192.png","sizes":"192x192"}]},
     {"name":"Handbook","short_name":"Handbook","url":"./#/book","icons":[{"src":"icon-192.png","sizes":"192x192"}]},
-    {"name":"SANS photo check","short_name":"Photo check","url":"./#/sans","icons":[{"src":"icon-192.png","sizes":"192x192"}]}
+    {"name":"SANS photo check","short_name":"Photo check","url":"./#/sans","icons":[{"src":"icon-192.png","sizes":"192x192"}]},
+    {"name":"Sketch","short_name":"Sketch","url":"./sketch/","icons":[{"src":"icon-192.png","sizes":"192x192"}]}
   ]
 }
