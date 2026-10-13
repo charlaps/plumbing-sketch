@@ -1,7 +1,7 @@
 /* APS Field App – core, Parts (Plumblink search), Settings. No secrets in this file. */
 var APSF=(function(){
 'use strict';
-var VERSION='1.4';var CACHE_NAME='aps-field-v1.4';
+var VERSION='1.5';var CACHE_NAME='aps-field-v1.5';
 var SNAP_FALLBACK='2026-10-04';
 var $=function(s,r){return (r||document).querySelector(s)};
 var view,barTitle;
@@ -131,7 +131,7 @@ A.routes.home=function(a,q,v){
  v.appendChild(h('div',{class:'foot'},[h('a',{href:'../index.html'},'Sketch'),h('a',{href:'../manual/'},'Manual'),h('a',{href:'../jobs/'},'Jobs'),h('span',{text:'APS Field App v'+VERSION}),h('a',{href:'#/settings','data-home':'settings'},[ic('gear'),'Settings'])]))};
 
 /* ---------------- Plumblink data & search ---------------- */
-var D={rows:null,loading:null,snap:SNAP_FALLBACK,cats:[],slugs:[],base:'',packs:0,byCode:{},c1:[],c2:{}};
+var D={rows:null,loading:null,snap:SNAP_FALLBACK,cats:[],slugs:[],base:'',urls:{},packs:0,byCode:{},c1:[],c2:{}};
 var BC={},GENERIC={},VOC={};'GALVANISED PVC UPVC HDPE BATHROOM CAST DRAIN LIQUID NYLON SPLIT FIRE CLEAR DUCTILE COPPER GV DRILLBIT STAINLESS BRASS SINK SET KIT PIPE TAP VALVE BASIN TOILET SHOWER WALL FLOOR STEEL MIXER BATH WASTE TRAP GEYSER CONCRETE PLASTIC RUBBER SPARE UNIVERSAL STANDARD SOLAR WATER SINGLE DOUBLE ROUND SQUARE CHROME BLACK WHITE GREY BRONZE GOLD ASSORTED COMPRESSION'.split(' ').forEach(function(k){GENERIC[k]=1});
 var SZ_NOM=[15,20,22,25,28,32,40,50,75,110];
 function sizesOf(n){
@@ -145,7 +145,7 @@ function loadData(){
  if(D.rows)return Promise.resolve(D);
  if(D.loading)return D.loading;
  D.loading=fetch('items.json').then(function(r){if(!r.ok)throw new Error('items '+r.status);return r.json()}).then(function(j){
-  D.snap=j.snap||SNAP_FALLBACK;D.cats=j.cats;D.slugs=j.slugs;D.base=j.base;D.packs=j.packs;
+  D.snap=j.snap||SNAP_FALLBACK;D.cats=j.cats;D.slugs=j.slugs;D.base=j.base;D.urls=j.urls||{};D.packs=j.packs;
   var c1={},c2={};
   D.rows=j.rows.map(function(r,i){
    var cp=D.cats[r[2]],segs=cp.split(' > ');
@@ -178,7 +178,7 @@ var LIVE=lsGet('live',{});
 function liveOf(it){var l=LIVE[it.code];return l&&Date.now()-l.ts<12*3600*1000?l:null}
 function costOf(it){var l=liveOf(it);return l?l.price:it.cost}
 function sellOf(it){var c=costOf(it);return round2(c*(1+markupFor(it,c).pct/100))}
-function itemUrl(it){return D.base+D.slugs[it.slug]+'/'+slugName(it.name)+'-'+it.code+'/'+it.code}
+function itemUrl(it){if(D.urls&&D.urls[it.code])return D.urls[it.code];return D.base+D.slugs[it.slug]+'/'+slugName(it.name)+'-'+it.code+'/'+it.code}
 function slugName(n){return n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')}
 A.D=D;A.sellOf=sellOf;A.costOf=costOf;A.itemUrl=itemUrl;A.loadData=loadData;A.tokens=tokens;
 var SYN={elbow:['elb','bend'],bend:['elbow','bnd'],toilet:['wc','pan','cistern'],wc:['toilet','pan'],geyser:['heater'],tap:['bibcock'],mixer:['mix'],nonreturn:['check'],tee:['t'],valve:['vlv'],heater:['geyser'],

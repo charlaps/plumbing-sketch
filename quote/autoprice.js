@@ -220,8 +220,8 @@
   }
 
   /* ---------- Plumblink product links (internal only) ----------
-   * Built the same way as the Field App (items.json slugs). Renamed pages are overridden from aps-data.json "urls"
-   * (8 Oct 2026: six Kwikot valve pages moved; field/items.json is left alone). */
+   * Built the same way as the Field App (items.json slugs). Renamed pages are overridden from aps-data.json "urls".
+   * 040402 and 001347 point at a Plumblink search for the item name (those product pages are not found). */
   function slugName(n) { return String(n || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, ""); }
   function itemUrl(code) {
     var o = D.data && D.data.urls && D.data.urls[code];

@@ -3,7 +3,7 @@
    - Shell, data and index: network-first (3 s timeout) so updates show up, cache fallback when offline.
    - Photo packs (pack-NN.bin): cache-first, filled on first use / background download.
    - Only deletes caches that start with "aps-field-" – never other apps' caches on this origin. */
-var CACHE='aps-field-v1.4';
+var CACHE='aps-field-v1.5';
 var SHELL=['./','index.html','app.css','app.js','handbook-data.js','tips.js','gsearch.js','handbook.js','sans.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png','logo.png','logo-white.png','items.json','photos.idx'];
 self.addEventListener('install',function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){

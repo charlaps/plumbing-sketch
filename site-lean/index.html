@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#004AAD">
+<title>APS – Architectural Plumbing Services</title>
+<link rel="icon" href="../site/favicon.ico" sizes="any">
+<style>
+@font-face{font-family:"Montserrat";src:url("../site/fonts/montserrat-var.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+:root{
+  --blue:#004AAD;--navy:#082464;--pale:#E8F0FC;--grey:#5A6473;--line:#DCE4F0;
+  --wa:#128C45;--font:"Montserrat",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:#fff;color:var(--navy);font:600 16px/1.25 var(--font);-webkit-text-size-adjust:100%}
+.page{
+  min-height:100dvh;min-height:100svh;
+  width:min(100%,520px);margin:0 auto;
+  display:flex;flex-direction:column;
+  padding:max(12px,env(safe-area-inset-top)) 16px max(10px,env(safe-area-inset-bottom));
+}
+.brand{text-align:center;padding-top:4px}
+.brand img{width:158px;height:auto;margin:0 auto 6px}
+h1{margin:0;font-size:1.02rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.tag{margin:3px 0 0;color:var(--grey);font-size:.9rem;font-weight:600}
+.jobs{
+  flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,minmax(64px,1fr));
+  gap:10px;margin:12px 0 10px;min-height:0;
+}
+.jobs a,.contact a{
+  display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;
+  border-radius:16px;font-weight:700;-webkit-tap-highlight-color:transparent;
+}
+.jobs a{
+  background:var(--pale);color:var(--navy);border:1.5px solid #C9D9F2;
+  padding:8px 8px;font-size:1.02rem;line-height:1.15;min-height:64px;
+}
+.jobs a:active{background:#d5e4f8}
+.contact{display:flex;gap:8px}
+.contact a{min-height:54px;padding:6px 6px;color:#fff;line-height:1.15}
+.call{flex:1.15;background:var(--blue);flex-direction:column;gap:1px;font-size:.78rem;font-weight:700}
+.call b{font-size:.95rem;font-weight:800;letter-spacing:-.01em}
+.wa{flex:.9;background:var(--wa);font-size:.92rem}
+.mail{
+  flex:1.35;background:#fff;color:var(--blue);border:1.5px solid var(--blue);
+  font-size:.68rem;font-weight:700;line-height:1.15;overflow-wrap:anywhere;padding:6px 5px;
+}
+footer{margin:8px 0 2px;text-align:center;color:var(--grey);font-size:.75rem;font-weight:600}
+:focus-visible{outline:3px solid #7FB2FF;outline-offset:2px}
+@media (min-width:800px){
+  body{background:var(--pale);display:grid;place-items:center;min-height:100dvh}
+  .page{
+    height:min(844px,calc(100dvh - 48px));min-height:0;
+    background:#fff;border-radius:28px;
+    box-shadow:0 18px 48px rgba(8,36,100,.14);
+    padding:22px 22px 14px;
+  }
+  .brand img{width:176px}
+  h1{font-size:1.12rem}
+  .jobs a{font-size:1.08rem}
+  .mail{font-size:.78rem}
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="brand">
+    <img src="../site/img/logo.png" alt="APS" width="600" height="191">
+    <h1>APS – Architectural Plumbing Services</h1>
+    <p class="tag">Plumbing done properly, West Rand.</p>
+  </header>
+  <nav class="jobs" aria-label="Message APS on WhatsApp">
+    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20burst%20pipe%20%2F%20leak.">Burst pipe / leak</a>
+    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20geyser.">Geyser</a>
+    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20blocked%20drain.">Blocked drain</a>
+    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20bathroom%20and%20kitchen.">Bathroom &amp; kitchen</a>
+    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20water%20tank%20backup.">Water tank backup</a>
+    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%27d%20like%20a%20free%20geyser%20inspection.">Free geyser inspection</a>
+  </nav>
+  <nav class="contact" aria-label="Contact">
+    <a class="call" href="tel:+27722309222">Call<b>072 230 9222</b></a>
+    <a class="wa" href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20a%20plumber.">WhatsApp</a>
+    <a class="mail" href="mailto:charl@agasouthafrica.co.za">charl@agasouthafrica.co.za</a>
+  </nav>
+  <footer>Mon–Sat 24/7</footer>
+</main>
+</body>
+</html>
