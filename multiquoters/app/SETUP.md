@@ -47,6 +47,7 @@ In the Supabase dashboard open **SQL Editor → New query**.
 3. Open `supabase/migrations/20261011190000_security_fixes.sql`, paste it, and run it.
 4. Open `supabase/migrations/20261012180000_launch_fixes.sql`, paste it, and run it. This adds line-item quotes, stable anonymous bid labels, hiding the client’s number from plumbers who were not chosen, a terms-consent time, and one review per job. The website still sends a quote if this step has not been run yet, but line items, stable labels, and the hidden number need this script.
 5. Open `supabase/migrations/20261012210000_retest_fixes.sql`, paste it, and run it. This sends an alert when a plumber’s place drops, including when they leave the top 3. It does not change what anyone pays.
+6. Open `supabase/migrations/20261013140000_voice_plans_registration.sql`, paste it, and run it last. This adds voice notes, plan files, and the trade registration check. If you re-run the security, launch, or retest script after this, run this file again so a bid still checks the registration. It does not change what anyone pays.
 
 If the second script says pg_cron is not installed, that is expected until the extension is on. Turn the extension on in the next section, then run `20261011120100_cron.sql` again, and then run the security script.
 
@@ -56,7 +57,7 @@ Run that script as the usual SQL editor role, postgres. A notice that default pr
 
 You can instead use the Supabase CLI (`supabase db query --file ...`) if you install it later. The SQL editor is enough.
 
-Do **not** run `supabase/tests/00_local_auth.sql`, `supabase/tests/01_supabase_grants.sql`, `supabase/tests/02_hosted_postgres.sql`, `supabase/tests/03_apply_security_migration.sql`, `supabase/tests/04_apply_launch_migration.sql`, or `supabase/tests/05_apply_retest_migration.sql` on Supabase. Those files are only for a Postgres installed on a computer.
+Do **not** run `supabase/tests/00_local_auth.sql`, `supabase/tests/01_supabase_grants.sql`, `supabase/tests/02_hosted_postgres.sql`, `supabase/tests/03_apply_security_migration.sql`, `supabase/tests/04_apply_launch_migration.sql`, `supabase/tests/05_apply_retest_migration.sql`, or `supabase/tests/06_apply_features_migration.sql` on Supabase. Those files are only for a Postgres installed on a computer.
 
 To end one job’s auction early, in the SQL editor as postgres (so the normal close runs, including payment of the top 3):
 
@@ -92,7 +93,9 @@ select public.close_expired_auctions();
 The first SQL script creates two **private** buckets when Storage is available:
 
 - `job-photos` — job pictures
-- `verification` — ID and trade certificates
+- `job-audio` — voice notes, up to 3 per job and 4 MB each
+- `job-plans` — drawings and PDFs, up to 5 per job and 10 MB each
+- `verification` — ID, trade certificates, and registration cards
 
 If the script printed a notice that storage was skipped, create those two buckets yourself in **Storage**, set them to **private**, and run the first SQL file again (or create the four policies the script describes: owners upload, winners and the client can read job photos, the contractor and admins can read that contractor’s verification files).
 

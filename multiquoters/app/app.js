@@ -14,6 +14,15 @@
   };
   const AREAS = ['Johannesburg North', 'Johannesburg South', 'West Rand', 'East Rand', 'Pretoria', 'Durban', 'Cape Town'];
   const WHEN_OPTIONS = ['Urgent / today', 'This week', 'This month', 'Flexible'];
+  const LIMITS = {
+    notes: 3,
+    noteSeconds: 120,
+    noteBytes: 4 * 1024 * 1024,
+    plans: 5,
+    planBytes: 10 * 1024 * 1024,
+    proofBytes: 5 * 1024 * 1024
+  };
+  let capture = null;
 
   const view = document.getElementById('view');
   const subnav = document.getElementById('subnav');
@@ -41,9 +50,9 @@
 
   function blankWizard() {
     return {
-      step: 1, trade: '', files: [], title: '', description: '',
+      step: 1, trade: '', files: [], notes: [], plans: [], title: '', description: '',
       area: '', suburb: '', when: '', contact_name: '', phone: '', note: '',
-      bidAmount: null
+      bidAmount: null, regTrade: '', regBody: ''
     };
   }
 
@@ -209,6 +218,250 @@
     throw new Error('Photo is still too large after compression. Try a smaller picture.');
   }
 
+  async function compressPlanImage(file) {
+    const bitmap = await createImageBitmap(file);
+    try {
+      let maxEdge = 2000;
+      let quality = 0.8;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      for (let i = 0; i < 8; i++) {
+        const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        const blob = await new Promise(function (resolve) { canvas.toBlob(resolve, 'image/jpeg', quality); });
+        if (blob && blob.size <= 700 * 1024) return blob;
+        quality = Math.max(0.5, quality - 0.06);
+        maxEdge = Math.round(maxEdge * 0.85);
+      }
+    } finally {
+      if (bitmap.close) bitmap.close();
+    }
+    throw new Error('That drawing is still too large. Try a photo taken a little further away, or a PDF under 10 MB.');
+  }
+
+  function clock(seconds) {
+    const s = Math.max(0, Math.round(seconds));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  function todayISO() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function dateOnly(value) {
+    return String(value || '').slice(0, 10);
+  }
+
+  function dateExpired(value) {
+    const day = dateOnly(value);
+    return !!day && day < todayISO();
+  }
+
+  function baseMime(mime) {
+    return String(mime || '').split(';')[0].trim().toLowerCase();
+  }
+
+  function extForMime(mime) {
+    const m = baseMime(mime);
+    if (m.indexOf('mp4') >= 0 || m.indexOf('aac') >= 0 || m.indexOf('m4a') >= 0) return 'm4a';
+    if (m.indexOf('mpeg') >= 0 || m.indexOf('mp3') >= 0) return 'mp3';
+    if (m.indexOf('wav') >= 0) return 'wav';
+    if (m.indexOf('ogg') >= 0) return 'ogg';
+    if (m.indexOf('pdf') >= 0) return 'pdf';
+    if (m.indexOf('png') >= 0) return 'png';
+    return 'webm';
+  }
+
+  function safeFileName(name) {
+    const base = String(name || 'plan').split(/[/\\]/).pop().replace(/[^\w.\- ()]+/g, '').trim();
+    return (base || 'plan').slice(0, 180);
+  }
+
+  function audioDuration(file) {
+    return new Promise(function (resolve) {
+      const url = URL.createObjectURL(file);
+      const audio = document.createElement('audio');
+      audio.preload = 'metadata';
+      function finish(value) {
+        URL.revokeObjectURL(url);
+        resolve(value);
+      }
+      audio.onloadedmetadata = function () {
+        finish(Number.isFinite(audio.duration) ? audio.duration : null);
+      };
+      audio.onerror = function () { finish(null); };
+      audio.src = url;
+    });
+  }
+
+  function encodeWav(audioBuffer, rate) {
+    const channels = audioBuffer.numberOfChannels;
+    const src = [];
+    for (let c = 0; c < channels; c++) src.push(audioBuffer.getChannelData(c));
+    const outLength = Math.max(1, Math.round(audioBuffer.length * rate / audioBuffer.sampleRate));
+    const samples = new Int16Array(outLength);
+    for (let i = 0; i < outLength; i++) {
+      const pos = i * audioBuffer.sampleRate / rate;
+      const i0 = Math.min(audioBuffer.length - 1, Math.floor(pos));
+      const i1 = Math.min(audioBuffer.length - 1, i0 + 1);
+      const t = pos - i0;
+      let sum = 0;
+      for (let c = 0; c < channels; c++) sum += src[c][i0] + (src[c][i1] - src[c][i0]) * t;
+      const mono = Math.max(-1, Math.min(1, sum / channels));
+      samples[i] = mono < 0 ? mono * 0x8000 : mono * 0x7fff;
+    }
+    const buffer = new ArrayBuffer(44 + samples.length * 2);
+    const view = new DataView(buffer);
+    function write(offset, text) {
+      for (let i = 0; i < text.length; i++) view.setUint8(offset + i, text.charCodeAt(i));
+    }
+    write(0, 'RIFF');
+    view.setUint32(4, 36 + samples.length * 2, true);
+    write(8, 'WAVE');
+    write(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, rate, true);
+    view.setUint32(28, rate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    write(36, 'data');
+    view.setUint32(40, samples.length * 2, true);
+    let offset = 44;
+    for (let i = 0; i < samples.length; i++) {
+      view.setInt16(offset, samples[i], true);
+      offset += 2;
+    }
+    return new Blob([buffer], { type: 'audio/wav' });
+  }
+
+  async function shrinkAudio(file) {
+    const heard = await audioDuration(file);
+    if (heard && heard > LIMITS.noteSeconds + 0.4) {
+      throw new Error('Voice notes can be up to 2 minutes.');
+    }
+    if (file.size <= 1024 * 1024) {
+      return { blob: file, mime: baseMime(file.type) || 'audio/mpeg', duration: Math.max(1, Math.ceil(heard || 1)) };
+    }
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) {
+      if (file.size > LIMITS.noteBytes) throw new Error('That audio file is over 4 MB. Record it here, or choose a shorter m4a or mp3.');
+      return { blob: file, mime: baseMime(file.type) || 'audio/mpeg', duration: Math.max(1, Math.ceil(heard || 1)) };
+    }
+    const ctx = new Ctx();
+    try {
+      const decoded = await ctx.decodeAudioData(await file.arrayBuffer());
+      if (decoded.duration > LIMITS.noteSeconds + 0.4) throw new Error('Voice notes can be up to 2 minutes.');
+      const wav = encodeWav(decoded, 16000);
+      if (wav.size > LIMITS.noteBytes) throw new Error('That audio file is still over 4 MB after compression.');
+      return { blob: wav, mime: 'audio/wav', duration: Math.max(1, Math.ceil(decoded.duration)) };
+    } catch (err) {
+      if (file.size <= LIMITS.noteBytes && (!heard || heard <= LIMITS.noteSeconds + 0.4)) {
+        return { blob: file, mime: baseMime(file.type) || 'audio/mpeg', duration: Math.max(1, Math.ceil(heard || 1)) };
+      }
+      throw err;
+    } finally {
+      if (ctx.close) ctx.close();
+    }
+  }
+
+  function recorderOptions() {
+    if (typeof MediaRecorder === 'undefined') return null;
+    const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/aac', 'audio/mp4;codecs=mp4a.40.2'];
+    for (let i = 0; i < types.length; i++) {
+      try {
+        if (!MediaRecorder.isTypeSupported || MediaRecorder.isTypeSupported(types[i])) {
+          if (MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported(types[i])) continue;
+          return { mimeType: types[i], audioBitsPerSecond: 24000 };
+        }
+      } catch (err) { /* try the next type */ }
+    }
+    return { audioBitsPerSecond: 24000 };
+  }
+
+  function canRecord() {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && typeof MediaRecorder !== 'undefined');
+  }
+
+  function emptyState(title, text, action) {
+    return '<article class="card empty">' +
+      '<div class="empty-mark" aria-hidden="true">' +
+      '<svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M6 22.5c2.2-1.4 4.2-2 6.2-2 2.6 0 4.2 1 6.3 1 2.2 0 4-.7 6.5-2.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M8 14.5h.01M16 12h.01M23 14.5h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><rect x="4" y="6" width="24" height="18" rx="6" stroke="currentColor" stroke-width="2"/></svg></div>' +
+      '<h2>' + title + '</h2><p>' + text + '</p>' + (action || '') + '</article>';
+  }
+
+  function registrationRows() {
+    return (profile && profile.registrations) || [];
+  }
+
+  function registrationGaps() {
+    const rules = (profile && profile.trade_rules) || [];
+    const regs = registrationRows();
+    const trades = (profile && profile.trades) || [];
+    const gaps = [];
+    trades.forEach(function (trade) {
+      rules.filter(function (rule) { return rule.trade === trade && rule.required; }).forEach(function (rule) {
+        const rows = regs.filter(function (row) { return row.trade === trade && row.body_code === rule.body_code; });
+        const current = rows.filter(function (row) { return row.status === 'verified' && !dateExpired(row.expires_on); })[0];
+        if (current) return;
+        gaps.push({
+          trade: trade,
+          rule: rule,
+          pending: rows.filter(function (row) { return row.status === 'pending'; })[0],
+          rejected: rows.filter(function (row) { return row.status === 'rejected'; })[0],
+          expired: rows.filter(function (row) { return row.status === 'expired' || (row.status === 'verified' && dateExpired(row.expires_on)); })[0]
+        });
+      });
+    });
+    return gaps;
+  }
+
+  function bidGate(trade) {
+    if (!profile || profile.role !== 'contractor') return '';
+    const sentences = [];
+    if (!profile.verified) sentences.push('An admin still needs to check your ID.');
+    registrationGaps().filter(function (gap) { return !trade || gap.trade === trade; }).forEach(function (gap) {
+      const label = gap.rule.short_label;
+      if (gap.expired) sentences.push('Your ' + label + ' registration for ' + gap.trade + ' has expired.');
+      else if (gap.pending) sentences.push('Your ' + label + ' registration for ' + gap.trade + ' is waiting for an admin.');
+      else if (gap.rejected) sentences.push('Your ' + label + ' registration was not accepted' + (gap.rejected.review_note ? ': ' + gap.rejected.review_note : '') + '.');
+      else sentences.push(gap.trade + ' needs a current ' + label + ' registration before you can bid.');
+    });
+    if (!sentences.length) return '';
+    const onForm = (location.hash || '').indexOf('#/contractor/registration') === 0;
+    return '<p class="notice" data-testid="bid-gate">You can browse leads. ' + esc(sentences.join(' ')) +
+      (onForm ? '' : ' <a href="#/contractor/registration">Add your registration</a>') + '</p>';
+  }
+
+  function friendlyBidError(err) {
+    if (err === 'verification required') return 'An admin must verify your ID before you can bid.';
+    if (err === 'registration required') return 'Add your trade registration and wait for an admin to verify it before you bid.';
+    if (err === 'registration expired') return 'Your trade registration has expired. Upload the new card before you bid.';
+    return err;
+  }
+
+  function badgePills(badges, id) {
+    const seen = {};
+    return (badges || []).filter(function (badge) {
+      if (badge.profile_id !== id || seen[badge.short_label]) return false;
+      seen[badge.short_label] = true;
+      return true;
+    }).map(function (badge) {
+      return '<span class="pill pill-good">' + esc(badge.short_label) + ' verified</span>';
+    }).join(' ');
+  }
+
+  function statusPill(status) {
+    if (status === 'verified') return '<span class="pill pill-good">Verified</span>';
+    if (status === 'rejected') return '<span class="pill pill-bad">Not accepted</span>';
+    if (status === 'expired') return '<span class="pill pill-bad">Expired</span>';
+    return '<span class="pill pill-orange">Waiting for review</span>';
+  }
+
   window.MQApp = { compressImage: compressImage, configured: configured };
 
   function payFor(amount) {
@@ -336,13 +589,13 @@
     const places = winnerPlaces();
     return '<div class="how-grid">' +
       '<article class="card"><h2>For clients</h2><ol>' +
-      '<li>Post the job once: trade, photos, where and when.</li>' +
+      '<li>Post the job once: trade, photos, an optional voice note or plan, where and when.</li>' +
       '<li>Contractors bid tokens for ' + plural(hours, 'hour') + '. The top ' + places + ' each pay their own bid and can send a quote.</li>' +
       '<li>Compare up to ' + places + ' quotes side by side, then accept one. The others are closed.</li>' +
       '<li>Message the contractor you accept here, or on WhatsApp. Your number stays hidden until bidding ends.</li>' +
       '</ol></article>' +
       '<article class="card"><h2>For contractors</h2><ol>' +
-      '<li>Sign up, add your trades and areas, and upload your ID and trade certificate.</li>' +
+      '<li>Sign up, add your trades and areas, and upload your ID. Add the registration for your trade, such as PIRB for plumbing.</li>' +
       '<li>An admin checks them. You can browse leads before that, and bid after you are verified.</li>' +
       '<li>The minimum bid is 1 token. Tokens are held, and released if you finish outside the top ' + places + '.</li>' +
       '<li>If you finish in the top ' + places + ', send one quote with line items. You then get the client’s number.</li>' +
@@ -390,7 +643,8 @@
   function pageTrust() {
     return '<h1>Trust & safety</h1>' +
       '<article class="card"><h2>What “verified” means</h2>' +
-      '<p>Verified means an admin has looked at the contractor’s ID and trade certificate. It is a manual check, not a guarantee of the work, the price, or insurance.</p></article>' +
+      '<p>Verified means an admin has looked at the contractor’s ID. A badge such as PIRB verified means the admin has also checked that trade’s registration card and it has not expired. It is a manual check, not a guarantee of the work, the price, or insurance.</p>' +
+      '<p>Plumbing and geyser work need a PIRB licensed plumber. Electrical work needs a Department of Employment and Labour wireman’s licence. ECA membership is optional. Building work needs NHBRC. Gas work is SAQCC Gas. Painting, handyman, solar and roofing do not have a required number here.</p></article>' +
       '<article class="card"><h2>Who sees your details</h2><ul>' +
       '<li>Clients see a lead’s suburb and description. The phone number is stored separately.</li>' +
       '<li>During bidding, contractors see stable anonymous labels (Contractor A, B, C). The same person keeps the same letter.</li>' +
@@ -408,8 +662,8 @@
       '<article class="card stack"><h2>Who we are</h2><p>Multiquoters helps a client ask for a quote and helps contractors bid for the chance to quote. The operator is the person who owns this site. Put the legal name and email address here before you rely on this text.</p>' +
       '<h2>What we collect</h2><ul>' +
       '<li>Account: email address, the role you choose, your name, and (for contractors) business name, phone, trades and areas.</li>' +
-      '<li>A job: description, suburb, photos, and the client’s name and phone. The phone is not shown on the public lead.</li>' +
-      '<li>Verification: a photo of an ID and a trade certificate, for contractors. An admin reviews them.</li>' +
+      '<li>A job: description, suburb, photos, optional voice notes and plans, and the client’s name and phone. The phone is not shown on the public lead.</li>' +
+      '<li>Verification: a photo of an ID, and for contractors the registration number, expiry and a photo of the card. An admin reviews them.</li>' +
       '<li>Bids, token balances, quotes, messages and reviews.</li>' +
       '</ul>' +
       '<h2>Why</h2><p>To run the auction, to show a client up to three quotes, to let the top 3 contact the client, and to keep a record of token holds and releases. The legal bases to describe in the final notice are consent (the photos and ID you upload) and the contract (running the lead you asked for).</p>' +
@@ -441,9 +695,15 @@
     if (!configured()) return offlineCard() + '<h2>How it works</h2>' + howBlocks();
     const postHref = profile && profile.role === 'contractor' ? '#/contractor/leads' : '#/client/new';
     const postLabel = profile && profile.role === 'contractor' ? 'See leads' : 'Post a job';
-    return '<section class="hero-grid"><div><h1>Post a job once. Compare up to three quotes.</h1>' +
-      '<p class="lede">Contractors in your area bid tokens for the lead. The top ' + winnerPlaces() + ' pay their own bids and send quotes. Your phone number stays hidden until then.</p>' +
-      '<div class="row">' +
+    return '<section class="hero-grid"><div class="hero-copy"><p class="eyebrow">For South African homes</p>' +
+      '<h1>Post a job once. Compare up to three quotes.</h1>' +
+      '<p class="lede">Tell us the job in your own words, with a photo, a voice note or a plan. Contractors near you bid for the lead. The top ' + winnerPlaces() + ' send quotes, and your phone number stays hidden until then.</p>' +
+      '<ul class="trust-list">' +
+      '<li>Your phone number stays hidden until bidding ends.</li>' +
+      '<li>Only the top ' + winnerPlaces() + ' contractors can quote, and each pays their own bid.</li>' +
+      '<li>Trade registrations, such as PIRB for plumbers, are checked before anyone can bid.</li>' +
+      '</ul>' +
+      '<div class="row hero-actions">' +
       (profile ? '' : '<a class="btn btn-teal" href="#/signup">Create an account</a>') +
       '<a class="btn btn-orange" href="' + postHref + '">' + postLabel + '</a></div>' +
       (profile ? '' : '<p class="tiny">Prefer to click around with pretend money first? <a href="../">Try the demo</a>.</p>') +
@@ -517,7 +777,7 @@
   }
 
   function pageOnboarding() {
-    return '<h1>Set up your business</h1><p class="lede">Choose the work you do and where you travel. Then upload an ID and a trade certificate. An admin checks them before you can bid.</p>' +
+    return '<h1>Set up your business</h1><p class="lede">Choose the work you do and where you travel. Then upload an ID. After that, add the registration for your trade, such as your PIRB number. An admin checks both before you can bid.</p>' +
       '<form class="card stack" data-form="onboarding">' +
       '<label class="field">Business name<input name="business_name" value="' + esc(profile.business_name || '') + '" required></label>' +
       '<label class="field">Your name<input name="full_name" value="' + esc(profile.full_name || '') + '" required></label>' +
@@ -535,24 +795,59 @@
       '<label class="choice"><input type="checkbox" name="vat"' + (profile.vat_registered ? ' checked' : '') + '> VAT registered</label>' +
       '<label class="field">ID document<input name="id_doc" type="file" accept="image/*"></label>' +
       '<label class="field">Trade certificate<input name="cert_doc" type="file" accept="image/*"></label>' +
-      '<button class="btn btn-teal" type="submit">Save</button><p class="form-error" data-error></p></form>';
+      '<button class="btn btn-teal" type="submit">Save</button><p class="form-error" data-error></p></form>' +
+      '<p><a class="btn btn-ghost" href="#/contractor/registration">Add your trade registration</a></p>';
+  }
+
+  function mediaStep() {
+    const count = wizard.files.length;
+    const notes = wizard.notes || [];
+    const plans = wizard.plans || [];
+    const recording = !!(capture && capture.recording);
+    const noteList = notes.map(function (note, index) {
+      return '<div class="note-row"><audio controls preload="metadata" src="' + esc(note.url) + '"></audio>' +
+        '<span class="tiny">' + esc(clock(note.duration)) + '</span>' +
+        '<button type="button" class="btn btn-ghost btn-small" data-action="delete-note" data-index="' + index + '">Delete</button></div>';
+    }).join('');
+    const planList = plans.map(function (plan, index) {
+      return '<div class="plan-row"><span>' + esc(plan.name) + '</span>' +
+        '<span class="tiny">' + Math.max(1, Math.round(plan.bytes / 1024)) + ' KB</span>' +
+        '<button type="button" class="btn btn-ghost btn-small" data-action="delete-plan" data-index="' + index + '">Delete</button></div>';
+    }).join('');
+    return '<label class="field">Photos<input name="photos" type="file" accept="image/*" multiple></label>' +
+      '<p class="tiny" data-photo-hint>' + (count
+        ? plural(count, 'photo') + ' selected. Each one is reduced to about 200KB before upload.'
+        : 'Optional. A photo helps contractors judge the job. We shrink each one to about 200KB.') + '</p>' +
+      '<div class="media-block" data-testid="voice-notes"><h3>Voice notes</h3>' +
+      '<p class="tiny">Optional. Up to ' + LIMITS.notes + ' notes, ' + clock(LIMITS.noteSeconds) + ' each. You can record here or upload a file you already have.</p>' +
+      (noteList || '<p class="tiny">No voice notes yet.</p>') +
+      (notes.length >= LIMITS.notes ? '<p class="tiny">You have added the maximum of ' + LIMITS.notes + ' voice notes.</p>' :
+        (recording
+          ? '<div class="rec-live" data-testid="recording"><span class="rec-dot" aria-hidden="true"></span><span data-rec-clock>0:00</span> of ' + clock(LIMITS.noteSeconds) + '</div>' +
+            '<button type="button" class="btn btn-orange" data-action="stop-recording">Stop and keep</button>'
+          : (canRecord()
+            ? '<button type="button" class="btn btn-teal" data-action="start-recording">Record a voice note</button>'
+            : '<p class="tiny">This browser cannot record. You can still upload an audio file.</p>') +
+            '<label class="field">Upload an audio file<input name="audio" type="file" accept="audio/*"></label>')) +
+      '</div>' +
+      '<div class="media-block" data-testid="plan-files"><h3>Plans and drawings</h3>' +
+      '<p class="tiny">Optional. PDF or a photo of the plan, up to ' + LIMITS.plans + ' files, 10 MB each. Photos are reduced before upload.</p>' +
+      (planList || '<p class="tiny">No plans yet.</p>') +
+      (plans.length >= LIMITS.plans ? '' : '<label class="field">Add a plan<input name="plans" type="file" accept="application/pdf,image/*" multiple></label>') +
+      '</div>';
   }
 
   function pageWizard() {
     const step = wizard.step;
     const total = 4;
-    const titles = ['', 'What needs doing?', 'Add photos', 'Describe the job', 'Check and post'];
+    const titles = ['', 'What needs doing?', 'Photos, voice and plans', 'Describe the job', 'Check and post'];
     let body = '';
     if (step === 1) {
       body = '<div class="trade-grid" data-field="trade">' + TRADES.map(function (t) {
         return '<button type="button" class="trade' + (wizard.trade === t ? ' is-on' : '') + '" data-action="pick-trade" data-trade="' + esc(t) + '"><strong>' + esc(t) + '</strong><small>' + esc(TRADE_HINTS[t] || '') + '</small></button>';
       }).join('') + '</div><p class="field-error" data-field-error="trade"></p>';
     } else if (step === 2) {
-      const count = wizard.files.length;
-      body = '<label class="field">Photos<input name="photos" type="file" accept="image/*" multiple></label>' +
-        '<p class="tiny" data-photo-hint>' + (count
-          ? plural(count, 'photo') + ' selected. Each one is reduced to about 200KB before upload.'
-          : 'Optional. A photo helps contractors judge the job. We shrink each one to about 200KB.') + '</p>';
+      body = mediaStep();
     } else if (step === 3) {
       body = '<p class="notice">Your name, phone and private note are shown only to contractors in the top ' + winnerPlaces() + ', after bidding ends.</p>' +
         '<label class="field">Short title<input name="title" value="' + esc(wizard.title) + '" required></label>' +
@@ -576,7 +871,9 @@
         '<div><dt>When</dt><dd>' + esc(wizard.when || '—') + '</dd></div>' +
         '<div><dt>Contact</dt><dd>' + esc(wizard.contact_name) + ' · ' + esc(wizard.phone) + '</dd></div>' +
         '<div><dt>Private note</dt><dd>' + esc(wizard.note || 'None') + '</dd></div>' +
-        '<div><dt>Photos</dt><dd>' + (wizard.files.length ? plural(wizard.files.length, 'photo') : 'None') + '</dd></div></dl>' +
+        '<div><dt>Photos</dt><dd>' + (wizard.files.length ? plural(wizard.files.length, 'photo') : 'None') + '</dd></div>' +
+        '<div><dt>Voice notes</dt><dd>' + (wizard.notes.length ? plural(wizard.notes.length, 'note') : 'None') + '</dd></div>' +
+        '<div><dt>Plans</dt><dd>' + (wizard.plans.length ? plural(wizard.plans.length, 'file') : 'None') + '</dd></div></dl>' +
         '<p class="tiny">Bidding lasts ' + plural(auctionHours(), 'hour') + '. Up to ' + winnerPlaces() + ' contractors can send a quote. Your phone stays hidden until then.</p>';
     }
     return '<h1>Post a job</h1><p class="tiny">Step ' + step + ' of ' + total + '</p>' +
@@ -676,6 +973,69 @@
     return out;
   }
 
+  function missingRelation(res) {
+    if (!res || !res.error) return false;
+    const msg = String(res.error.message || '');
+    return res.error.code === '42P01' || res.error.code === 'PGRST205' || /schema cache|job_audio|job_plans|registration_badges/i.test(msg);
+  }
+
+  async function signedBucket(bucket, rows) {
+    const out = [];
+    for (let i = 0; i < rows.length; i++) {
+      const signed = await sb.storage.from(bucket).createSignedUrl(rows[i].storage_path, 60 * 30);
+      if (signed.data && signed.data.signedUrl) out.push(Object.assign({}, rows[i], { url: signed.data.signedUrl }));
+    }
+    return out;
+  }
+
+  async function loadJobMedia(jobId) {
+    const audioRes = await sb.from('job_audio').select('*').eq('job_id', jobId).order('created_at');
+    const planRes = await sb.from('job_plans').select('*').eq('job_id', jobId).order('created_at');
+    if (missingRelation(audioRes) || missingRelation(planRes)) return { ready: false, audio: [], plans: [] };
+    return {
+      ready: true,
+      audio: audioRes.error ? [] : await signedBucket('job-audio', audioRes.data || []),
+      plans: planRes.error ? [] : await signedBucket('job-plans', planRes.data || [])
+    };
+  }
+
+  function jobMediaHtml(media, job, editable) {
+    if (!media || !media.ready) return '';
+    const notes = media.audio.length
+      ? media.audio.map(function (row) {
+        return '<div class="note-row"><audio controls preload="none" src="' + esc(row.url) + '"></audio>' +
+          (editable ? '<button type="button" class="btn btn-ghost btn-small" data-action="delete-saved-note" data-id="' + esc(row.id) + '" data-path="' + esc(row.storage_path) + '">Delete</button>' : '') +
+          '</div>';
+      }).join('')
+      : '<p class="tiny">No voice notes yet. A short note helps a contractor hear the problem.</p>';
+    const plans = media.plans.length
+      ? media.plans.map(function (row) {
+        const image = String(row.mime || '').indexOf('image/') === 0;
+        const open = image
+          ? '<button type="button" class="btn btn-ghost btn-small" data-action="zoom-photo" data-src="' + esc(row.url) + '">View</button>'
+          : '<a class="btn btn-ghost btn-small" href="' + esc(row.url) + '" target="_blank" rel="noopener">Open</a>';
+        return '<div class="plan-row"><span>' + esc(row.file_name || 'Plan') + '</span>' + open +
+          (editable ? '<button type="button" class="btn btn-ghost btn-small" data-action="delete-saved-plan" data-id="' + esc(row.id) + '" data-path="' + esc(row.storage_path) + '">Delete</button>' : '') +
+          '</div>';
+      }).join('')
+      : '<p class="tiny">No plans yet. A drawing or PDF is optional.</p>';
+    const addNotes = editable && media.audio.length < LIMITS.notes
+      ? '<form class="stack" data-form="add-audio" data-id="' + job.id + '"><label class="field">Add a voice note<input type="file" name="audio" accept="audio/*"></label><button class="btn btn-ghost btn-small" type="submit">Upload</button><p class="form-error" data-error></p></form>'
+      : '';
+    const addPlans = editable && media.plans.length < LIMITS.plans
+      ? '<form class="stack" data-form="add-plans" data-id="' + job.id + '"><label class="field">Add a plan<input type="file" name="plans" accept="application/pdf,image/*"></label><button class="btn btn-ghost btn-small" type="submit">Upload</button><p class="form-error" data-error></p></form>'
+      : '';
+    return '<div class="media-block" data-testid="job-audio"><h3>Voice notes</h3>' + notes + addNotes + '</div>' +
+      '<div class="media-block" data-testid="job-plans"><h3>Plans and drawings</h3>' + plans + addPlans + '</div>';
+  }
+
+  async function loadBadges(ids) {
+    if (!ids.length) return [];
+    const res = await sb.from('registration_badges').select('profile_id, trade, short_label, body_name').in('profile_id', ids);
+    if (res.error) return [];
+    return res.data || [];
+  }
+
   function photoHtml(urls) {
     if (!urls.length) return '<p class="tiny">No photos yet.</p>';
     return '<div class="thumbs">' + urls.map(function (src) {
@@ -739,7 +1099,7 @@
     const reviewed = {};
     const rev = await sb.from('reviews').select('job_id').eq('client_id', profile.id);
     (rev.data || []).forEach(function (row) { reviewed[row.job_id] = true; });
-    if (!jobs.length) return '<h1>Your requests</h1><article class="card"><p>No jobs yet.</p><a class="btn btn-teal" href="#/client/new">Post a job</a></article>';
+    if (!jobs.length) return '<h1>Your requests</h1>' + emptyState('Nothing posted yet', 'When you are ready, post the job once. You can add a photo, a voice note, or a plan.', '<a class="btn btn-teal" href="#/client/new">Post a job</a>');
     return '<div class="between"><h1>Your requests</h1><a class="btn btn-teal btn-small" href="#/client/new">Post a job</a></div>' +
       '<div class="stack">' + jobs.map(function (job) {
         return '<a class="card glance-main" href="#/client/request/' + job.id + '"><strong>' + esc(job.title) + '</strong>' +
@@ -791,15 +1151,17 @@
     }).join('');
   }
 
-  function comparisonTable(priced) {
+  function comparisonTable(priced, badges) {
     if (!priced.length) return '';
     priced = priced.slice().sort(function (a, b) {
       return a.total - b.total || String(a.q.id).localeCompare(String(b.q.id));
     });
     const head = '<tr><th class="row-label"></th>' + priced.map(function (row) {
       const name = row.card.business_name || row.card.full_name || 'Contractor';
+      const pills = badgePills(badges, row.card.id);
       return '<th>' + esc(name) +
         (row.card.verified ? ' <span class="pill pill-good">Verified</span>' : '') +
+        (pills ? '<br>' + pills : '') +
         (row.card.vip ? ' <span class="vip-badge">VIP member</span>' : '') +
         '</th>';
     }).join('') + '</tr>';
@@ -834,7 +1196,12 @@
     const hint = priced.length > 1
       ? '<p class="compare-hint">Cheapest first. <span class="compare-swipe">Swipe sideways to see every quote.</span></p>'
       : '';
-    return hint + '<div class="compare-scroll" data-testid="compare-quotes"><table class="compare-table"><thead>' + head + '</thead><tbody>' +
+    const badgeLine = '<div class="badge-row" data-testid="quote-badges">' + priced.map(function (row) {
+      const name = row.card.business_name || row.card.full_name || 'Contractor';
+      const pills = badgePills(badges, row.card.id);
+      return '<span>' + esc(name) + (pills ? ' ' + pills : '') + '</span>';
+    }).join('') + '</div>';
+    return hint + badgeLine + '<div class="compare-scroll" data-testid="compare-quotes"><table class="compare-table"><thead>' + head + '</thead><tbody>' +
       rows.map(function (pair) {
         return '<tr><th class="row-label">' + pair[0] + '</th>' + cells(pair[1]) + '</tr>';
       }).join('') + '</tbody></table></div>' +
@@ -876,6 +1243,8 @@
       reviews = r.data || [];
     }
     const photos = await signedPhotos(photosRes.data || []);
+    const media = await loadJobMedia(id);
+    const badges = await loadBadges(ids);
     const contacts = contactsRes.data || [];
     const allItems = itemsRes.error ? [] : (itemsRes.data || []);
     function cardFor(cid) { return cards.filter(function (c) { return c.id === cid; })[0] || {}; }
@@ -928,9 +1297,10 @@
       (job.when_needed ? ' · ' + esc(job.when_needed) : '') + '</p><p class="tiny">' + esc(left(job.auction_ends_at)) + '</p>' +
       photoHtml(photos) +
       (job.status === 'open' ? '<form data-form="add-photos" data-id="' + job.id + '"><label class="field">Add another photo<input type="file" name="photos" accept="image/*" multiple></label><button class="btn btn-ghost btn-small" type="submit">Upload</button><p class="form-error" data-error></p></form>' : '') +
+      jobMediaHtml(media, job, job.status === 'open') +
       '</article>' +
       bidLine +
-      (quotes.length ? '<h2>Compare quotes</h2>' + comparisonTable(priced) : (job.status === 'open' ? '' : '<p class="tiny">Quotes show up here once the top ' + winnerPlaces() + ' send them.</p>')) +
+      (quotes.length ? '<h2>Compare quotes</h2>' + comparisonTable(priced, badges) : (job.status === 'open' ? '' : '<p class="tiny">Quotes show up here once the top ' + winnerPlaces() + ' send them.</p>')) +
       (chats ? '<h2>Contact</h2><div class="stack">' + chats + '</div>' : '') +
       (canMessage ? messageThreads(job, threadPeople(contacts, quotes, cards), msgRes.data, acceptedId) : '') +
       (job.status === 'accepted' ? reviewBlock(job, quotes, cards, reviewRes && reviewRes.data) : '') +
@@ -973,8 +1343,8 @@
     const res = await sb.from('job_requests').select('*').eq('status', 'open').order('created_at', { ascending: false });
     if (res.error) return '<p class="form-error">' + esc(res.error.message) + '</p>';
     const jobs = res.data || [];
-    const note = profile.verified ? '' : '<p class="notice">You can browse leads. An admin must verify your ID before you can bid.</p>';
-    if (!jobs.length) return '<h1>Leads</h1>' + note + '<article class="card"><p>No open leads in your trades and areas.</p></article>';
+    const note = bidGate();
+    if (!jobs.length) return '<h1>Leads</h1>' + note + emptyState('No open leads', 'When a homeowner posts a job in your trades and areas, it will show up here.', '');
     const cards = [];
     for (let i = 0; i < jobs.length; i++) {
       const job = jobs[i];
@@ -1047,6 +1417,7 @@
       myItems = itemRes.data || [];
     }
     const photos = won ? await signedPhotos(photosRes.data || []) : [];
+    const media = won ? await loadJobMedia(id) : { ready: false, audio: [], plans: [] };
     const clientContact = (contactsRes.data || []).filter(function (c) { return c.who === 'client'; })[0];
     const stand = standingText(job, mine, board, won, myQuote);
     const statusLabel = contractorStatusLabel(job, won, myQuote);
@@ -1056,8 +1427,9 @@
     const showContact = clientContact && !lost && (won || chosen);
     const photoBlock = won && photos.length
       ? photoHtml(photos)
-      : '<p class="tiny">' + (won ? 'No photos on this lead.' : 'Photos and the client’s number unlock if you finish in the top ' + winnerPlaces() + '.') + '</p>';
-    const taps = job.status === 'open' && profile.verified ? bidControls(id, preview) : (job.status === 'open' ? '<p class="notice">An admin must verify your ID before you can bid.</p>' : '');
+      : '<p class="tiny">' + (won ? 'No photos on this lead.' : 'Photos, voice notes, plans and the client’s number unlock if you finish in the top ' + winnerPlaces() + '.') + '</p>';
+    const gate = bidGate(job.trade);
+    const taps = job.status === 'open' && !gate ? bidControls(id, preview) : (job.status === 'open' ? gate : '');
     const canEdit = myQuote && quotingOpen && myQuote.status === 'submitted';
     const quoteBlock = myQuote
       ? '<article class="card" data-testid="quote-sent"><h2>Your quote</h2>' +
@@ -1091,6 +1463,7 @@
       '<article class="card"><div class="between"><span class="pill">' + esc(job.trade) + '</span><span>' + esc(left(job.auction_ends_at)) + '</span></div>' +
       '<p>' + esc(job.description) + '</p><p class="tiny">' + esc(job.suburb) + ', ' + esc(job.area) + (job.when_needed ? ' · ' + esc(job.when_needed) : '') + '</p>' +
       photoBlock +
+      (won ? jobMediaHtml(media, job, false) : '') +
       (sameStatus ? '' : '<p class="standing ' + stand.cls + '" data-testid="bid-standing">' + esc(stand.text) + '</p>') +
       (auctionOpen ? '<ul class="topbids">' + boardHtml(board.filter(function (row) { return row.place <= winnerPlaces() || row.is_you; })) + '</ul>' : '') +
       taps + '<p class="form-error" data-error></p>' + quoteLink + '</article>' +
@@ -1317,6 +1690,7 @@
       (isVip(profile) ? ' <span class="vip-badge">VIP member</span>' : '') + '</p>' +
       (isVip(profile) ? '<p data-testid="vip-renewal">Renews ' + fmtDate(profile.vip_until) + '</p>' : '') +
       '<a class="btn btn-teal" target="_blank" rel="noopener" href="' + esc(waShare(profile)) + '">Share to WhatsApp</a>' +
+      '<a class="btn btn-ghost" href="#/contractor/registration">Trade registration</a>' +
       '<a class="btn btn-ghost" href="#/onboarding">Edit trades and documents</a></article>';
   }
 
@@ -1324,10 +1698,13 @@
     if (!sb) return offlineCard();
     const res = await sb.rpc('public_contractor', { p_code: code });
     const p = res.data;
-    if (!p) return '<h1>Contractor</h1><p>No public profile for that code.</p>';
+    if (!p) return '<h1>Contractor</h1>' + emptyState('No profile for that code', 'Check the link, or ask the contractor to share it again from their profile.', '');
+    const badges = (p.badges || []).map(function (badge) {
+      return '<span class="pill pill-good">' + esc(badge.short_label) + ' verified</span>';
+    }).join(' ');
     return '<h1>' + esc(p.business_name || p.full_name) + '</h1><article class="card">' +
       (p.vip ? '<span class="vip-badge">VIP member</span>' : '') +
-      '<p>' + (p.verified ? 'Verified' : 'Not verified yet') + '</p>' +
+      '<p>' + (p.verified ? 'ID checked' : 'Not verified yet') + (badges ? ' ' + badges : '') + '</p>' +
       '<p>' + (p.trades || []).map(esc).join(', ') + '</p>' +
       '<p class="tiny">' + (p.areas || []).map(esc).join(', ') + '</p>' +
       '<p>' + (p.vat_registered ? 'VAT registered' : 'Not VAT registered') + '</p>' +
@@ -1373,7 +1750,7 @@
     await sb.rpc('mark_notifications_read');
     unread = 0;
     const rows = res.data || [];
-    if (!rows.length) return '<h1>Alerts</h1><article class="card"><p>Nothing yet. Bid updates and quotes show up here.</p></article>';
+    if (!rows.length) return '<h1>Alerts</h1>' + emptyState('You are all caught up', 'Bid updates, quotes and registration news will show up here.', '');
     const jobIds = [];
     rows.forEach(function (n) {
       const id = alertJobId(n.href);
@@ -1484,11 +1861,30 @@
       '<article class="card stat"><span class="tiny">VIP recorded</span><strong>' + formatR(snap.vip_revenue || 0) + '</strong></article></div>' +
       '<h2>Contractors</h2><div class="stack">' + contractors.map(function (c) {
         const docs = Array.isArray(c.verification_docs) ? c.verification_docs.length : 0;
+        let regs = c.registrations || [];
+        if (typeof regs === 'string') {
+          try { regs = JSON.parse(regs); } catch (err) { regs = []; }
+        }
+        if (!Array.isArray(regs)) regs = [];
+        const regHtml = regs.length ? regs.map(function (r) {
+          return '<article class="card reg-card" data-testid="admin-registration"><div class="between"><strong>' + esc(r.short_label || r.body_name) + ' · ' + esc(r.trade) + '</strong>' + statusPill(r.status) + '</div>' +
+            '<p class="tiny">Number ' + esc(r.registration_number) + ' · expires ' + esc(fmtDate(r.expires_on) || r.expires_on) + '</p>' +
+            (r.review_note ? '<p>' + esc(r.review_note) + '</p>' : '') +
+            '<button type="button" class="btn btn-ghost btn-small" data-action="open-proof" data-path="' + esc(r.proof_path) + '">View certificate</button>' +
+            (r.status === 'pending' || r.status === 'rejected' || r.status === 'expired'
+              ? '<label class="field">Reason if you reject<input name="reason" data-reason="' + esc(r.id) + '" placeholder="What needs to change"></label>' +
+                '<div class="row"><button type="button" class="btn btn-teal btn-small" data-action="review-registration" data-id="' + esc(r.id) + '" data-decision="verified">Mark verified</button>' +
+                '<button type="button" class="btn btn-ghost btn-small" data-action="review-registration" data-id="' + esc(r.id) + '" data-decision="rejected">Reject</button></div>'
+              : '<label class="field">Reason<input name="reason" data-reason="' + esc(r.id) + '" placeholder="Why you are removing it"></label>' +
+                '<button type="button" class="btn btn-ghost btn-small" data-action="review-registration" data-id="' + esc(r.id) + '" data-decision="rejected">Remove verification</button>') +
+            '</article>';
+        }).join('') : '<p class="tiny">No trade registration sent yet.</p>';
         return '<article class="card stack"><div class="between"><strong>' + esc(c.business_name || c.full_name) + '</strong>' +
-          (c.verified ? '<span class="pill pill-good">Verified</span>' : '<span class="pill pill-orange">Unverified</span>') + '</div>' +
+          (c.verified ? '<span class="pill pill-good">ID checked</span>' : '<span class="pill pill-orange">ID not checked</span>') + '</div>' +
           '<p class="tiny">' + esc(c.email || '') + ' · ' + esc(c.user_code) + ' · ' + esc(c.phone || 'no phone') + '</p>' +
           '<p class="tiny">' + (c.trades || []).map(esc).join(', ') + ' · ' + plural(docs, 'document') + ' · ' + plural(c.token_available, 'token') + ' available</p>' +
-          '<div class="row"><button type="button" class="btn btn-teal btn-small" data-action="verify" data-id="' + c.id + '" data-verified="' + (c.verified ? 'false' : 'true') + '">' + (c.verified ? 'Remove verification' : 'Verify') + '</button></div>' +
+          '<div class="row"><button type="button" class="btn btn-teal btn-small" data-action="verify" data-id="' + c.id + '" data-verified="' + (c.verified ? 'false' : 'true') + '">' + (c.verified ? 'Remove ID check' : 'Mark ID checked') + '</button></div>' +
+          '<h3>Trade registration</h3>' + regHtml +
           '<form class="row" data-form="grant" data-id="' + c.id + '"><input name="tokens" type="number" min="1" value="10" aria-label="Tokens"><button class="btn btn-ghost btn-small" type="submit">Credit tokens</button></form>' +
           '<div class="row"><button type="button" class="btn btn-ghost btn-small" data-action="mark-vip" data-id="' + c.id + '" data-plan="monthly">VIP month</button>' +
           '<button type="button" class="btn btn-ghost btn-small" data-action="mark-vip" data-id="' + c.id + '" data-plan="yearly">VIP year</button></div></article>';
@@ -1500,6 +1896,40 @@
             '<form data-form="flag" data-id="' + j.id + '"><label class="field">Reason<input name="reason" placeholder="Not a real job"></label><button class="btn btn-ghost btn-small" type="submit">Flag fake lead</button></form>') +
           '</article>';
       }).join('') + '</div>';
+  }
+
+  function pageRegistration() {
+    const trades = profile.trades || [];
+    const rules = (profile.trade_rules || []).filter(function (rule) { return trades.indexOf(rule.trade) >= 0; });
+    const chosenTrade = wizard.regTrade && trades.indexOf(wizard.regTrade) >= 0 ? wizard.regTrade : (trades[0] || '');
+    const bodies = rules.filter(function (rule) { return rule.trade === chosenTrade; });
+    const chosenBody = bodies.filter(function (rule) { return rule.body_code === wizard.regBody; })[0] || bodies[0];
+    const rows = registrationRows().map(function (row) {
+      return '<article class="card reg-card"><div class="between"><strong>' + esc(row.short_label) + ' · ' + esc(row.trade) + '</strong>' + statusPill(row.status) + '</div>' +
+        '<p class="tiny">Number ' + esc(row.registration_number) + ' · expires ' + esc(fmtDate(row.expires_on) || dateOnly(row.expires_on)) + '</p>' +
+        (row.review_note ? '<p>' + esc(row.review_note) + '</p>' : '') +
+        '</article>';
+    }).join('');
+    const form = bodies.length
+      ? '<form class="card stack" data-form="registration" data-testid="registration-form">' +
+        '<label class="field">Trade<select name="reg_trade">' + trades.map(function (trade) {
+          return '<option value="' + esc(trade) + '"' + (trade === chosenTrade ? ' selected' : '') + '>' + esc(trade) + '</option>';
+        }).join('') + '</select></label>' +
+        '<label class="field">Governing body<select name="reg_body">' + bodies.map(function (rule) {
+          const label = rule.short_label + ' — ' + rule.body_name + (rule.required ? ' (required)' : ' (optional)');
+          return '<option value="' + esc(rule.body_code) + '"' + (chosenBody && rule.body_code === chosenBody.body_code ? ' selected' : '') + '>' + esc(label) + '</option>';
+        }).join('') + '</select></label>' +
+        '<label class="field">Registration number<input name="reg_number" required autocomplete="off"></label>' +
+        '<label class="field">Expiry<input name="reg_expires" type="date" required min="' + todayISO() + '"></label>' +
+        '<label class="field">Certificate or card<input name="reg_proof" type="file" accept="image/*,application/pdf" required></label>' +
+        '<p class="tiny">A photo of the card is reduced before upload. A PDF must be 5 MB or smaller.</p>' +
+        '<button class="btn btn-teal" type="submit">Send for review</button><p class="form-error" data-error></p></form>'
+      : '<article class="card"><p>The trades you selected do not ask for a registration number. An admin still checks your ID before you can bid.</p></article>';
+    return '<h1>Trade registration</h1>' +
+      '<p class="lede">Enter the body, your number and the expiry, and upload the card. You can look around the app while an admin reviews it. You cannot bid on a trade that requires a current registration until it is verified.</p>' +
+      (bidGate() || '') +
+      (rows ? '<div class="stack">' + rows + '</div>' : '') +
+      form;
   }
 
   async function render() {
@@ -1540,6 +1970,7 @@
     if (head === 'client' && b[1] === 'new') return pageWizard();
     if (head === 'client' && b[1] === 'requests') return pageRequests();
     if (head === 'client' && b[1] === 'request') return pageRequest(b[2]);
+    if (head === 'contractor' && b[1] === 'registration') return pageRegistration();
     if (head === 'contractor' && b[1] === 'leads') return pageLeads();
     if (head === 'contractor' && b[1] === 'lead') return pageLead(b[2]);
     if (head === 'contractor' && b[1] === 'quote') return pageQuote(b[2], b[3] === 'edit');
@@ -1564,6 +1995,8 @@
 
   async function go(opts) {
     if (!ready) return;
+    const onRecordStep = bits()[0] === 'client' && bits()[1] === 'new' && wizard.step === 2;
+    if (!onRecordStep && capture && capture.recording) await stopCapture(true);
     const my = ++seq;
     if (bits()[2] !== wizard.confirmJob) wizard.confirmJob = null;
     if (bits()[1] !== 'request') pendingAccept = null;
@@ -1702,6 +2135,79 @@
       const ins = await sb.from('request_photos').insert({ job_id: jobId, storage_path: path });
       if (ins.error) throw new Error(ins.error.message);
     }
+  }
+
+  async function preparePlan(file) {
+    const name = safeFileName(file.name);
+    if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
+      if (file.size > LIMITS.planBytes) throw new Error(name + ' is over 10 MB.');
+      return { blob: file, mime: 'application/pdf', name: name, bytes: file.size };
+    }
+    const blob = await compressPlanImage(file);
+    return { blob: blob, mime: 'image/jpeg', name: safeFileName(name.replace(/\.[^.]+$/, '') + '.jpg'), bytes: blob.size };
+  }
+
+  async function uploadJobAudio(jobId, notes) {
+    for (let i = 0; i < notes.length; i++) {
+      const note = notes[i];
+      const mime = baseMime(note.mime) || 'audio/webm';
+      const path = jobId + '/' + crypto.randomUUID() + '.' + extForMime(mime);
+      const up = await sb.storage.from('job-audio').upload(path, note.blob, { contentType: mime, upsert: false });
+      if (up.error) throw new Error(up.error.message);
+      const ins = await sb.from('job_audio').insert({
+        job_id: jobId,
+        storage_path: path,
+        mime: mime,
+        duration_seconds: Math.min(LIMITS.noteSeconds, Math.max(1, Math.round(note.duration || 1))),
+        bytes: Math.min(LIMITS.noteBytes, note.blob.size || 1)
+      });
+      if (ins.error) throw new Error(ins.error.message);
+    }
+  }
+
+  async function uploadJobPlans(jobId, plans) {
+    for (let i = 0; i < plans.length; i++) {
+      const plan = plans[i];
+      const path = jobId + '/' + crypto.randomUUID() + '.' + (plan.mime === 'application/pdf' ? 'pdf' : 'jpg');
+      const up = await sb.storage.from('job-plans').upload(path, plan.blob, { contentType: plan.mime, upsert: false });
+      if (up.error) throw new Error(up.error.message);
+      const ins = await sb.from('job_plans').insert({
+        job_id: jobId,
+        storage_path: path,
+        file_name: plan.name,
+        mime: plan.mime,
+        bytes: Math.min(LIMITS.planBytes, plan.bytes || plan.blob.size || 1)
+      });
+      if (ins.error) throw new Error(ins.error.message);
+    }
+  }
+
+  function stopCapture(save) {
+    if (!capture || !capture.recording) return Promise.resolve();
+    const current = capture;
+    current.recording = false;
+    clearInterval(current.timer);
+    return new Promise(function (resolve) {
+      let done = false;
+      function finish() {
+        if (done) return;
+        done = true;
+        if (current.stream) current.stream.getTracks().forEach(function (track) { track.stop(); });
+        if (save && current.chunks && current.chunks.length && wizard.notes.length < LIMITS.notes) {
+          const mime = baseMime(current.mime) || 'audio/webm';
+          const blob = new Blob(current.chunks, { type: mime });
+          const duration = Math.max(1, Math.min(LIMITS.noteSeconds, Math.ceil((Date.now() - current.started) / 1000)));
+          wizard.notes.push({ blob: blob, url: URL.createObjectURL(blob), duration: duration, mime: mime });
+        }
+        if (capture === current) capture = null;
+        resolve();
+      }
+      if (current.recorder && current.recorder.state !== 'inactive') {
+        current.recorder.onstop = finish;
+        try { current.recorder.stop(); } catch (err) { finish(); }
+        setTimeout(finish, 1200);
+      } else finish();
+    });
   }
 
   async function handleSubmit(form) {
@@ -1913,6 +2419,60 @@
         go();
         return;
       }
+      if (kind === 'add-audio') {
+        const file = form.audio.files && form.audio.files[0];
+        if (!file) return fail('Choose an audio file first.');
+        const shrunk = await shrinkAudio(file);
+        await uploadJobAudio(form.getAttribute('data-id'), [shrunk]);
+        toast('Voice note added');
+        go();
+        return;
+      }
+      if (kind === 'add-plans') {
+        const file = form.plans.files && form.plans.files[0];
+        if (!file) return fail('Choose a plan first.');
+        const plan = await preparePlan(file);
+        await uploadJobPlans(form.getAttribute('data-id'), [plan]);
+        toast('Plan added');
+        go();
+        return;
+      }
+      if (kind === 'registration') {
+        const trade = form.reg_trade.value;
+        const body = form.reg_body.value;
+        const number = form.reg_number.value.trim();
+        const expires = form.reg_expires.value;
+        const proof = form.reg_proof.files && form.reg_proof.files[0];
+        if (number.length < 3) return fail('Enter the registration number.');
+        if (!expires || expires < todayISO()) return fail('Expiry must be today or later.');
+        if (!proof) return fail('Upload a photo or PDF of the card.');
+        let blob = proof;
+        let mime = 'application/pdf';
+        let ext = 'pdf';
+        if (proof.type === 'application/pdf' || /\.pdf$/i.test(proof.name)) {
+          if (proof.size > LIMITS.proofBytes) return fail('The certificate must be 5 MB or smaller. A photo of the card is enough.');
+        } else {
+          blob = await compressImage(proof);
+          mime = 'image/jpeg';
+          ext = 'jpg';
+        }
+        const path = profile.id + '/registration/' + crypto.randomUUID() + '.' + ext;
+        const up = await sb.storage.from('verification').upload(path, blob, { contentType: mime });
+        if (up.error) return fail(up.error.message);
+        const res = await sb.rpc('submit_registration', {
+          p_trade: trade,
+          p_body: body,
+          p_number: number,
+          p_expires: expires,
+          p_proof_path: path
+        });
+        const err = rpcFail(res);
+        if (err) return fail(err);
+        toast('Registration sent. An admin will check it.');
+        await loadProfile();
+        go();
+        return;
+      }
       if (kind === 'grant') {
         const res = await sb.rpc('grant_tokens', {
           p_profile: form.getAttribute('data-id'),
@@ -2036,7 +2596,11 @@
         const err = rpcFail(created);
         if (err) { if (errorEl) errorEl.textContent = err; el.disabled = false; return; }
         const id = created.data.id;
+        await stopCapture(true);
         if (wizard.files.length) await uploadJobPhotos(id, wizard.files);
+        if (wizard.notes.length) await uploadJobAudio(id, wizard.notes);
+        if (wizard.plans.length) await uploadJobPlans(id, wizard.plans);
+        wizard.notes.forEach(function (note) { if (note.url) URL.revokeObjectURL(note.url); });
         Object.assign(wizard, blankWizard());
         try { sessionStorage.setItem('mq-just-posted', id); } catch (err) { /* private mode */ }
         toast('Job posted. Reference ' + jobRef(id) + '.');
@@ -2087,7 +2651,7 @@
       const err = rpcFail(res);
       wizard.confirmJob = null;
       wizard.bidAmount = null;
-      if (err) toast(err);
+      if (err) toast(friendlyBidError(err));
       else toast('Bid placed. ' + bidSentence(num(el.getAttribute('data-amount'))));
       await loadProfile();
       go();
@@ -2175,6 +2739,89 @@
       go();
       return;
     }
+    if (action === 'start-recording') {
+      e.preventDefault();
+      if (wizard.notes.length >= LIMITS.notes) return toast('You can add up to 3 voice notes.');
+      if (!canRecord()) return toast('This browser cannot record. Upload an audio file instead.');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const options = recorderOptions() || {};
+        let rec;
+        try { rec = options.mimeType ? new MediaRecorder(stream, options) : new MediaRecorder(stream); }
+        catch (err) { rec = new MediaRecorder(stream); }
+        capture = {
+          recording: true,
+          chunks: [],
+          started: Date.now(),
+          stream: stream,
+          recorder: rec,
+          mime: rec.mimeType || options.mimeType || 'audio/webm',
+          timer: null
+        };
+        rec.ondataavailable = function (ev) { if (ev.data && ev.data.size) capture.chunks.push(ev.data); };
+        try { rec.start(1000); } catch (err) { rec.start(); }
+        capture.timer = setInterval(function () {
+          if (!capture || !capture.recording) return;
+          const elapsed = (Date.now() - capture.started) / 1000;
+          const clockEl = view.querySelector('[data-rec-clock]');
+          if (clockEl) clockEl.textContent = clock(elapsed);
+          if (elapsed >= LIMITS.noteSeconds) stopCapture(true).then(function () { go(); });
+        }, 250);
+        go();
+      } catch (err) {
+        toast('The microphone is not available. You can upload an audio file instead.');
+      }
+      return;
+    }
+    if (action === 'stop-recording') {
+      e.preventDefault();
+      await stopCapture(true);
+      go();
+      return;
+    }
+    if (action === 'delete-note') {
+      const note = wizard.notes.splice(num(el.getAttribute('data-index')), 1)[0];
+      if (note && note.url) URL.revokeObjectURL(note.url);
+      go();
+      return;
+    }
+    if (action === 'delete-plan') {
+      wizard.plans.splice(num(el.getAttribute('data-index')), 1);
+      go();
+      return;
+    }
+    if (action === 'delete-saved-note' || action === 'delete-saved-plan') {
+      const bucket = action === 'delete-saved-note' ? 'job-audio' : 'job-plans';
+      const table = action === 'delete-saved-note' ? 'job_audio' : 'job_plans';
+      const removed = await sb.storage.from(bucket).remove([el.getAttribute('data-path')]);
+      if (removed.error) return toast(removed.error.message);
+      const del = await sb.from(table).delete().eq('id', el.getAttribute('data-id'));
+      if (del.error) return toast(del.error.message);
+      toast('Removed');
+      go();
+      return;
+    }
+    if (action === 'open-proof') {
+      const signed = await sb.storage.from('verification').createSignedUrl(el.getAttribute('data-path'), 60 * 10);
+      if (!signed.data || !signed.data.signedUrl) return toast((signed.error && signed.error.message) || 'That file is not available.');
+      window.open(signed.data.signedUrl, '_blank', 'noopener');
+      return;
+    }
+    if (action === 'review-registration') {
+      const id = el.getAttribute('data-id');
+      const card = el.closest('article');
+      const reasonEl = card && card.querySelector('[data-reason="' + id + '"]');
+      const res = await sb.rpc('review_registration', {
+        p_id: id,
+        p_decision: el.getAttribute('data-decision'),
+        p_reason: reasonEl ? reasonEl.value : ''
+      });
+      const err = rpcFail(res);
+      if (err) toast(err);
+      else toast(el.getAttribute('data-decision') === 'verified' ? 'Registration verified' : 'Registration updated');
+      go();
+      return;
+    }
     if (action === 'verify') {
       const res = await sb.rpc('verify_contractor', {
         p_profile: el.getAttribute('data-id'),
@@ -2220,10 +2867,38 @@
     handleSubmit(form);
   });
   document.body.addEventListener('change', function (e) {
-    if (e.target && e.target.name === 'photos' && e.target.files) {
+    if (!e.target || !e.target.name) return;
+    if (e.target.name === 'photos' && e.target.files) {
       wizard.files = Array.prototype.slice.call(e.target.files);
       const hint = view.querySelector('[data-photo-hint]');
       if (hint) hint.textContent = plural(wizard.files.length, 'photo') + ' selected. Each one is reduced to about 200KB before upload.';
+    }
+    if (e.target.name === 'audio' && e.target.files && e.target.files[0] && e.target.form && e.target.form.getAttribute('data-form') !== 'add-audio') {
+      const file = e.target.files[0];
+      shrinkAudio(file).then(function (shrunk) {
+        if (wizard.notes.length >= LIMITS.notes) return toast('You can add up to 3 voice notes.');
+        wizard.notes.push({
+          blob: shrunk.blob,
+          url: URL.createObjectURL(shrunk.blob),
+          duration: shrunk.duration,
+          mime: shrunk.mime
+        });
+        go();
+      }).catch(function (err) { toast(err.message || 'That audio file could not be used.'); });
+    }
+    if (e.target.name === 'plans' && e.target.files && e.target.form && e.target.form.getAttribute('data-form') !== 'add-plans') {
+      const files = Array.prototype.slice.call(e.target.files);
+      const room = LIMITS.plans - wizard.plans.length;
+      Promise.all(files.slice(0, room).map(preparePlan)).then(function (ready) {
+        ready.forEach(function (plan) { wizard.plans.push(plan); });
+        if (files.length > room) toast('You can add up to 5 plans.');
+        go();
+      }).catch(function (err) { toast(err.message || 'That plan could not be used.'); });
+    }
+    if (e.target.name === 'reg_trade') {
+      wizard.regTrade = e.target.value;
+      wizard.regBody = '';
+      go();
     }
   });
   document.body.addEventListener('input', function (e) {

@@ -569,6 +569,21 @@ BEGIN
   IF to_regprocedure('public.bid_board(uuid)') IS NOT NULL THEN
     GRANT EXECUTE ON FUNCTION public.bid_board(uuid) TO authenticated;
   END IF;
+  IF to_regprocedure('public.submit_registration(text, text, text, date, text)') IS NOT NULL THEN
+    GRANT EXECUTE ON FUNCTION public.submit_registration(text, text, text, date, text) TO authenticated;
+  END IF;
+  IF to_regprocedure('public.review_registration(uuid, text, text)') IS NOT NULL THEN
+    GRANT EXECUTE ON FUNCTION public.review_registration(uuid, text, text) TO authenticated;
+  END IF;
+  IF to_regclass('public.registration_badges') IS NOT NULL THEN
+    GRANT SELECT ON public.registration_badges TO authenticated;
+  END IF;
+  IF to_regclass('public.job_audio') IS NOT NULL THEN
+    GRANT SELECT, INSERT, DELETE ON public.job_audio TO authenticated;
+  END IF;
+  IF to_regclass('public.job_plans') IS NOT NULL THEN
+    GRANT SELECT, INSERT, DELETE ON public.job_plans TO authenticated;
+  END IF;
 END
 $later_rpcs$;
 

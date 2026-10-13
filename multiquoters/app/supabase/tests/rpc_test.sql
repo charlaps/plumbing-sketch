@@ -89,6 +89,21 @@ UPDATE public.profiles SET
   token_available = 50
 WHERE id = '88888888-8888-4888-8888-888888888888';
 
+-- Existing bid tests predate trade registration. A current PIRB row keeps
+-- those bids on the same money rules. The unverified contractor is left out.
+INSERT INTO public.contractor_registrations (
+  profile_id, trade, body_code, registration_number, expires_on, proof_path, status, reviewed_at
+)
+SELECT p.id, 'Plumbing', 'pirb', 'TEST-' || left(replace(p.id::text, '-', ''), 8),
+       current_date + 400, p.id::text || '/registration/pirb-test.jpg', 'verified', now()
+FROM public.profiles p
+WHERE p.verified
+  AND 'Plumbing' = ANY (p.trades)
+  AND NOT EXISTS (
+    SELECT 1 FROM public.contractor_registrations r
+    WHERE r.profile_id = p.id AND r.trade = 'Plumbing' AND r.body_code = 'pirb' AND r.status = 'verified'
+  );
+
 SELECT public._assert(public.setting_int('token_rand') = 20, 'token price is R20');
 SELECT public._assert(public.setting_int('vip_free_tokens') = 5, 'VIP covers 5 tokens');
 SELECT public._assert(public.setting_int('places') = 3, 'top 3 places');
