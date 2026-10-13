@@ -10,82 +10,249 @@
 <style>
 @font-face{font-family:"Montserrat";src:url("../site/fonts/montserrat-var.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
 :root{
-  --blue:#004AAD;--navy:#082464;--pale:#E8F0FC;--grey:#5A6473;--line:#DCE4F0;
-  --wa:#128C45;--font:"Montserrat",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --blue:#004AAD;--navy:#082464;--pale:#E8F0FC;--grey:#5A6473;--ink:#1A2333;
+  --line:#D5DEEC;--wa:#128C45;--wa-dark:#0E7539;
+  --font:"Montserrat",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --wrap:1120px;
 }
 *{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:#fff;color:var(--navy);font:600 16px/1.25 var(--font);-webkit-text-size-adjust:100%}
-.page{
-  min-height:100dvh;min-height:100svh;
-  width:min(100%,520px);margin:0 auto;
-  display:flex;flex-direction:column;
-  padding:max(12px,env(safe-area-inset-top)) 16px max(10px,env(safe-area-inset-bottom));
-}
-.brand{text-align:center;padding-top:4px}
-.brand img{width:158px;height:auto;margin:0 auto 6px}
-h1{margin:0;font-size:1.02rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}
-.tag{margin:3px 0 0;color:var(--grey);font-size:.9rem;font-weight:600}
-.jobs{
-  flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,minmax(64px,1fr));
-  gap:10px;margin:12px 0 10px;min-height:0;
-}
-.jobs a,.contact a{
-  display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;
-  border-radius:16px;font-weight:700;-webkit-tap-highlight-color:transparent;
-}
-.jobs a{
-  background:var(--pale);color:var(--navy);border:1.5px solid #C9D9F2;
-  padding:8px 8px;font-size:1.02rem;line-height:1.15;min-height:64px;
-}
-.jobs a:active{background:#d5e4f8}
-.contact{display:flex;gap:8px}
-.contact a{min-height:54px;padding:6px 6px;color:#fff;line-height:1.15}
-.call{flex:1.15;background:var(--blue);flex-direction:column;gap:1px;font-size:.78rem;font-weight:700}
-.call b{font-size:.95rem;font-weight:800;letter-spacing:-.01em}
-.wa{flex:.9;background:var(--wa);font-size:.92rem}
-.mail{
-  flex:1.35;background:#fff;color:var(--blue);border:1.5px solid var(--blue);
-  font-size:.72rem;font-weight:700;line-height:1.15;padding:6px 6px;
-}
-footer{margin:8px 0 2px;text-align:center;color:var(--grey);font-size:.75rem;font-weight:600}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);background:#fff;font:500 17px/1.55 var(--font);-webkit-text-size-adjust:100%}
+img{max-width:100%;display:block}
+a{color:var(--blue)}
+h1,h2,h3{font-weight:800;letter-spacing:-.025em;line-height:1.15;color:var(--navy);margin:0}
+p{margin:0}
+.wrap{width:min(100% - 40px,var(--wrap));margin-inline:auto}
+.skip{position:absolute;left:-999px;top:0;background:var(--blue);color:#fff;padding:10px 14px;z-index:50}
+.skip:focus{left:12px;top:12px}
 :focus-visible{outline:3px solid #7FB2FF;outline-offset:2px}
-@media (min-width:800px){
-  body{background:var(--pale);display:grid;place-items:center;min-height:100dvh}
-  .page{
-    height:min(844px,calc(100dvh - 48px));min-height:0;
-    background:#fff;border-radius:28px;
-    box-shadow:0 18px 48px rgba(8,36,100,.14);
-    padding:22px 22px 14px;
-  }
-  .brand img{width:176px}
-  h1{font-size:1.12rem}
-  .jobs a{font-size:1.08rem}
-  .mail{font-size:.78rem}
+
+.site-header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--line)}
+#services,#why,#contact{scroll-margin-top:84px}
+.bar{display:flex;align-items:center;gap:14px;min-height:68px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--navy);margin-right:auto;min-width:0}
+.brand img{width:118px;height:auto}
+.brand-name{font-weight:800;font-size:.95rem;letter-spacing:-.02em;white-space:nowrap}
+.brand-name span{display:none}
+.menu-btn{width:44px;height:44px;border:0;border-radius:10px;background:var(--pale);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;cursor:pointer}
+.menu-btn span{display:block;width:18px;height:2px;background:var(--blue);border-radius:2px}
+a.btn.nav-call{display:none}
+.site-nav{display:none}
+.site-nav.open{display:flex;flex-direction:column;position:absolute;left:0;right:0;top:100%;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 18px 36px rgba(8,20,50,.1);padding:6px 22px 14px}
+.site-nav a{padding:13px 0;border-bottom:1px solid var(--line);font-weight:700;color:var(--navy);text-decoration:none}
+.site-nav a:last-child{border-bottom:0}
+.menu-call{color:var(--blue)}
+
+.hero{position:relative;min-height:560px;display:flex;align-items:flex-end;color:#fff;overflow:hidden;background:#082464}
+.hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%}
+.hero-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,18,48,.28) 0%,rgba(8,18,48,.55) 42%,rgba(8,18,48,.82) 100%)}
+.hero-copy{position:relative;z-index:1;padding:48px 0 40px;max-width:680px}
+.eyebrow{margin:0 0 12px;font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#D6E4FF}
+h1{color:#fff;font-size:clamp(2rem,7vw,3.35rem);max-width:11em}
+.lede{margin-top:14px;font-size:1.08rem;font-weight:500;color:rgba(255,255,255,.92);max-width:34em}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:8px;font:700 .98rem/1 var(--font);text-decoration:none;border:0}
+.btn-wa{background:var(--wa);color:#fff}
+.btn-wa:hover{background:var(--wa-dark)}
+.btn-ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.85)}
+.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:var(--navy)}
+
+.section{padding:64px 0}
+.kicker{margin:0 0 8px;color:var(--blue);font-size:.74rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+h2{font-size:clamp(1.55rem,3vw,2.05rem);margin-bottom:10px}
+.intro{color:var(--grey);max-width:38em;margin-bottom:28px}
+.cards{display:grid;gap:14px}
+.card{display:flex;flex-direction:column;gap:8px;padding:18px 18px 16px;background:#fff;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:inherit;box-shadow:0 1px 0 rgba(8,20,50,.03)}
+.card:hover{border-color:#B7CBEA;box-shadow:0 10px 24px rgba(8,36,100,.08)}
+.ico{width:40px;height:40px;border-radius:10px;background:var(--pale);color:var(--blue);display:grid;place-items:center}
+.ico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.card h3{font-size:1.05rem}
+.card p{color:var(--grey);font-size:.95rem;line-height:1.45}
+.more{margin-top:auto;padding-top:8px;font-size:.86rem;font-weight:700;color:var(--blue)}
+
+.why{background:var(--pale)}
+.why h2{margin-bottom:22px}
+.points{display:grid;gap:18px;margin:0;padding:0;list-style:none}
+.points li{background:#fff;border-radius:12px;padding:16px 16px 14px;border:1px solid #D5E3F7}
+.points strong{display:block;color:var(--navy);font-size:1.02rem;margin-bottom:4px}
+.points span{color:var(--grey);font-size:.95rem}
+
+.contact-grid{display:grid;gap:22px}
+.contact-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.contact-list a,.contact-list span{display:flex;flex-direction:column;gap:2px;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.contact-list small{color:var(--grey);font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.contact-list b{color:var(--navy);font-weight:700;font-size:1rem}
+.muted{color:var(--grey)}
+
+.site-footer{background:var(--navy);color:#D5DDEC;padding:22px 0}
+.site-footer .wrap{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:space-between;align-items:center}
+.site-footer p{margin:0;font-size:.88rem}
+.site-footer a{color:#fff;text-decoration:none;font-weight:700}
+
+@media (min-width:720px){
+  .cards{grid-template-columns:1fr 1fr}
+  .points{grid-template-columns:1fr 1fr}
+  .contact-list{grid-template-columns:1fr 1fr}
+}
+@media (min-width:980px){
+  .brand img{width:138px}
+  .brand-name span{display:inline;font-weight:650;color:var(--grey)}
+  .menu-btn,.menu-call{display:none}
+  a.btn.nav-call{display:inline-flex}
+  .site-nav{display:flex;align-items:center;gap:22px;position:static;background:none;border:0;box-shadow:none;padding:0}
+  .site-nav a{padding:0;border:0;font-size:.95rem}
+  .site-nav a:hover{color:var(--blue)}
+  .hero{min-height:640px;align-items:center}
+  .hero-shade{background:linear-gradient(90deg,rgba(8,18,48,.82) 0%,rgba(8,18,48,.55) 46%,rgba(8,18,48,.18) 100%)}
+  .hero-copy{padding:72px 0}
+  .cards{grid-template-columns:repeat(3,1fr);gap:18px}
+  .points{grid-template-columns:repeat(4,1fr);gap:16px}
+  .contact-grid{grid-template-columns:1fr 1.2fr;align-items:start;gap:40px}
+  .section{padding:84px 0}
 }
 </style>
 </head>
 <body>
-<main class="page">
-  <header class="brand">
-    <img src="../site/img/logo.png" alt="APS" width="600" height="191">
-    <h1>APS – Architectural Plumbing Services</h1>
-    <p class="tag">Plumbing done properly, West Rand.</p>
-  </header>
-  <nav class="jobs" aria-label="Message APS on WhatsApp">
-    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20burst%20pipe%20%2F%20leak.">Burst pipe / leak</a>
-    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20geyser.">Geyser</a>
-    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20blocked%20drain.">Blocked drain</a>
-    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20bathroom%20and%20kitchen.">Bathroom &amp; kitchen</a>
-    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20water%20tank%20backup.">Water tank backup</a>
-    <a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%27d%20like%20a%20free%20geyser%20inspection.">Free geyser inspection</a>
-  </nav>
-  <nav class="contact" aria-label="Contact">
-    <a class="call" href="tel:+27722309222">Call<b>072 230 9222</b></a>
-    <a class="wa" href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20a%20plumber.">WhatsApp</a>
-    <a class="mail" href="mailto:charl@agasouthafrica.co.za">charl@<wbr>agasouthafrica.co.za</a>
-  </nav>
-  <footer>Mon–Sat 24/7</footer>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="top">
+  <div class="wrap bar">
+    <a class="brand" href="#top">
+      <img src="../site/img/logo.png" alt="" width="600" height="191">
+      <span class="brand-name">APS<span> – Architectural Plumbing Services</span></span>
+    </a>
+    <nav class="site-nav" id="siteNav" aria-label="Page">
+      <a href="#services">Services</a>
+      <a href="#why">Why APS</a>
+      <a href="#contact">Contact</a>
+      <a class="menu-call" href="tel:+27722309222">Call 072 230 9222</a>
+    </nav>
+    <a class="btn btn-blue nav-call" href="tel:+27722309222">Call 072 230 9222</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-controls="siteNav" aria-expanded="false" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" aria-label="Introduction">
+    <picture>
+      <source media="(min-width: 800px)" srcset="../site/img/geyser-hero.webp" type="image/webp">
+      <source media="(min-width: 800px)" srcset="../site/img/geyser-hero.jpg">
+      <source srcset="../site/img/geyser-hero-sm.webp" type="image/webp">
+      <img class="hero-photo" src="../site/img/geyser-hero-sm.jpg" alt="Solar geyser with evacuated tubes on a tiled roof in South Africa" width="1200" height="900">
+    </picture>
+    <div class="hero-shade" aria-hidden="true"></div>
+    <div class="wrap hero-copy">
+      <p class="eyebrow">Krugersdorp · West Rand</p>
+      <h1>Reliable plumbing for the West Rand</h1>
+      <p class="lede">Geysers, leaks and bathrooms, with a written quote before the work starts.</p>
+      <div class="hero-actions">
+        <a class="btn btn-wa" href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%27d%20like%20a%20quote.">WhatsApp for a quote</a>
+        <a class="btn btn-ghost" href="tel:+27722309222">Call now</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="services">
+    <div class="wrap">
+      <p class="kicker">Services</p>
+      <h2>What we do</h2>
+      <p class="intro">Choose a job and message us on WhatsApp.</p>
+      <div class="cards">
+        <a class="card" href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20leak%20or%20burst%20pipe.">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3s6 6.2 6 10.2A6 6 0 1 1 6 13.2C6 9.2 12 3 12 3z"/></svg></span>
+          <h3>Leaks &amp; burst pipes</h3>
+          <p>Burst pipes, leaks and dripping taps.</p>
+          <span class="more">WhatsApp</span>
+        </a>
+        <a class="card" href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20geyser.">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10 7h4M10 11h4"/></svg></span>
+          <h3>Geysers</h3>
+          <p>Repairs, replacements and valve checks.</p>
+          <span class="more">WhatsApp</span>
+        </a>
+        <a class="card" href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20blocked%20drain.">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9 13l3 3 3-3"/></svg></span>
+          <h3>Blocked drains</h3>
+          <p>Sinks, showers and blocked drains cleared.</p>
+          <span class="more">WhatsApp</span>
+        </a>
+        <a class="card" href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20bathroom%20or%20kitchen.">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 10V6a2 2 0 0 1 2-2h1"/><path d="M8 10h11a2 2 0 0 1 2 2v1H6v-1a2 2 0 0 1 0-2z"/><path d="M7 13v2M17 13v2M5 19h14"/></svg></span>
+          <h3>Bathrooms &amp; kitchens</h3>
+          <p>Basins, toilets, sinks and new fittings.</p>
+          <span class="more">WhatsApp</span>
+        </a>
+        <a class="card" href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20help%20with%20a%20water%20tank%20backup.">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 7h12v12H6z"/><path d="M6 7c0-2 2.5-3 6-3s6 1 6 3"/><path d="M9 12h6"/></svg></span>
+          <h3>Water tank backup</h3>
+          <p>Tank and pump backup when the supply drops.</p>
+          <span class="more">WhatsApp</span>
+        </a>
+        <a class="card" href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%27d%20like%20a%20free%20geyser%20inspection.">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-3.5-3.5M11 8v3l2 2"/></svg></span>
+          <h3>Free geyser inspection</h3>
+          <p>We look at the geyser, then quote any repair.</p>
+          <span class="more">WhatsApp</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section why" id="why">
+    <div class="wrap">
+      <p class="kicker">Why APS</p>
+      <h2>Plumbing done properly</h2>
+      <ul class="points">
+        <li><strong>Mon–Sat 24/7</strong><span>On call through the week and Saturday.</span></li>
+        <li><strong>Written quotes</strong><span>You see the work in writing before we start.</span></li>
+        <li><strong>Neat work</strong><span>Tidy pipework, checked before we leave.</span></li>
+        <li><strong>West Rand based</strong><span>Krugersdorp and the West Rand.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="wrap contact-grid">
+      <div>
+        <p class="kicker">Contact</p>
+        <h2>Call, WhatsApp or email</h2>
+        <p class="muted">Mon–Sat, day or night. Tell us the suburb and what has gone wrong.</p>
+      </div>
+      <ul class="contact-list">
+        <li><a href="tel:+27722309222"><small>Phone</small><b>072 230 9222</b></a></li>
+        <li><a href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20a%20plumber."><small>WhatsApp</small><b>Message APS</b></a></li>
+        <li><a href="mailto:charl@agasouthafrica.co.za"><small>Email</small><b>charl@agasouthafrica.co.za</b></a></li>
+        <li><span><small>Hours</small><b>Mon–Sat 24/7</b></span></li>
+      </ul>
+    </div>
+  </section>
 </main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>© APS – Architectural Plumbing Services</p>
+    <p><a href="tel:+27722309222">072 230 9222</a> · <a href="mailto:charl@agasouthafrica.co.za">charl@agasouthafrica.co.za</a> · Mon–Sat 24/7</p>
+  </div>
+</footer>
+<script>
+(function(){
+  var btn=document.getElementById('menuBtn');
+  var nav=document.getElementById('siteNav');
+  if(!btn||!nav)return;
+  btn.addEventListener('click',function(){
+    var open=nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded',open?'true':'false');
+    btn.setAttribute('aria-label',open?'Close menu':'Open menu');
+  });
+  nav.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click',function(){
+      nav.classList.remove('open');
+      btn.setAttribute('aria-expanded','false');
+      btn.setAttribute('aria-label','Open menu');
+    });
+  });
+})();
+</script>
 </body>
 </html>
