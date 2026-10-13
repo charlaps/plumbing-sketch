@@ -36,9 +36,7 @@ p{margin:0}
 .site-header{position:relative;background:rgba(255,255,255,.98);border-bottom:1px solid var(--line)}
 .bar{display:flex;align-items:center;gap:12px;min-height:64px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--navy);margin-right:auto;min-width:0}
-.brand img{width:108px;height:auto}
-.brand-name{font-weight:800;font-size:.92rem;letter-spacing:-.02em;white-space:nowrap}
-.brand-name span{display:none}
+.brand img{width:132px;height:auto}
 .menu-btn{width:44px;height:44px;border:0;border-radius:10px;background:var(--pale);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;cursor:pointer;flex:none}
 .menu-btn span{display:block;width:18px;height:2px;background:var(--blue);border-radius:2px}
 a.btn.nav-call{display:none}
@@ -110,7 +108,7 @@ h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:8px}
 
 .site-footer{background:#06183A;color:#D5DDEC;padding:28px 0 18px}
 .foot{display:grid;gap:16px}
-.foot strong{color:#fff;font-size:1rem}
+.foot-logo{width:148px;height:auto;background:#fff;border-radius:8px;padding:6px 8px}
 .foot p,.foot a{color:#D5DDEC;font-size:.92rem;text-decoration:none}
 .foot a{color:#fff;font-weight:700}
 .copy{margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);font-size:.82rem;color:#A9B4C9}
@@ -126,8 +124,7 @@ h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:8px}
   .foot{grid-template-columns:1.3fr 1fr 1fr;gap:24px}
 }
 @media (min-width:1040px){
-  .brand img{width:128px}
-  .brand-name span{display:inline;font-weight:650;color:var(--grey)}
+  .brand img{width:156px}
   .menu-btn,.menu-call{display:none}
   a.btn.nav-call{display:inline-flex}
   .site-nav{display:flex;align-items:center;gap:18px;position:static;background:none;border:0;box-shadow:none;padding:0}
@@ -158,8 +155,7 @@ h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:8px}
   <header class="site-header" id="top">
     <div class="wrap bar">
       <a class="brand" href="#top">
-        <img src="../site/img/logo.png" alt="" width="600" height="191">
-        <span class="brand-name">APS<span> – Architectural Plumbing Services</span></span>
+        <img src="../site/img/logo.png" alt="APS – Architectural Plumbing Services" width="600" height="191">
       </a>
       <nav class="site-nav" id="siteNav" aria-label="Page">
         <a href="#services">Services</a>
@@ -184,8 +180,8 @@ h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:8px}
     </picture>
     <div class="hero-shade" aria-hidden="true"></div>
     <div class="wrap hero-copy">
-      <p class="eyebrow">Krugersdorp · West Rand</p>
-      <h1>Reliable plumbing for the West Rand</h1>
+      <p class="eyebrow">Pretoria · Johannesburg</p>
+      <h1>Reliable plumbing across Pretoria &amp; Johannesburg</h1>
       <p class="lede">Geysers, leaks and bathrooms, with a written quote before the work starts.</p>
       <div class="hero-actions">
         <a class="btn btn-wa" href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%27d%20like%20a%20quote.">WhatsApp for a quote</a>
@@ -194,7 +190,7 @@ h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:8px}
       <ul class="hero-notes">
         <li>Written quote first</li>
         <li>Neat, checked work</li>
-        <li>Based on the West Rand</li>
+        <li>Pretoria, Johannesburg and surrounds</li>
       </ul>
     </div>
   </section>
@@ -265,7 +261,7 @@ h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:8px}
         <li><strong>Mon–Sat 24/7</strong><span>On call through the week and Saturday.</span></li>
         <li><strong>Written quotes</strong><span>You see the work in writing before we start.</span></li>
         <li><strong>Neat work</strong><span>Tidy pipework, checked before we leave.</span></li>
-        <li><strong>West Rand based</strong><span>Krugersdorp and the towns around it.</span></li>
+        <li><strong>Pretoria &amp; Johannesburg</strong><span>And all surrounding areas.</span></li>
       </ul>
     </div>
   </section>
@@ -273,22 +269,19 @@ h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:8px}
   <section class="section" id="areas">
     <div class="wrap">
       <p class="kicker">Where we work</p>
-      <h2>The West Rand</h2>
-      <p class="intro">Homes around Krugersdorp and nearby towns.</p>
+      <h2>Pretoria, Johannesburg and all surrounding areas</h2>
       <ul class="places">
-        <li>Krugersdorp</li>
-        <li>Roodepoort</li>
-        <li>Randfontein</li>
-        <li>Westonaria</li>
-        <li>West Rand</li>
+        <li>Pretoria</li>
+        <li>Johannesburg</li>
+        <li>All surrounding areas</li>
       </ul>
     </div>
   </section>
 
   <section class="cta" aria-label="Get in touch">
     <div class="wrap">
-      <h2>Need a plumber on the West Rand?</h2>
-      <p>Call or WhatsApp. Mon–Sat, day or night.</p>
+      <h2>Need a plumber in Pretoria or Johannesburg?</h2>
+      <p>Pretoria, Johannesburg and all surrounding areas. Call or WhatsApp, Mon–Sat, day or night.</p>
       <div class="cta-actions">
         <a class="btn btn-wa" href="https://wa.me/27722309222?text=Hi%20APS%2C%20I%20need%20a%20plumber.">WhatsApp</a>
         <a class="btn btn-ghost" href="tel:+27722309222">Call 072 230 9222</a>
@@ -317,8 +310,8 @@ h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:8px}
   <div class="wrap">
     <div class="foot">
       <div>
-        <strong>APS – Architectural Plumbing Services</strong>
-        <p>Plumbing for homes on the West Rand.</p>
+        <img class="foot-logo" src="../site/img/logo.png" alt="APS – Architectural Plumbing Services" width="600" height="191">
+        <p>Plumbing for homes in Pretoria, Johannesburg and all surrounding areas.</p>
       </div>
       <div>
         <p><a href="tel:+27722309222">072 230 9222</a></p>
@@ -326,7 +319,7 @@ h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:8px}
         <p><a href="mailto:charl@agasouthafrica.co.za">charl@agasouthafrica.co.za</a></p>
       </div>
       <div>
-        <p>Krugersdorp, Roodepoort, Randfontein, Westonaria</p>
+        <p>Pretoria, Johannesburg and all surrounding areas</p>
         <p>Mon–Sat 24/7</p>
       </div>
     </div>
