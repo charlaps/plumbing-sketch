@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Sample bathroom mixer with no drip.">
+  <rect width="800" height="500" fill="#e7eef0"/>
+  <rect x="80" y="70" width="640" height="300" rx="24" fill="#f7f5f2" stroke="#d5d0c8"/>
+  <rect x="140" y="250" width="520" height="28" fill="#c5cdd1"/>
+  <path d="M250 250 v-70 h180 v40" fill="none" stroke="#b7b1a8" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="250" cy="168" r="28" fill="#1f4f45"/>
+  <circle cx="430" cy="250" r="16" fill="#9aa3a8"/>
+  <rect x="210" y="300" width="380" height="120" rx="16" fill="#e5f6ec" stroke="#1c6b45"/>
+  <text x="400" y="352" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#1c6b45">No drip at the spout</text>
+  <text x="400" y="386" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#1c6b45">Mixer seats evenly · sample photo</text>
+</svg>

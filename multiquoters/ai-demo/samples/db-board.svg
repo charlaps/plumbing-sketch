@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Sample distribution board with no surge arrestor.">
+  <rect width="800" height="500" fill="#d9d0c3"/>
+  <rect x="150" y="36" width="500" height="428" rx="16" fill="#f4f1ea" stroke="#2a2118" stroke-width="8"/>
+  <text x="400" y="84" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#2a2118">DB BOARD · SAMPLE</text>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#2a2118">
+    <rect x="190" y="110" width="70" height="110" rx="6" fill="#1f4f45"/>
+    <text x="225" y="240" text-anchor="middle">MAIN</text>
+    <rect x="290" y="110" width="54" height="110" rx="6" fill="#f7f7f5" stroke="#2a2118" stroke-width="3"/>
+    <text x="317" y="240" text-anchor="middle">LTS</text>
+    <rect x="360" y="110" width="54" height="110" rx="6" fill="#f7f7f5" stroke="#2a2118" stroke-width="3"/>
+    <text x="387" y="240" text-anchor="middle">PLUG</text>
+    <rect x="430" y="110" width="54" height="110" rx="6" fill="#9a3412"/>
+    <text x="457" y="240" text-anchor="middle" font-size="14">STOVE</text>
+    <rect x="500" y="110" width="54" height="110" rx="6" fill="#f7f7f5" stroke="#2a2118" stroke-width="3"/>
+    <text x="527" y="240" text-anchor="middle">GEY</text>
+    <rect x="570" y="110" width="54" height="110" rx="6" fill="#f7f7f5" stroke="#2a2118" stroke-width="3"/>
+    <text x="597" y="240" text-anchor="middle">HW</text>
+  </g>
+  <rect x="190" y="280" width="420" height="110" rx="10" fill="#fff6ea" stroke="#e2b08a" stroke-width="2"/>
+  <text x="400" y="328" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#6b3a12">No surge arrestor in this row</text>
+  <text x="400" y="360" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#6b3a12">Earth leakage is present. Labels are handwritten.</text>
+  <text x="400" y="430" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#5e5146">Sample drawing for the demo. Do not copy a real board.</text>
+</svg>

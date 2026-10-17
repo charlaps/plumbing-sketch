@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Sample photo of a water-stained passage ceiling.">
+  <rect width="800" height="500" fill="#efe6d8"/>
+  <rect x="40" y="30" width="720" height="300" fill="#f7f1e6"/>
+  <ellipse cx="430" cy="150" rx="180" ry="90" fill="#c4a27a"/>
+  <ellipse cx="470" cy="170" rx="90" ry="48" fill="#a67c52"/>
+  <path d="M500 210 q8 40 0 70" fill="none" stroke="#7f92a3" stroke-width="4" stroke-linecap="round"/>
+  <path d="M40 330 H760" stroke="#d9cbb8" stroke-width="8"/>
+  <rect x="180" y="360" width="440" height="90" rx="14" fill="#fffdf9" stroke="#9a3412"/>
+  <text x="400" y="398" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#9a3412">Passage ceiling · water stain</text>
+  <text x="400" y="426" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#5e5146">Sample drawing for the claim pack</text>
+</svg>

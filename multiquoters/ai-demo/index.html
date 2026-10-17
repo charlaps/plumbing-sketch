@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1F4F45">
+  <meta name="description" content="Multiquoters concept demo. AI that finds the work: a contractor radar, a home health check, and an insurance claim helper. Pretend South African data. Nothing is charged.">
+  <title>AI that finds the work · Multiquoters</title>
+  <link rel="icon" href="../app/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#view">Skip to content</a>
+  <header class="topbar">
+    <a class="brand" href="#/">
+      <img src="../app/icon.svg" width="36" height="36" alt="">
+      <span>Multiquoters</span>
+    </a>
+    <div class="role-wrap">
+      <div class="switch" role="group" aria-label="You're viewing as">
+        <button type="button" data-action="role" data-role="homeowner" aria-pressed="true">Homeowner</button>
+        <button type="button" data-action="role" data-role="contractor" aria-pressed="false">Contractor</button>
+      </div>
+    </div>
+  </header>
+  <div class="demo-banner">
+    <p><strong>Demo.</strong> Pretend data and a simulated AI. Nothing is charged, posted, or sent to a plumber.</p>
+    <div class="demo-actions">
+      <a href="../app/">Live app</a>
+      <button type="button" id="reset-demo">Reset demo</button>
+    </div>
+  </div>
+  <nav id="subnav" class="subnav" aria-label="Concepts"></nav>
+  <main id="view" class="wrap" tabindex="-1"></main>
+  <nav id="bottom-nav" class="bottom-nav" aria-label="Concepts"></nav>
+  <div id="toast-root" aria-live="polite"></div>
+  <noscript>
+    <div class="wrap">
+      <h1>AI that finds the work</h1>
+      <p>This demo needs JavaScript to switch screens. It is a static page: no account and no server.</p>
+      <p><a href="../app/">Open the live Multiquoters app</a></p>
+    </div>
+  </noscript>
+  <script src="app.js"></script>
+</body>
+</html>

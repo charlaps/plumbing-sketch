@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Sample geyser plate. Manufacture date 03/2014.">
+  <rect width="800" height="500" fill="#cfc6b8"/>
+  <rect x="36" y="28" width="728" height="444" rx="18" fill="#b7c0c4"/>
+  <rect x="58" y="50" width="684" height="400" rx="8" fill="#e7ecee" stroke="#7e888d" stroke-width="3"/>
+  <rect x="58" y="50" width="684" height="18" fill="#d5dcde"/>
+  <text x="400" y="128" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700" fill="#1c2428" letter-spacing="4">KWIKOT</text>
+  <text x="400" y="166" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#3d484d">Electric storage water heater · sample plate</text>
+  <line x1="110" y1="188" x2="690" y2="188" stroke="#b7c0c4" stroke-width="2"/>
+  <text x="110" y="230" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#5c676c">MODEL</text>
+  <text x="110" y="262" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1c2428">150 L Dual</text>
+  <text x="460" y="230" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#5c676c">WORKING PRESSURE</text>
+  <text x="460" y="262" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1c2428">400 kPa</text>
+  <text x="110" y="320" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#5c676c">DATE OF MANUFACTURE</text>
+  <text x="110" y="368" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700" fill="#1f4f45">03/2014</text>
+  <text x="460" y="320" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#5c676c">SERIAL</text>
+  <text x="460" y="358" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#1c2428">KW-150-0314-8841</text>
+  <text x="110" y="424" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5c676c">Drawn for this Multiquoters demo. Not a photograph of a real cylinder.</text>
+</svg>

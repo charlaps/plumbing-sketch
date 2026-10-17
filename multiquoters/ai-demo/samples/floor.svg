@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Sample photo of wet laminate in a passage.">
+  <rect width="800" height="500" fill="#e6d7c4"/>
+  <g stroke="#c9b49a" stroke-width="3">
+    <path d="M0 80 H800 M0 160 H800 M0 240 H800 M0 320 H800 M0 400 H800"/>
+  </g>
+  <ellipse cx="390" cy="250" rx="200" ry="90" fill="#7f92a3" opacity="0.55"/>
+  <ellipse cx="420" cy="270" rx="120" ry="46" fill="#5d7384" opacity="0.45"/>
+  <rect x="190" y="360" width="420" height="90" rx="14" fill="#fffdf9" stroke="#1f4f45"/>
+  <text x="400" y="398" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#1f4f45">Laminate still wet</text>
+  <text x="400" y="426" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#5e5146">Sample drawing · passage floor</text>
+</svg>
