@@ -482,5 +482,5 @@
     }
     render();
   }
-  window.APSMat = { start: start, sum: sum, clientLines: clientLines, render: render, loadItems: loadItems, search: search };
+  window.APSMat = { start: start, sum: sum, clientLines: clientLines, lineCents: lineCents, render: render, loadItems: loadItems, search: search };
 })();

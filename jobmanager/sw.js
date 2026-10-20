@@ -1,5 +1,5 @@
 /* APS Job Manager — cache the app shell so a job card still opens with no signal. */
-const CACHE = 'aps-jm-v2';
+const CACHE = 'aps-jm-v3';
 const FILES = [
   './',
   './index.html',
@@ -12,6 +12,7 @@ const FILES = [
   './pdf.js',
   './demo.js',
   './office.js',
+  './bridge.js',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',

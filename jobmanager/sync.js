@@ -77,6 +77,8 @@
     if (table === 'stock_items') {
       return {
         id: row.id, code: row.code || '', name: row.name || '', generic: row.generic || row.name || '',
+        description: row.description || '', material: row.material || '', joint: row.joint || '',
+        ftype: row.ftype || '', size: row.size || '',
         unit: row.unit || 'each', cost: Number(row.cost) || 0, reorder: Number(row.reorder) || 0,
         supplier: row.supplier || '', cls: row.cls || 'f', created_at: row.created_at, updated_at: row.updated_at
       };
@@ -112,7 +114,9 @@
         body: {
           items: row.items || [], ah: !!row.ah, cons: row.cons !== false, tier: row.tier || 'high',
           mat_typed: Number(row.mat_typed) || 0, not_included: row.not_included || '',
-          date: row.date || null, valid_days: row.valid_days || 14, public: row.public || null
+          date: row.date || null, valid_days: row.valid_days || 14, public: row.public || null,
+          finale_id: row.finale_id || null, disc: Number(row.disc) || 0,
+          callout_lock: (row.callout_lock == null || row.callout_lock === '') ? null : Number(row.callout_lock)
         }
       };
     }
@@ -146,7 +150,9 @@
         created_by: row.created_by, created_at: row.created_at, updated_at: row.updated_at,
         items: b.items || [], ah: !!b.ah, cons: b.cons !== false, tier: b.tier || 'high',
         mat_typed: b.mat_typed || 0, not_included: b.not_included || '',
-        date: b.date, valid_days: b.valid_days || 14, public: b.public || null
+        date: b.date, valid_days: b.valid_days || 14, public: b.public || null,
+        finale_id: b.finale_id || '', disc: Number(b.disc) || 0,
+        callout_lock: (b.callout_lock == null || b.callout_lock === '') ? null : Number(b.callout_lock)
       };
     }
     if (table === 'invoices') {

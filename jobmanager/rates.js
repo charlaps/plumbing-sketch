@@ -82,15 +82,17 @@
       if (i.kind === 'material') matLines += line;
       else labour += line;
     });
-    var co = callout(q.items);
+    var co = (q.callout_lock != null && q.callout_lock !== '') ? r2(+q.callout_lock || 0) : callout(q.items);
     var ah = q.ah ? r2(labour * 0.5) : 0;
+    var discPct = Math.min(100, Math.max(0, +q.disc || 0));
+    var disc = discPct ? -r2((labour + ah) * discPct / 100) : 0;
     var mat = r2(matLines + (+q.mat_typed || 0));
     var cons = q.cons === false ? 0 : r2(mat * RATES.consumables);
-    var total = r2(labour + co + ah + mat + cons);
+    var total = r2(labour + co + ah + disc + mat + cons);
     var dep = r2(total * RATES.deposit);
     return {
-      labour: r2(labour), co: co, ah: ah, mat: mat, cons: cons,
-      total: total, dep: dep, bal: r2(total - dep), labourAll: r2(labour + co + ah)
+      labour: r2(labour), co: co, ah: ah, disc: disc, mat: mat, cons: cons,
+      total: total, dep: dep, bal: r2(total - dep), labourAll: r2(labour + co + ah + disc)
     };
   }
   function markupPct(cls, tier) {
@@ -242,6 +244,86 @@ function genericName(name) {
 
 
 
+  var MATERIALS = [
+    [/HDPE/, 'HDPE'],
+    [/CPVC|UPVC|MPVC|\bPVC\b/, 'PVC'],
+    [/PEX[\s-]*AL[\s-]*PEX|MULTILAYER|\bMLP\b|\bMEPLA\b/, 'multilayer'],
+    [/\bPEX\b|SPEEDFIT/, 'PEX'],
+    [/GALVANI[SZ]ED|\bGALV\b/, 'galvanised'],
+    [/STAINLESS|S\/STEEL|S\/S\b/, 'stainless'],
+    [/\bBRASS\b|BRASSMAN/, 'brass'],
+    [/\bCOPPER\b|COPPERMAN|COPCAL/, 'copper'],
+    [/POLYCOP|\bPPR\b|POLYPROP|PP-R|\bPP\b/, 'polypropylene'],
+    [/\bABS\b/, 'ABS'],
+    [/CAST IRON/, 'cast iron']
+  ];
+  function firstHit(list, text) {
+    for (var i = 0; i < list.length; i++) if (list[i][0].test(text)) return list[i][1];
+    return '';
+  }
+  function materialOf(name, cat) {
+    var fromName = firstHit(MATERIALS, String(name || '').toUpperCase());
+    if (fromName) return fromName;
+    var parts = String(cat || '').toUpperCase().split('>').map(function (s) { return s.trim(); }).filter(function (p) {
+      return p && p.indexOf('COPPER ALT') !== 0 && p.indexOf('ALTERNATIVE') !== 0;
+    });
+    var blob = parts.join(' ');
+    if (/GALVANI[SZ]ED|\bGALV\b/.test(blob)) return 'galvanised';
+    if (/\bHDPE\b/.test(blob)) return 'HDPE';
+    if (/MEPLA|MULTILAYER|\bMLP\b|PEX-AL/.test(blob)) return 'multilayer';
+    if (/SPEEDFIT|\bPEX\b/.test(blob)) return 'PEX';
+    if (/\bPVC\b/.test(blob)) return 'PVC';
+    if (/COPPER/.test(blob)) return 'copper';
+    if (/BRASS/.test(blob)) return 'brass';
+    if (/STAINLESS|\bSS\b/.test(blob)) return 'stainless';
+    if (/POLYPROP|POLYCOP|\bPPR\b|\bPP\b/.test(blob)) return 'polypropylene';
+    return '';
+  }
+  function jointOf(name, cat) {
+    var n = String(name || '').toUpperCase();
+    var blob = n + ' ' + String(cat || '').toUpperCase();
+    if (/COMPRESSION/.test(blob)) return 'compression';
+    if (/PUSH[-\s]?FIT|SPEEDFIT|SHARKBITE|JOHN GUEST/.test(blob)) return 'push-fit';
+    if (/\bCRIMP/.test(blob)) return 'crimp';
+    if (/MAPRESS|\bPRESS\b/.test(blob)) return 'press';
+    if (/SOLVENT|FUSION/.test(blob)) return 'solvent';
+    if (/CAPILLARY|COPCAL/.test(blob) || (/\bCXC\b/.test(n) && !/COMPRESSION/.test(blob))) return 'capillary/solder';
+    if (/THREADED|\bBSP\b|\bFXF\b|\bMXF\b|\bMXM\b|\bCXMI\b|\bCXFI\b|MALE IRON|FEMALE IRON|GROOVED/.test(n)) {
+      return /GROOVED/.test(n) ? 'grooved' : 'threaded';
+    }
+    return '';
+  }
+  function fittingType(name) {
+    var n = String(name || '').toUpperCase();
+    var type = '';
+    for (var i = 0; i < TYPES.length; i++) {
+      var t = TYPES[i];
+      if (t[0].test(n)) { type = t[2] ? t[2](n) : t[1]; if (type) break; }
+    }
+    if (type === 'coupler') return 'coupling';
+    if (type === 'reducing coupler') return 'reducing coupling';
+    return type || '';
+  }
+  function fittingAttrs(name, cat) {
+    var type = fittingType(name);
+    return {
+      type: type,
+      material: materialOf(name, cat),
+      joint: jointOf(name, cat),
+      size: sizeOf(String(name || '').toUpperCase(), type)
+    };
+  }
+  function sizeWords(size) {
+    var s = String(size || '').toLowerCase();
+    if (!/mm|\bx\b|x/.test(s)) return '';
+    var out = [];
+    s.split(/x/i).forEach(function (part) {
+      var n = (part.match(/(\d+(?:\.\d+)?)/) || [])[1];
+      if (n) out.push(n + 'mm');
+    });
+    return out.join(' ');
+  }
+
   function classifier(data) {
     var map = {};
     var cls = (data && data.cls) || {};
@@ -253,6 +335,6 @@ function genericName(name) {
     RATES: RATES, JOBS: JOBS, EXTRAS: EXTRAS, CATALOGUE: CATALOGUE, BYNAME: BYNAME, QUICK: QUICK,
     r2: r2, money: money, coKind: coKind, labourGeneric: labourGeneric, callout: callout,
     totals: totals, markupPct: markupPct, sell: sell, scopeLines: scopeLines, labourLabel: labourLabel,
-    genericName: genericName, classifier: classifier
+    genericName: genericName, classifier: classifier, fittingAttrs: fittingAttrs, sizeWords: sizeWords
   };
 });

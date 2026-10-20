@@ -77,7 +77,9 @@ table.sum td:last-child{text-align:right;font-variant-numeric:tabular-nums;white
 table.sum tr.tot td{background:var(--navy);color:#fff;font-weight:800;font-size:18px}
 table.sum tr.dep td{font-weight:700;color:var(--blue)}
 .note{font-size:13px;color:var(--grey)}
-.saved{display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #edf1f8}
+.saved{display:flex;gap:10px;align-items:center;padding:12px 0 4px}
+.jm-row{display:flex;flex-wrap:wrap;gap:8px;width:100%;margin:0 0 4px;padding:0 0 12px;border-bottom:1px solid #edf1f8}
+.jm-row .btn{flex:1;min-width:140px;min-height:44px;padding:8px 10px;font-size:14px}
 .saved .n{flex:1}.saved .n b{color:var(--navy)}
 .toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .25s;z-index:50;pointer-events:none}
 .toast.on{opacity:.92}
@@ -240,13 +242,14 @@ body:has(#s-quote.on) .draft-note{display:none}
 <!-- 5 QUOTE -->
 <section class="screen" id="s-quote">
   <h2>5. Client quote</h2>
-  <div class="btns" style="margin:0 0 12px"><button class="btn" onclick="window.print()">🖨 Save as PDF / Print</button><button class="btn light" onclick="sharePdf()">Share PDF</button><button class="btn wa" onclick="shareWA()">WhatsApp</button><button class="btn light" onclick="copySummary()">📋 Copy summary</button><button class="btn light" onclick="saveQuote()">💾 Save quote</button></div>
+  <div class="btns" style="margin:0 0 12px"><button class="btn" onclick="window.print()">🖨 Save as PDF / Print</button><button class="btn light" onclick="sharePdf()">Share PDF</button><button class="btn wa" onclick="shareWA()">WhatsApp</button><button class="btn light" onclick="copySummary()">📋 Copy summary</button><button class="btn light" onclick="saveQuote()">💾 Save quote</button><button class="btn light" type="button" onclick="sendCurrent()">Send to Job Manager</button><button class="btn light" type="button" onclick="openCurrent()">Open in Job Manager</button></div>
   <div class="qwrap"><div id="quote"></div></div>
 </section>
 
 <!-- 6 SAVED + RULES -->
 <section class="screen" id="s-saved">
   <h2>6. Saved quotes</h2>
+  <p class="note">Saving a quote also sends it to Job Manager on this phone.</p>
   <div class="btns" style="margin:0 0 12px"><button class="btn blue" onclick="newQuote()">＋ New quote</button><button class="btn light" onclick="saveQuote()">💾 Save current</button></div>
   <div class="card" id="savedList"></div>
   <h2 style="margin-top:22px">How we price</h2>
@@ -439,15 +442,23 @@ function copySummary(){const s=summaryText();(navigator.clipboard?navigator.clip
 
 /* ---------- saved ---------- */
 function bumpNo(no){const m=/APS-(\d+)/.exec(no||'');if(m){const n=+m[1]+1;if(n>LS.get('aps_next',1))LS.set('aps_next',n)}}
-function saveQuote(){if(S.rateBook!==RATE_BOOK){S.feeLock={callout:legacyCallout(S),legacy:true};S.rateBook=RATE_BOOK}else if(!S.feeLock)S.feeLock={callout:liveFees()};S.items.forEach(i=>{const n=+i.l;i.l=Number.isFinite(n)?n:0});const list=LS.get('aps_saved',[]);if(!S.id)S.id=Date.now().toString(36);S.saved=new Date().toISOString();const k=list.findIndex(x=>x.id===S.id);const copy=JSON.parse(JSON.stringify(S));if(k>=0)list[k]=copy;else list.unshift(copy);LS.set('aps_saved',list);bumpNo(S.no);persist();toast('Saved '+S.no);if(screen==='saved')renderSaved()}
+function saveQuote(){if(S.rateBook!==RATE_BOOK){S.feeLock={callout:legacyCallout(S),legacy:true};S.rateBook=RATE_BOOK}else if(!S.feeLock)S.feeLock={callout:liveFees()};S.items.forEach(i=>{const n=+i.l;i.l=Number.isFinite(n)?n:0});const list=LS.get('aps_saved',[]);if(!S.id)S.id=Date.now().toString(36);S.saved=new Date().toISOString();const k=list.findIndex(x=>x.id===S.id);const copy=JSON.parse(JSON.stringify(S));if(k>=0)list[k]=copy;else list.unshift(copy);LS.set('aps_saved',list);bumpNo(S.no);persist();publishQuote(copy);toast('Saved '+S.no);if(screen==='saved')renderSaved()}
+function publishQuote(q){if(!q||!q.id)return;const prev=S;let t,mats=[];try{S=q;t=totals();let cents=[];try{if(window.APSMat&&typeof APSMat.lineCents==='function')cents=APSMat.lineCents()||[]}catch(e){cents=[]}(q.mats||[]).forEach((m,i)=>{if(!(Number(m.qty)>0))return;const sell=(Number(cents[i])||0)/100;if(m.fromKit)mats.push({kind:'material',name:m.pl||m.gen||m.clientLabel||'Material',generic:m.gen||m.clientLabel||'Material',qty:1,each:sell,co:'No'});else{const qty=Number(m.qty)||1;mats.push({kind:'material',name:m.pl||m.gen||'Material',generic:m.gen||'Material',qty:qty,each:qty?sell/qty:0,co:'No'})}})}finally{S=prev}const labour=(q.items||[]).filter(i=>+i.q>0).map(i=>({kind:'labour',name:i.j,generic:generic(i.j),qty:+i.q||0,each:+i.l||0,co:i.co||'No'}));const env={finale_id:q.id,no:q.no||'',date:q.date||'',saved:q.saved||'',client:q.name||'',phone:q.phone||'',email:q.email||'',address:q.addr||'',suburb:q.area||'',title:q.title||q.type||'Plumbing work',scope:q.desc||'',ah:!!q.ah,cons:q.cons!==false,tier:q.tier==='low'?'low':'high',disc:+q.disc||0,callout_lock:t?t.co:0,mat_typed:+q.mat||0,not_included:q.notinc||'',items:labour.concat(mats),updated_at:q.saved||new Date().toISOString()};let bag;try{bag=JSON.parse(localStorage.getItem('aps_jm_bridge')||'{}')}catch(e){bag={}}if(!bag||typeof bag!=='object')bag={};bag.quotes=bag.quotes||{};bag.quotes[q.id]=env;localStorage.setItem('aps_jm_bridge',JSON.stringify(bag))}
+function publishSaved(){try{LS.get('aps_saved',[]).forEach(publishQuote)}catch(e){}}
+function sendSaved(id){const q=LS.get('aps_saved',[]).find(x=>x.id===id);if(!q)return;publishQuote(q);toast('Sent '+q.no+' to Job Manager')}
+function openSaved(id){const q=LS.get('aps_saved',[]).find(x=>x.id===id);if(!q)return;publishQuote(q);location.href='../jobmanager/#/from/'+encodeURIComponent(q.id)}
+function sendCurrent(){saveQuote();toast('Sent '+S.no+' to Job Manager')}
+function openCurrent(){saveQuote();location.href='../jobmanager/#/from/'+encodeURIComponent(S.id)}
 function loadQuote(id){const q=LS.get('aps_saved',[]).find(x=>x.id===id);if(!q)return;S=adopt(q);bindFields();persist();renderAll();go('client');toast('Opened '+S.no)}
 function delQuote(id){if(!confirm('Delete this saved quote?'))return;LS.set('aps_saved',LS.get('aps_saved',[]).filter(x=>x.id!==id));renderSaved()}
 function newQuote(){if(S.items.length&&!S.id&&!confirm('Start a new quote? The current one is not saved.'))return;if(S.id)bumpNo(S.no);S=blank();bindFields();persist();renderAll();go('client')}
 function renderSaved(){
   const list=LS.get('aps_saved',[]);
-  $('savedList').innerHTML=list.length?list.map(q=>{const t=(()=>{const s=S;S=q;const r=totals();S=s;return r})();return `<div class="saved"><div class="n"><b>${esc(q.no)}</b> · ${esc(q.name||'No name')}<div class="note">${esc(q.title||q.type||'')} · ${R(t.total)} · ${esc(fmtDate(q.date))}</div></div><button class="btn light" data-o="${q.id}">Open</button><button class="btn red" data-d="${q.id}">✕</button></div>`}).join(''):'<div class="empty">No saved quotes yet.</div>';
+  $('savedList').innerHTML=list.length?list.map(q=>{const t=(()=>{const s=S;S=q;const r=totals();S=s;return r})();return `<div class="saved"><div class="n"><b>${esc(q.no)}</b> · ${esc(q.name||'No name')}<div class="note">${esc(q.title||q.type||'')} · ${R(t.total)} · ${esc(fmtDate(q.date))}</div></div><button class="btn light" data-o="${q.id}">Open</button><button class="btn red" data-d="${q.id}">✕</button></div><div class="jm-row"><button class="btn light" type="button" data-jm="${q.id}">Send to Job Manager</button><button class="btn light" type="button" data-go="${q.id}">Open in Job Manager</button></div>`}).join(''):'<div class="empty">No saved quotes yet.</div>';
   $('savedList').querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>loadQuote(b.dataset.o));
   $('savedList').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>delQuote(b.dataset.d));
+  $('savedList').querySelectorAll('[data-jm]').forEach(b=>b.onclick=()=>sendSaved(b.dataset.jm));
+  $('savedList').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>openSaved(b.dataset.go));
 }
 
 /* ---------- nav ---------- */
@@ -472,7 +483,7 @@ $('nJobs').textContent=JOBS.length;
     desc:'Supply and install a 3-stage whole-house water filter (sediment, carbon and carbon block) on a wall bracket, tied into the 22 mm main with isolating valves and a bypass so the water stays on during filter changes. Leak-tested.',
     sup:'APS',mat:'3223.48',cons:true,matnote:'Flowbins 3-stage slim 20in, 3/4in ports (check on site). PRV not included (~R1,420 if pressure >5 bar). Spare cartridge set ~R407.',items:[{j:'Whole-house filter install with 22 mm tie-in and bypass',l:1650,c:'Water treatment',m:'Package',q:1}]});saveQuote();}}
   if(window.APSMat)APSMat.start({getS:()=>S,changed(){persist();if(screen==='sum')renderSummary();if(screen==='quote')renderQuote()},toast,esc,R});
-  bindFields();persist();renderAll();
+  bindFields();persist();renderAll();publishSaved();
   if(p.get('q')){$('q').value=p.get('q');renderResults()}
   if(p.get('screen'))go(p.get('screen'));
   const t=totals();document.documentElement.dataset.test=JSON.stringify({labour:t.labour,total:t.total,dep:t.dep,bal:t.bal,co:t.co,mat:t.mat,type:S.type,results:$('results').querySelectorAll('.job').length,first:[...$('results').querySelectorAll('.job .n')].slice(0,30).map(x=>x.firstChild.textContent)});

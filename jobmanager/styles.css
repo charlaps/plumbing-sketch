@@ -102,6 +102,7 @@ h3 { font-size: 1.05rem; }
 }
 .field textarea { min-height: 88px; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.filter-label { font-weight: 800; font-size: .8rem; color: var(--muted); margin: 10px 0 4px; }
 .chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
 .chips::-webkit-scrollbar { display: none; }
 .chip {

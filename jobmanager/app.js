@@ -323,6 +323,13 @@
       App.places = all[6] || [];
       App.demoOn = !!(all[7] && all[7].on);
     }).then(function () {
+      if (!App.user) return;
+      var bridge = window.APSBridge ? APSBridge.importAll() : Promise.resolve();
+      return bridge.then(function () {
+        if (App.stockAttrs || !window.APSOffice || !APSOffice.enrichStock) return;
+        return APSOffice.enrichStock().then(function () { App.stockAttrs = true; }, function () { App.stockAttrs = true; });
+      });
+    }).then(function () {
       if (!APSSync.configured()) return;
       return DB.get('meta', 'cloud_team').then(function (cached) {
         if (cached && cached.rows) App.cloudTeam = cached.rows;
@@ -424,8 +431,25 @@
     });
   }
 
+  function land() {
+    var h = location.hash || '';
+    if (h.indexOf('#/from/') === 0) {
+      App.route = parse();
+      return reload().then(draw);
+    }
+    return go(home());
+  }
+  function viewFrom(fid) {
+    var q = window.APSBridge ? APSBridge.quoteByFinale(fid) : null;
+    if (q && q.job_id) {
+      location.replace('#/job/' + q.job_id);
+      return frame('<p class="muted">Opening the quote in Job Manager…</p>', { title: 'Quote' });
+    }
+    return frame('<div class="panel"><h2>Quote not on this phone yet</h2><p>Save it in Quote Finale on this phone, then open Job Manager again.</p></div>', { title: 'Quote' });
+  }
   function view() {
     var r = App.route;
+    if (r.name === 'from') return viewFrom(r.id);
     if (r.name === 'approve') return viewApprove(r.id);
     if (r.name === 'setup') return viewSetup();
     if (!App.user || r.name === 'login') return viewLogin();
@@ -543,7 +567,7 @@
       return '<a class="card st-' + esc(j.status) + '" href="#/job/' + esc(j.id) + '">' +
         '<div class="row"><span class="title">' + esc(j.client_name || 'No name') + '</span>' +
         '<span class="badge bg-' + esc(j.status) + '">' + esc(stageName(j.status)) + '</span></div>' +
-        '<div class="muted">' + esc([j.suburb, when, userName(j.assigned_to)].filter(Boolean).join(' · ')) + '</div>' +
+        '<div class="muted">' + esc([quoteOf(j) && quoteOf(j).no, j.suburb, when, userName(j.assigned_to)].filter(Boolean).join(' · ')) + '</div>' +
         '<div>' + esc(j.title || j.scope || '') + '</div>' +
         (t ? '<div class="row"><span class="money">' + money(t.total) + '</span><span class="muted">Deposit ' + money(t.dep) + '</span></div>' : '') +
         '</a>';
@@ -585,7 +609,7 @@
       : '<p class="muted">Add a phone number to send WhatsApp updates.</p>';
     var html = '<div class="panel"><div class="row"><h2>' + esc(job.client_name || 'No name') + '</h2>' +
       '<span class="badge bg-' + esc(job.status) + '">' + esc(stageName(job.status)) + '</span></div>' +
-      '<p class="muted">' + esc(job.no) + (job.suburb ? ' · ' + esc(job.suburb) : '') + '</p>' +
+      '<p class="muted">' + esc([q && q.no, job.no, job.suburb].filter(Boolean).join(' · ')) + '</p>' +
       '<p>' + esc(job.title || '') + '</p>' +
       (job.scope ? '<p>' + esc(job.scope) + '</p>' : '') +
       (job.address ? '<p>' + esc(job.address) + '</p>' : '') +
@@ -1275,7 +1299,7 @@
       App.user = publicUser(user);
       App.hasUsers = true;
       return DB.put('meta', { id: 'session', user_id: user.id });
-    }).then(function () { toast('PIN saved on this phone'); go(home()); });
+    }).then(function () { toast('PIN saved on this phone'); land(); });
   }
   function savePin(form) {
     var pin = form.pin.value.trim();
@@ -1284,7 +1308,7 @@
       return hashPin(pin, user.salt).then(function (hash) {
         if (hash !== user.pin_hash) return toast('Wrong PIN');
         App.user = publicUser(user);
-        return DB.put('meta', { id: 'session', user_id: user.id }).then(function () { go(home()); });
+        return DB.put('meta', { id: 'session', user_id: user.id }).then(function () { land(); });
       });
     });
   }
@@ -1302,7 +1326,7 @@
         App.user = { id: prof.data.id, name: prof.data.name, role: prof.data.role, phone: prof.data.phone || '', email: email };
         return DB.put('meta', { id: 'cloud_user', user: App.user });
       });
-    }).then(function () { return APSSync.kick(); }).then(function () { go(home()); });
+    }).then(function () { return APSSync.kick(); }).then(function () { land(); });
   }
   function logout() {
     App.user = null;
@@ -1858,27 +1882,35 @@
       return Mat.loading;
     },
     _load: function () {
+      function build(itemsJson, data) {
+        var clsOf = R.classifier(data);
+        var names = data.names || {};
+        var checks = data.checks || {};
+        var cats = itemsJson.cats || [];
+        return itemsJson.rows.map(function (row) {
+          var code = row[0];
+          var name = names[code] || row[1];
+          var cat = cats[row[2]] || '';
+          var cost = Number(row[3]) || 0;
+          var out = false;
+          if (checks[code]) { cost = Number(checks[code][0]); out = checks[code][2] === 'O'; }
+          var gen = R.genericName(name);
+          var attrs = R.fittingAttrs(name, cat);
+          var hay = [name, gen, code, attrs.type, attrs.material, attrs.joint, attrs.size, R.sizeWords(attrs.size)].join(' ').toLowerCase().replace(/[\/]+/g, ' ').replace(/(\d)\s+mm\b/g, '$1mm');
+          return { code: code, name: name, gen: gen, cost: cost, cls: clsOf(code), out: out, cat: cat, ftype: attrs.type, material: attrs.material, joint: attrs.joint, size: attrs.size, hay: hay };
+        });
+      }
       return DB.get('meta', 'plumblink').then(function (cached) {
-        if (cached && cached.items && cached.items.length) return cached.items;
+        if (cached && cached.v === 2 && cached.items && cached.items.length && cached.items[0].cat != null) return cached.items;
         return Promise.all([fetch('../field/items.json'), fetch('../quote-app/aps-data.json')]).then(function (pair) {
           if (!pair[0].ok || !pair[1].ok) throw new Error('Price list did not load');
           return Promise.all([pair[0].json(), pair[1].json()]);
         }).then(function (pair) {
-          var itemsJson = pair[0];
-          var data = pair[1];
-          var clsOf = R.classifier(data);
-          var names = data.names || {};
-          var checks = data.checks || {};
-          var rows = itemsJson.rows.map(function (row) {
-            var code = row[0];
-            var name = names[code] || row[1];
-            var cost = Number(row[3]) || 0;
-            var out = false;
-            if (checks[code]) { cost = Number(checks[code][0]); out = checks[code][2] === 'O'; }
-            var gen = R.genericName(name);
-            return { code: code, name: name, gen: gen, cost: cost, cls: clsOf(code), out: out, hay: (name + ' ' + gen + ' ' + code).toLowerCase() };
-          });
-          return DB.put('meta', { id: 'plumblink', snap: itemsJson.snap || '', items: rows }).catch(function () {}).then(function () { return rows; });
+          var rows = build(pair[0], pair[1]);
+          return DB.put('meta', { id: 'plumblink', v: 2, snap: pair[0].snap || '', items: rows }).catch(function () {}).then(function () { return rows; });
+        }).catch(function (err) {
+          if (cached && cached.items && cached.items.length) return cached.items;
+          throw err;
         });
       });
     },

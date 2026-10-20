@@ -8,6 +8,7 @@
     krugersdorp: [-26.086, 27.775], roodepoort: [-26.120, 27.872], randburg: [-26.144, 27.982],
     johannesburg: [-26.204, 28.047], sandton: [-26.107, 28.056], soweto: [-26.268, 27.858],
     pretoria: [-25.747, 28.229], midrand: [-25.989, 28.128], centurion: [-25.860, 28.189],
+    edenvale: [-26.133, 28.152],
     kempton: [-26.104, 28.232], benoni: [-26.188, 28.321], bokburg: [-26.215, 28.259],
     boksburg: [-26.215, 28.259], germiston: [-26.216, 28.167], alberton: [-26.267, 28.122],
     randfontein: [-26.184, 27.702], westonaria: [-26.319, 27.648]
@@ -21,6 +22,125 @@
     var names = Object.keys(SUBURBS);
     for (var i = 0; i < names.length; i++) if (key.indexOf(names[i]) >= 0) return SUBURBS[names[i]];
     return null;
+  }
+  var STOCK_MATS = ['copper', 'brass', 'PVC', 'HDPE', 'galvanised', 'PEX', 'multilayer', 'stainless', 'polypropylene'];
+  var STOCK_TYPES = ['elbow', 'tee', 'coupling', 'valve', 'pipe', 'bend', 'reducer', 'union', 'adaptor', 'tap'];
+  function typeMatch(ftype, typ) {
+    var f = String(ftype || '').toLowerCase();
+    var t = String(typ || '').toLowerCase();
+    if (!t) return true;
+    if (f === t) return true;
+    if (t === 'valve') return f.indexOf('valve') >= 0;
+    if (t === 'coupling') return f.indexOf('coupl') >= 0;
+    if (t === 'tap') return f.indexOf('tap') >= 0 || f.indexOf('mixer') >= 0;
+    if (t === 'reducer') return f.indexOf('reduc') >= 0;
+    if (t === 'adaptor') return f.indexOf('adapt') >= 0;
+    return f.indexOf(t) >= 0;
+  }
+  function matchStock(it) {
+    var mat = A().App.stockMat || '';
+    var typ = A().App.stockType || '';
+    if (mat && String(it.material || '').toLowerCase() !== mat.toLowerCase()) return false;
+    if (typ && !typeMatch(it.ftype, typ)) return false;
+    return true;
+  }
+  function stockTitle(it) { return (it && (it.description || it.name || it.generic)) || 'Item'; }
+  function stockMeta(it) {
+    if (!it) return '';
+    return [it.ftype, it.material, it.joint, it.size, it.code].filter(Boolean).join(' · ');
+  }
+  function stockHay(it) {
+    return [it.description, it.name, it.generic, it.code, it.ftype, it.material, it.joint, it.size, A().R.sizeWords(it.size)].join(' ').toLowerCase().replace(/[\/]+/g, ' ').replace(/(\d)\s+mm\b/g, '$1mm');
+  }
+  function stockWords(q) {
+    return String(q || '').toLowerCase().replace(/(\d)\s+mm\b/g, '$1mm').split(/\s+/).filter(Boolean);
+  }
+  function wordHit(hay, words) {
+    var alt = { coupling: 'coupler', coupler: 'coupling', solder: 'capillary', capillary: 'solder', galv: 'galvanised', galvanized: 'galvanised', galvanised: 'galv' };
+    return words.every(function (w) {
+      if (hay.indexOf(w) >= 0) return true;
+      var other = alt[w];
+      return !!(other && hay.indexOf(other) >= 0);
+    });
+  }
+  function qtyAt(levels, itemId, placeId) {
+    var n = 0;
+    (levels || []).forEach(function (lv) {
+      if (lv.item_id === itemId && (!placeId || lv.place_id === placeId)) n += Number(lv.qty) || 0;
+    });
+    return n;
+  }
+  function stockOption(it) {
+    var title = stockTitle(it);
+    var meta = stockMeta(it);
+    if (meta && title.indexOf(it.code || '___') < 0) return title + ' — ' + meta;
+    return title;
+  }
+  function pickOptions(items, levels, placeId) {
+    var list = (items || []).filter(matchStock);
+    if (!(A().App.stockMat || A().App.stockType)) {
+      var stocked = list.filter(function (it) { return qtyAt(levels, it.id, placeId) !== 0; });
+      list = stocked.length ? stocked : list.slice().sort(function (a, b) { return stockTitle(a).localeCompare(stockTitle(b)); }).slice(0, 80);
+    } else if (list.length > 200) {
+      list = list.slice().sort(function (a, b) { return stockTitle(a).localeCompare(stockTitle(b)); }).slice(0, 200);
+    }
+    return list.map(function (it) {
+      return '<option value="' + esc(it.id) + '">' + esc(stockOption(it)) + '</option>';
+    }).join('');
+  }
+  function chipRow(kind, current, options) {
+    var html = '<button type="button" class="chip' + (current ? '' : ' on') + '" data-act="stock-filter" data-kind="' + kind + '" data-v="">All</button>';
+    options.forEach(function (opt) {
+      html += '<button type="button" class="chip' + (current === opt ? ' on' : '') + '" data-act="stock-filter" data-kind="' + kind + '" data-v="' + esc(opt) + '">' + esc(opt) + '</button>';
+    });
+    return '<div class="chips">' + html + '</div>';
+  }
+  function describeStored(it, src) {
+    var description = (src && src.name) || it.description || it.name || it.generic || '';
+    var attrs = (src && src.material != null) ? src : A().R.fittingAttrs(description, (src && src.cat) || '');
+    return {
+      description: description,
+      name: description || it.name || '',
+      material: attrs.material || '',
+      joint: attrs.joint || '',
+      ftype: attrs.ftype || attrs.type || '',
+      size: attrs.size || ''
+    };
+  }
+  function enrichStock(passed) {
+    var load = A().loadCatalogue ? A().loadCatalogue() : Promise.resolve([]);
+    return load.then(function (rows) {
+      return DB.all('stock_items').then(function (items) {
+        items = passed || items || [];
+        var by = {};
+        (rows || []).forEach(function (r) { if (r.code) by[r.code] = r; });
+        var changed = [];
+        items.forEach(function (it) {
+          var src = it.code ? by[it.code] : null;
+          var next = describeStored(it, src);
+          if (!it.generic) it.generic = (src && src.gen) || A().R.genericName(next.description || it.name || '');
+          if ((it.description || '') === next.description && (it.name || '') === next.name && (it.material || '') === next.material && (it.joint || '') === next.joint && (it.ftype || '') === next.ftype && (it.size || '') === next.size) return;
+          it.description = next.description;
+          it.name = next.name;
+          it.material = next.material;
+          it.joint = next.joint;
+          it.ftype = next.ftype;
+          it.size = next.size;
+          it.updated_at = new Date().toISOString();
+          changed.push(it);
+        });
+        if (!changed.length) return items;
+        return DB.putAll('stock_items', changed).then(function () { return items; });
+      });
+    }).catch(function () { return passed || []; });
+  }
+  function fittingFromCatalogue(it) {
+    var attrs = A().R.fittingAttrs(it.name, it.cat);
+    return {
+      id: DB.uid(), code: it.code, name: it.name, description: it.name, generic: it.gen || A().R.genericName(it.name),
+      material: it.material || attrs.material, joint: it.joint || attrs.joint, ftype: it.ftype || attrs.type, size: it.size || attrs.size,
+      unit: 'each', cost: it.cost, reorder: 0, supplier: 'Plumblink Krugersdorp', cls: it.cls || 'f', demo: false
+    };
   }
   function dayAdd(key, days) {
     var d = A().parseDay(key);
@@ -156,7 +276,7 @@
         late +
         (lows.length ? '<div class="panel"><h3>Low stock</h3>' + lows.slice(0, 6).map(function (row) {
           var place = (A().App.places || []).filter(function (p) { return p.id === row.level.place_id; })[0];
-          return '<div class="line"><div class="grow"><b>' + esc(row.item.generic || row.item.name) + '</b><span class="muted">' + esc(place ? place.name : '') + ' · ' + row.level.qty + ' left, reorder ' + row.item.reorder + '</span></div></div>';
+          return '<div class="line"><div class="grow"><b>' + esc(stockTitle(row.item)) + '</b><span class="muted">' + esc(stockMeta(row.item)) + (stockMeta(row.item) ? ' · ' : '') + esc(place ? place.name : '') + ' · ' + row.level.qty + ' left, reorder ' + row.item.reorder + '</span></div></div>';
         }).join('') + '<a class="btn btn-light btn-block" href="#/stock">Open stock</a></div>' : '') +
         '<div class="noprint"><a class="btn btn-block" href="#/board">Open the pipeline</a></div>';
       return A().frame(html, { title: 'Dashboard', sub: A().App.user.name });
@@ -250,6 +370,8 @@
 
   function viewStock() {
     return ensurePlaces().then(function () { return A().reload(); }).then(function () {
+      return enrichStock();
+    }).then(function () {
       return Promise.all([DB.all('stock_items'), DB.all('stock_levels'), DB.all('places'), DB.all('purchase_orders')]);
     }).then(function (all) {
       var items = all[0] || [];
@@ -261,28 +383,40 @@
       A().App.stockPlace = placeId;
       var lows = lowList(items, levels);
       var here = levels.filter(function (lv) { return lv.place_id === placeId && Number(lv.qty) !== 0; });
-      var rows = here.map(function (lv) {
-        var item = items.filter(function (it) { return it.id === lv.item_id; })[0];
-        if (!item) return '';
-        var low = Number(item.reorder) > 0 && Number(lv.qty) <= Number(item.reorder);
-        return '<div class="line"><div class="grow"><b>' + esc(item.generic || item.name) + '</b><span class="muted">' + esc(item.code || '') + (low ? ' · low' : '') + '</span></div><b>' + lv.qty + '</b></div>';
-      }).join('') || '<p class="muted">Nothing counted in this place yet.</p>';
+      var filtering = !!(A().App.stockMat || A().App.stockType);
+      var rows;
+      if (filtering) {
+        var matched = items.filter(matchStock).sort(function (a, b) { return stockTitle(a).localeCompare(stockTitle(b)); });
+        rows = matched.slice(0, 60).map(function (item) {
+          var qty = qtyAt(levels, item.id, placeId);
+          var low = Number(item.reorder) > 0 && qty > 0 && qty <= Number(item.reorder);
+          return '<div class="line"><div class="grow"><b>' + esc(stockTitle(item)) + '</b><span class="muted">' + esc(stockMeta(item)) + (low ? ' · low' : '') + '</span></div><b>' + qty + '</b></div>';
+        }).join('') || '<p class="muted">No fittings match those filters.</p>';
+        if (matched.length > 60) rows += '<p class="muted">Showing 60 of ' + matched.length + '. Search to narrow this list.</p>';
+      } else {
+        rows = here.map(function (lv) {
+          var item = items.filter(function (it) { return it.id === lv.item_id; })[0];
+          if (!item) return '';
+          var low = Number(item.reorder) > 0 && Number(lv.qty) <= Number(item.reorder);
+          return '<div class="line"><div class="grow"><b>' + esc(stockTitle(item)) + '</b><span class="muted">' + esc(stockMeta(item)) + (low ? ' · low' : '') + '</span></div><b>' + lv.qty + '</b></div>';
+        }).join('') || '<p class="muted">Nothing counted in this place yet. Search, or filter by material and type.</p>';
+      }
       var placeOpts = places.map(function (p) {
         return '<option value="' + esc(p.id) + '"' + (p.id === placeId ? ' selected' : '') + '>' + esc(p.name) + '</option>';
       }).join('');
-      var itemOpts = '<option value="">Choose an item</option>' + items.slice().sort(function (a, b) { return (a.name || '').localeCompare(b.name || ''); }).slice(0, 400).map(function (it) {
-        return '<option value="' + esc(it.id) + '">' + esc(it.generic || it.name) + '</option>';
-      }).join('');
+      var itemOpts = '<option value="">Choose an item</option>' + pickOptions(items, levels, placeId);
       var pos = A().staff() ? '<a class="btn btn-block" href="#/po">Purchase orders</a>' : '';
       var vans = A().staff() ? '<form id="vanForm" class="panel"><h3>Add a van</h3><label class="field">Plumber<select name="user_id">' +
         A().team().map(function (u) { return '<option value="' + esc(u.id) + '">' + esc(u.name) + '</option>'; }).join('') +
         '</select></label><button class="btn btn-light btn-block" type="submit">Add van</button></form>' : '';
-      var importBtn = A().staff() ? '<button class="btn btn-light btn-block" type="button" data-act="import-stock">Load the Plumblink list into stock</button><p class="muted">That copies generic names and cost prices onto this phone. It does not order anything.</p>' : '';
+      var importBtn = A().staff() ? '<button class="btn btn-light btn-block" type="button" data-act="import-stock">Load the Plumblink list into stock</button><p class="muted">That copies the full Plumblink description, material, joint and size onto this phone. Counts you already entered stay. It does not order anything.</p>' : '';
       return A().frame(
         (lows.length ? '<div class="panel"><h3>Low stock</h3>' + lows.slice(0, 8).map(function (row) {
-          return '<div>' + esc(row.item.generic || row.item.name) + ' · ' + row.level.qty + '</div>';
+          return '<div>' + esc(stockTitle(row.item)) + ' · ' + esc(stockMeta(row.item)) + ' · ' + row.level.qty + '</div>';
         }).join('') + '</div>' : '') +
         '<label class="field">Place<select id="placePick">' + placeOpts + '</select></label>' +
+        '<div class="filter-label">Material</div>' + chipRow('mat', A().App.stockMat || '', STOCK_MATS) +
+        '<div class="filter-label">Type</div>' + chipRow('type', A().App.stockType || '', STOCK_TYPES) +
         rows +
         '<form id="receiveForm" class="panel"><h3>Count or receive</h3>' +
         '<label class="field">Item<select name="item_id">' + itemOpts + '</select></label>' +
@@ -294,7 +428,7 @@
         '<label class="field">To<select name="to_id">' + placeOpts + '</select></label>' +
         A().field('Quantity', 'qty', '1', 'decimal') +
         '<button class="btn btn-block" type="submit">Move stock</button></form>' +
-        '<div class="panel"><h3>Find a fitting</h3><input class="search" id="stockSearch" placeholder="valve, geyser, 22mm">' +
+        '<div class="panel"><h3>Find a fitting</h3><input class="search" id="stockSearch" placeholder="22mm copper elbow" value="' + esc(A().App.stockQ || '') + '">' +
         '<div id="stockHits"></div>' + importBtn + '</div>' + pos + vans,
         { title: 'Stock' }
       );
@@ -320,9 +454,7 @@
           (po.status === 'received' ? '' : '<button class="btn btn-light" type="button" data-act="po-del" data-i="' + i + '" data-id="' + esc(po.id) + '">Remove</button>') +
           '</div>';
       }).join('') || '<p class="muted">No lines yet.</p>';
-      var itemOpts = items.map(function (it) {
-        return '<option value="' + esc(it.id) + '">' + esc(it.generic || it.name) + '</option>';
-      }).join('');
+      var itemOpts = pickOptions(items, [], '');
       var placeOpts = places.map(function (p) {
         return '<option value="' + esc(p.id) + '"' + (p.id === po.place_id ? ' selected' : '') + '>' + esc(p.name) + '</option>';
       }).join('');
@@ -585,11 +717,9 @@
       var places = all[2] && all[3] ? all[3] : [];
       var used = moves.map(function (m) {
         var item = items.filter(function (it) { return it.id === m.item_id; })[0];
-        return '<div class="line"><div class="grow">' + esc(item ? (item.generic || item.name) : 'Part') + '</div><b>' + Math.abs(Number(m.qty)) + '</b></div>';
+        return '<div class="line"><div class="grow"><b>' + esc(item ? stockTitle(item) : 'Part') + '</b><span class="muted">' + esc(item ? stockMeta(item) : '') + '</span></div><b>' + Math.abs(Number(m.qty)) + '</b></div>';
       }).join('') || '<p class="muted">No parts taken off the van yet.</p>';
-      var opts = items.slice().sort(function (a, b) { return (a.name || '').localeCompare(b.name || ''); }).slice(0, 400).map(function (it) {
-        return '<option value="' + esc(it.id) + '">' + esc(it.generic || it.name) + '</option>';
-      }).join('');
+      var opts = pickOptions(items, all[2] || [], '');
       var placeOpts = places.map(function (p) {
         var mine = p.user_id === A().App.user.id;
         return '<option value="' + esc(p.id) + '"' + (mine ? ' selected' : '') + '>' + esc(p.name) + '</option>';
@@ -636,7 +766,7 @@
         var card = all[0] || {};
         var parts = (all[1] || []).filter(function (m) { return m.job_id === job.id && Number(m.qty) < 0; }).map(function (m) {
           var item = (all[2] || []).filter(function (it) { return it.id === m.item_id; })[0];
-          return { qty: Math.abs(Number(m.qty)), name: item ? (item.generic || item.name) : 'Part' };
+          return { qty: Math.abs(Number(m.qty)), name: item ? stockTitle(item) : 'Part' };
         });
         var t = A().totalsOf(job);
         var q = A().quoteOf(job);
@@ -706,16 +836,20 @@
     var local = Promise.resolve();
     var show = function (hits) {
       DB.all('stock_items').then(function (items) {
-        var words = q.toLowerCase().split(/\s+/).filter(Boolean);
+        var words = stockWords(q);
+        var have = {};
+        (items || []).forEach(function (it) { if (it.code) have[it.code] = 1; });
         var mine = (items || []).filter(function (it) {
-          var hay = (it.name + ' ' + it.generic + ' ' + it.code).toLowerCase();
-          return words.every(function (w) { return hay.indexOf(w) >= 0; });
+          return matchStock(it) && wordHit(stockHay(it), words);
         }).slice(0, 8);
         var html = mine.map(function (it) {
-          return '<div class="hit"><div class="grow"><b>' + esc(it.generic || it.name) + '</b><span class="muted">On the stock list</span></div></div>';
+          return '<div class="hit"><div class="grow"><b>' + esc(stockTitle(it)) + '</b><span class="muted">' + esc(stockMeta(it)) + ' · on the stock list</span></div></div>';
         }).join('');
-        html += (hits || []).slice(0, 8).map(function (it, i) {
-          return '<div class="hit"><div class="grow"><b>' + esc(it.gen) + '</b><span class="muted">' + esc(it.code) + ' · cost ' + money(it.cost) + '</span></div>' +
+        html += (hits || []).filter(function (it) {
+          return !have[it.code] && matchStock(it);
+        }).slice(0, 8).map(function (it) {
+          var i = (hits || []).indexOf(it);
+          return '<div class="hit"><div class="grow"><b>' + esc(it.name || it.gen) + '</b><span class="muted">' + esc([it.ftype, it.material, it.joint, it.size, it.code].filter(Boolean).join(' · ')) + ' · cost ' + money(it.cost) + '</span></div>' +
             '<button type="button" data-act="stock-add" data-i="' + i + '">Add</button></div>';
         }).join('');
         A().App.stockHits = hits || [];
@@ -758,6 +892,13 @@
       return true;
     }
     if (name === 'checkin') { checkin(el.dataset.id || ''); return true; }
+    if (name === 'stock-filter') {
+      if (el.dataset.kind === 'mat') A().App.stockMat = el.dataset.v || '';
+      if (el.dataset.kind === 'type') A().App.stockType = el.dataset.v || '';
+      A().App.focusId = A().App.stockQ ? 'stockSearch' : '';
+      A().draw();
+      return true;
+    }
     if (name === 'csv') { csv(); return true; }
     if (name === 'import-stock') {
       if (!A().loadCatalogue) return true;
@@ -770,10 +911,10 @@
           var add = [];
           (rows || []).forEach(function (it) {
             if (codes[it.code]) return;
-            add.push({
-              id: DB.uid(), code: it.code, name: it.gen, generic: it.gen, unit: 'each', cost: it.cost,
-              reorder: 0, supplier: 'Plumblink Krugersdorp', cls: it.cls || 'f', created_at: now, updated_at: now, demo: false
-            });
+            var row = fittingFromCatalogue(it);
+            row.created_at = now;
+            row.updated_at = now;
+            add.push(row);
           });
           return DB.putAll('stock_items', add).then(function (n) { return A().draw().then(function () { A().toast('Added ' + n + ' fittings'); }); });
         });
@@ -786,10 +927,7 @@
       DB.all('stock_items').then(function (items) {
         var found = (items || []).filter(function (it) { return it.code === hit.code; })[0];
         if (found) { A().toast('Already on the stock list'); return; }
-        return DB.save('stock_items', {
-          id: DB.uid(), code: hit.code, name: hit.gen, generic: hit.gen, unit: 'each', cost: hit.cost,
-          reorder: 0, supplier: 'Plumblink Krugersdorp', cls: hit.cls || 'f', demo: false
-        }).then(function () { return A().draw().then(function () { A().toast('Added ' + hit.gen); }); });
+        return DB.save('stock_items', fittingFromCatalogue(hit)).then(function () { return A().draw().then(function () { A().toast('Added ' + (hit.name || hit.gen)); }); });
       });
       return true;
     }
@@ -898,7 +1036,7 @@
         return DB.get('stock_items', node.item_id.value).then(function (item) {
           if (!po || !item || !(qtyL > 0)) return;
           po.lines = po.lines || [];
-          po.lines.push({ item_id: item.id, name: item.generic || item.name, qty: qtyL, cost: Number(item.cost) || 0 });
+          po.lines.push({ item_id: item.id, name: stockTitle(item), qty: qtyL, cost: Number(item.cost) || 0 });
           return DB.save('purchase_orders', po);
         });
       }).then(A().draw);
@@ -920,7 +1058,10 @@
       A().draw();
       return;
     }
-    if (t.id === 'stockSearch') searchStock(t.value);
+    if (t.id === 'stockSearch') {
+      A().App.stockQ = t.value;
+      searchStock(t.value);
+    }
   }
 
   global.APSOffice = {
@@ -932,9 +1073,11 @@
     linkClient: linkClient,
     cardExtra: cardExtra,
     pinFor: pinFor,
+    enrichStock: enrichStock,
     mount: function () {
       if (A().App.route.name === 'map') mountMap();
       if (A().App.route.name === 'board') mountBoard();
+      if (A().App.route.name === 'stock' && A().App.stockQ) searchStock(A().App.stockQ);
     },
     unmount: function () {
       if (mapObj) { mapObj.remove(); mapObj = null; }

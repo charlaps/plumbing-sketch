@@ -390,9 +390,20 @@ create table if not exists public.stock_items (
   reorder numeric not null default 0,
   supplier text not null default '',
   cls text not null default 'f',
+  description text not null default '',
+  material text not null default '',
+  joint text not null default '',
+  ftype text not null default '',
+  size text not null default '',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.stock_items add column if not exists description text not null default '';
+alter table public.stock_items add column if not exists material text not null default '';
+alter table public.stock_items add column if not exists joint text not null default '';
+alter table public.stock_items add column if not exists ftype text not null default '';
+alter table public.stock_items add column if not exists size text not null default '';
 
 create table if not exists public.stock_levels (
   id uuid primary key,
