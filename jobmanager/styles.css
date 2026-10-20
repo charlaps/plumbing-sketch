@@ -78,6 +78,7 @@ button, .btn, .field input, .field select, .field textarea { scroll-margin-botto
 .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 h2, h3 { margin: 0 0 8px; }
 h2 { font-size: 1.25rem; }
+.import-card h2 { overflow-wrap: anywhere; }
 h3 { font-size: 1.05rem; }
 .muted { color: var(--muted); font-size: .9rem; }
 .title { font-weight: 800; font-size: 1.05rem; overflow-wrap: anywhere; }

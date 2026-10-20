@@ -105,7 +105,7 @@
     var lines = [];
     (q.items || []).forEach(function (i) {
       if ((+i.qty || 0) <= 0) return;
-      var name = i.kind === 'material' ? (i.generic || i.name || 'Material') : labourGeneric(i.name);
+      var name = i.kind === 'material' ? (i.generic || i.name || 'Material') : (i.generic || labourGeneric(i.name));
       var qty = +i.qty;
       lines.push((qty === 1 ? '1' : String(qty)) + ' × ' + name);
     });

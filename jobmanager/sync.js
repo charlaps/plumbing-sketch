@@ -116,7 +116,8 @@
           mat_typed: Number(row.mat_typed) || 0, not_included: row.not_included || '',
           date: row.date || null, valid_days: row.valid_days || 14, public: row.public || null,
           finale_id: row.finale_id || null, disc: Number(row.disc) || 0,
-          callout_lock: (row.callout_lock == null || row.callout_lock === '') ? null : Number(row.callout_lock)
+          callout_lock: (row.callout_lock == null || row.callout_lock === '') ? null : Number(row.callout_lock),
+          description: row.description || '', import_id: row.import_id || null
         }
       };
     }
@@ -152,7 +153,8 @@
         mat_typed: b.mat_typed || 0, not_included: b.not_included || '',
         date: b.date, valid_days: b.valid_days || 14, public: b.public || null,
         finale_id: b.finale_id || '', disc: Number(b.disc) || 0,
-        callout_lock: (b.callout_lock == null || b.callout_lock === '') ? null : Number(b.callout_lock)
+        callout_lock: (b.callout_lock == null || b.callout_lock === '') ? null : Number(b.callout_lock),
+        description: b.description || '', import_id: b.import_id || ''
       };
     }
     if (table === 'invoices') {

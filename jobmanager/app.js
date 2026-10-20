@@ -45,7 +45,8 @@
     repFrom: '',
     repTo: '',
     reportCache: null,
-    focusId: ''
+    focusId: '',
+    importEnv: null
   };
   window.APSApp = {
     onSync: function () {
@@ -211,7 +212,13 @@
   }
 
   function parse() {
-    var raw = (location.hash || '').replace(/^#\/?/, '');
+    var hash = location.hash || '';
+    if (hash.indexOf('#import=') === 0) {
+      var payload = hash.slice('#import='.length);
+      try { payload = decodeURIComponent(payload); } catch (e) { /* keep payload */ }
+      return { name: 'import', id: payload };
+    }
+    var raw = hash.replace(/^#\/?/, '');
     try { raw = decodeURIComponent(raw); } catch (e) { /* keep raw */ }
     var bits = raw.split('/').filter(Boolean);
     if (!bits.length) return { name: 'jobs', id: '' };
@@ -433,7 +440,7 @@
 
   function land() {
     var h = location.hash || '';
-    if (h.indexOf('#/from/') === 0) {
+    if (h.indexOf('#/from/') === 0 || h.indexOf('#import=') === 0) {
       App.route = parse();
       return reload().then(draw);
     }
@@ -451,6 +458,7 @@
     var r = App.route;
     if (r.name === 'from') return viewFrom(r.id);
     if (r.name === 'approve') return viewApprove(r.id);
+    if (r.name === 'import' && App.user) return viewImport();
     if (r.name === 'setup') return viewSetup();
     if (!App.user || r.name === 'login') return viewLogin();
     if (window.APSOffice && APSOffice.routes[r.name]) return APSOffice.view(r);
@@ -841,10 +849,10 @@
       client: job.client_name || '', phone: job.phone || '', email: job.email || '',
       addr: [job.address, job.suburb].filter(Boolean).join(', '),
       title: job.title || job.scope || 'Plumbing work',
-      scope: R.scopeLines(q),
+      scope: (q.description ? [q.description] : []).concat(R.scopeLines(q)),
       mat: t.mat, cons: t.cons, labour: t.labourAll, total: t.total, dep: t.dep, bal: t.bal,
       labour_label: R.labourLabel(t),
-      not_included: q.not_included || NOT_INCL,
+      not_included: q.not_included == null ? NOT_INCL : q.not_included,
       status: q.status || 'draft'
     };
   }
@@ -1283,6 +1291,44 @@
     if (act === 'export') return exportBackup();
     if (act === 'upload-sync') return uploadSync();
     if (act === 'pull-sync') return APSSync.pull().then(reload).then(draw).then(function () { toast('Fetched'); });
+    if (act === 'import-yes') return confirmImport();
+    if (act === 'import-no') { App.importEnv = null; return go(home()); }
+  }
+
+  function viewImport() {
+    if (!window.APSImport) {
+      return frame('<div class="panel"><h2>Import is not available</h2></div>', { title: 'Quote', back: '#/jobs' });
+    }
+    return APSImport.decode(App.route.id).then(function (env) {
+      App.importEnv = env;
+      var info = APSImport.peek(env);
+      var verb = info.updating ? 'Update' : 'Add';
+      var who = env.client || 'Client';
+      var where = [env.address, env.suburb].filter(Boolean).join(', ');
+      var html = '<div class="panel import-card" id="importCard">' +
+        '<h2>' + esc(verb + ' ' + who + ' - quote ' + money(info.total) + '?') + '</h2>' +
+        '<p>' + esc(env.title || 'Plumbing work') + '</p>' +
+        (env.description ? '<p>' + esc(env.description) + '</p>' : '') +
+        (where ? '<p class="muted">' + esc(where) + '</p>' : '') +
+        '<p class="muted">' + esc([env.no, 'Deposit ' + money(info.dep), 'No VAT'].filter(Boolean).join(' · ')) + '</p>' +
+        '<button class="btn btn-block" type="button" data-act="import-yes">' + (info.updating ? 'Update quote' : 'Add to Job Manager') + '</button>' +
+        '<button class="btn btn-light btn-block" type="button" data-act="import-no">Not now</button></div>';
+      return frame(html, { title: 'Quote' });
+    }).catch(function (err) {
+      App.importEnv = null;
+      return frame('<div class="panel"><h2>This link could not be read</h2><p>' + esc(err.message || 'Try the link again.') + '</p>' +
+        '<button class="btn btn-block" type="button" data-act="import-no">Back</button></div>', { title: 'Quote' });
+    });
+  }
+  function confirmImport() {
+    var env = App.importEnv;
+    if (!env || !window.APSImport) return toast('Open the quote link again');
+    return APSImport.apply(env).then(function (res) {
+      App.importEnv = null;
+      location.hash = '#/job/' + res.job.id;
+    }).catch(function (err) {
+      toast(err && err.message ? err.message : 'Could not save the quote');
+    });
   }
 
   function saveSetup(form) {

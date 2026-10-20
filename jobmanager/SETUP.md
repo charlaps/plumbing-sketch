@@ -23,6 +23,8 @@ Quotes use the same rates as Quote Finale (already 10% off): R585 an hour, R585 
 
 Saving a quote in Quote Finale (on this same phone) also sends it to Job Manager. Open Job Manager and the quote is there: the client and the site are matched or created, and the job sits at Quoted with that quote number, the lines, the total and the deposit. Saving the same quote again updates it. It does not make a second job. On each saved quote, **Send to Job Manager** writes it again and **Open in Job Manager** jumps to the job. When Supabase is connected later, that job syncs like any other job.
 
+A quote can also arrive as a link. Open it on this phone. A short card asks you to add it (for example “Add Derick - quote R 1,170.00?”). Tap **Add to Job Manager** and the client, the site and a Quoted job are created, with the full quote attached. Open the same link again and it updates that quote instead of adding another job. How to build the link is in `IMPORT.md`.
+
 The client’s approval link opens in their browser. They tap approve, then **Tell APS on WhatsApp** so it reaches your phone. You can also tap **Mark approved** on the quote.
 
 Invoices have a box for a Yoco or PayFast link. Paste the https link you created in Yoco or PayFast. The app does not take the money.
