@@ -332,8 +332,215 @@ create policy photos_delete on public.photos
   for delete to authenticated
   using (public.is_staff());
 
-revoke all on public.profiles, public.jobs, public.quotes, public.invoices, public.job_cards, public.photos from anon;
-grant select, insert, update, delete on public.profiles, public.jobs, public.quotes, public.invoices, public.job_cards, public.photos to authenticated;
+alter table public.jobs add column if not exists client_id uuid;
+alter table public.jobs add column if not exists site_id uuid;
+alter table public.jobs add column if not exists lat double precision;
+alter table public.jobs add column if not exists lng double precision;
+
+create table if not exists public.clients (
+  id uuid primary key,
+  name text not null default '',
+  phone text not null default '',
+  email text not null default '',
+  notes text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.sites (
+  id uuid primary key,
+  client_id uuid,
+  label text not null default '',
+  address text not null default '',
+  suburb text not null default '',
+  lat double precision,
+  lng double precision,
+  notes text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.contacts (
+  id uuid primary key,
+  client_id uuid,
+  name text not null default '',
+  phone text not null default '',
+  email text not null default '',
+  role text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.places (
+  id uuid primary key,
+  name text not null default '',
+  kind text not null default 'warehouse' check (kind in ('warehouse', 'van')),
+  user_id uuid,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.stock_items (
+  id uuid primary key,
+  code text not null default '',
+  name text not null default '',
+  generic text not null default '',
+  unit text not null default 'each',
+  cost numeric not null default 0,
+  reorder numeric not null default 0,
+  supplier text not null default '',
+  cls text not null default 'f',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.stock_levels (
+  id uuid primary key,
+  item_id uuid,
+  place_id uuid,
+  qty numeric not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.stock_moves (
+  id uuid primary key,
+  item_id uuid,
+  place_id uuid,
+  qty numeric not null default 0,
+  job_id uuid,
+  kind text not null default 'adjust',
+  note text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.purchase_orders (
+  id uuid primary key,
+  no text not null,
+  supplier text not null default '',
+  status text not null default 'draft' check (status in ('draft', 'ordered', 'received')),
+  place_id uuid,
+  lines jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.checkins (
+  id uuid primary key,
+  user_id uuid,
+  job_id uuid,
+  lat double precision,
+  lng double precision,
+  accuracy double precision,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists sites_client_idx on public.sites (client_id);
+create index if not exists contacts_client_idx on public.contacts (client_id);
+create index if not exists stock_levels_place_idx on public.stock_levels (place_id);
+create index if not exists stock_moves_job_idx on public.stock_moves (job_id);
+create index if not exists checkins_user_idx on public.checkins (user_id);
+create index if not exists jobs_client_idx on public.jobs (client_id);
+
+create or replace function public.my_van(place uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.places p
+    where p.id = place and p.kind = 'van' and p.user_id = auth.uid()
+  )
+$$;
+
+revoke all on function public.my_van(uuid) from public, anon;
+grant execute on function public.my_van(uuid) to authenticated;
+
+alter table public.clients enable row level security;
+alter table public.sites enable row level security;
+alter table public.contacts enable row level security;
+alter table public.places enable row level security;
+alter table public.stock_items enable row level security;
+alter table public.stock_levels enable row level security;
+alter table public.stock_moves enable row level security;
+alter table public.purchase_orders enable row level security;
+alter table public.checkins enable row level security;
+
+drop policy if exists clients_staff on public.clients;
+create policy clients_staff on public.clients for all to authenticated
+  using (public.is_staff()) with check (public.is_staff());
+drop policy if exists clients_plumber on public.clients;
+create policy clients_plumber on public.clients for select to authenticated
+  using (exists (select 1 from public.jobs j where j.client_id = clients.id and j.assigned_to = auth.uid()));
+
+drop policy if exists sites_staff on public.sites;
+create policy sites_staff on public.sites for all to authenticated
+  using (public.is_staff()) with check (public.is_staff());
+drop policy if exists sites_plumber on public.sites;
+create policy sites_plumber on public.sites for select to authenticated
+  using (exists (select 1 from public.jobs j where j.site_id = sites.id and j.assigned_to = auth.uid()));
+
+drop policy if exists contacts_staff on public.contacts;
+create policy contacts_staff on public.contacts for all to authenticated
+  using (public.is_staff()) with check (public.is_staff());
+drop policy if exists contacts_plumber on public.contacts;
+create policy contacts_plumber on public.contacts for select to authenticated
+  using (exists (select 1 from public.jobs j where j.client_id = contacts.client_id and j.assigned_to = auth.uid()));
+
+drop policy if exists places_staff on public.places;
+create policy places_staff on public.places for all to authenticated
+  using (public.is_staff()) with check (public.is_staff());
+drop policy if exists places_read on public.places;
+create policy places_read on public.places for select to authenticated using (true);
+
+drop policy if exists stock_items_staff on public.stock_items;
+create policy stock_items_staff on public.stock_items for all to authenticated
+  using (public.is_staff()) with check (public.is_staff());
+drop policy if exists stock_items_read on public.stock_items;
+create policy stock_items_read on public.stock_items for select to authenticated using (true);
+
+drop policy if exists levels_staff on public.stock_levels;
+create policy levels_staff on public.stock_levels for all to authenticated
+  using (public.is_staff()) with check (public.is_staff());
+drop policy if exists levels_read on public.stock_levels;
+create policy levels_read on public.stock_levels for select to authenticated using (true);
+drop policy if exists levels_van on public.stock_levels;
+create policy levels_van on public.stock_levels for update to authenticated
+  using (public.my_van(place_id)) with check (public.my_van(place_id));
+drop policy if exists levels_van_ins on public.stock_levels;
+create policy levels_van_ins on public.stock_levels for insert to authenticated
+  with check (public.my_van(place_id));
+
+drop policy if exists moves_staff on public.stock_moves;
+create policy moves_staff on public.stock_moves for all to authenticated
+  using (public.is_staff()) with check (public.is_staff());
+drop policy if exists moves_read on public.stock_moves;
+create policy moves_read on public.stock_moves for select to authenticated
+  using (public.my_van(place_id) or exists (select 1 from public.jobs j where j.id = stock_moves.job_id and j.assigned_to = auth.uid()));
+drop policy if exists moves_van on public.stock_moves;
+create policy moves_van on public.stock_moves for insert to authenticated
+  with check (public.my_van(place_id));
+
+drop policy if exists po_staff on public.purchase_orders;
+create policy po_staff on public.purchase_orders for all to authenticated
+  using (public.is_staff()) with check (public.is_staff());
+
+drop policy if exists checkins_read on public.checkins;
+create policy checkins_read on public.checkins for select to authenticated
+  using (public.is_staff() or user_id = auth.uid());
+drop policy if exists checkins_write on public.checkins;
+create policy checkins_write on public.checkins for insert to authenticated
+  with check (user_id = auth.uid() or public.is_staff());
+
+revoke all on public.profiles, public.jobs, public.quotes, public.invoices, public.job_cards, public.photos,
+  public.clients, public.sites, public.contacts, public.places, public.stock_items, public.stock_levels,
+  public.stock_moves, public.purchase_orders, public.checkins from anon;
+grant select, insert, update, delete on public.profiles, public.jobs, public.quotes, public.invoices, public.job_cards, public.photos,
+  public.clients, public.sites, public.contacts, public.places, public.stock_items, public.stock_levels,
+  public.stock_moves, public.purchase_orders, public.checkins to authenticated;
 
 -- Private photo bucket. Skip quietly if Storage is not available yet.
 do $$

@@ -5,7 +5,7 @@
   var client = null;
   var kicking = false;
   var again = false;
-  var TABLES = ['jobs', 'quotes', 'invoices', 'cards'];
+  var TABLES = ['clients', 'sites', 'contacts', 'places', 'stock_items', 'stock_levels', 'jobs', 'quotes', 'invoices', 'cards', 'stock_moves', 'purchase_orders', 'checkins'];
 
   function cfg() { return global.APS_JM || {}; }
 
@@ -53,6 +53,53 @@
         assigned_to: cleanId(row.assigned_to), start_at: row.start_at || null, end_at: row.end_at || null,
         quote_id: cleanId(row.quote_id), invoice_id: cleanId(row.invoice_id),
         wa_log: row.wa_log || [], created_by: cleanId(row.created_by),
+        client_id: cleanId(row.client_id), site_id: cleanId(row.site_id),
+        lat: row.lat == null ? null : Number(row.lat), lng: row.lng == null ? null : Number(row.lng),
+        created_at: row.created_at, updated_at: row.updated_at
+      };
+    }
+    if (table === 'clients') {
+      return { id: row.id, name: row.name || '', phone: row.phone || '', email: row.email || '', notes: row.notes || '', created_at: row.created_at, updated_at: row.updated_at };
+    }
+    if (table === 'sites') {
+      return {
+        id: row.id, client_id: cleanId(row.client_id), label: row.label || '', address: row.address || '',
+        suburb: row.suburb || '', lat: row.lat == null ? null : Number(row.lat), lng: row.lng == null ? null : Number(row.lng),
+        notes: row.notes || '', created_at: row.created_at, updated_at: row.updated_at
+      };
+    }
+    if (table === 'contacts') {
+      return { id: row.id, client_id: cleanId(row.client_id), name: row.name || '', phone: row.phone || '', email: row.email || '', role: row.role || '', created_at: row.created_at, updated_at: row.updated_at };
+    }
+    if (table === 'places') {
+      return { id: row.id, name: row.name || '', kind: row.kind === 'van' ? 'van' : 'warehouse', user_id: cleanId(row.user_id), created_at: row.created_at, updated_at: row.updated_at };
+    }
+    if (table === 'stock_items') {
+      return {
+        id: row.id, code: row.code || '', name: row.name || '', generic: row.generic || row.name || '',
+        unit: row.unit || 'each', cost: Number(row.cost) || 0, reorder: Number(row.reorder) || 0,
+        supplier: row.supplier || '', cls: row.cls || 'f', created_at: row.created_at, updated_at: row.updated_at
+      };
+    }
+    if (table === 'stock_levels') {
+      return { id: row.id, item_id: cleanId(row.item_id), place_id: cleanId(row.place_id), qty: Number(row.qty) || 0, updated_at: row.updated_at };
+    }
+    if (table === 'stock_moves') {
+      return {
+        id: row.id, item_id: cleanId(row.item_id), place_id: cleanId(row.place_id), qty: Number(row.qty) || 0,
+        job_id: cleanId(row.job_id), kind: row.kind || 'adjust', note: row.note || '', created_at: row.created_at, updated_at: row.updated_at
+      };
+    }
+    if (table === 'purchase_orders') {
+      return {
+        id: row.id, no: row.no || '', supplier: row.supplier || '', status: row.status || 'draft',
+        place_id: cleanId(row.place_id), lines: row.lines || [], created_at: row.created_at, updated_at: row.updated_at
+      };
+    }
+    if (table === 'checkins') {
+      return {
+        id: row.id, user_id: cleanId(row.user_id), job_id: cleanId(row.job_id),
+        lat: Number(row.lat), lng: Number(row.lng), accuracy: Number(row.accuracy) || null,
         created_at: row.created_at, updated_at: row.updated_at
       };
     }
@@ -77,7 +124,7 @@
         body: {
           date: row.date || null, scope: row.scope || [], totals: row.totals || {},
           deposit_paid: !!row.deposit_paid, client_name: row.client_name || '',
-          title: row.title || '', addr: row.addr || ''
+          title: row.title || '', addr: row.addr || '', labour_label: row.labour_label || ''
         }
       };
     }
@@ -109,7 +156,7 @@
         pay_link: row.pay_link || '', created_by: row.created_by, created_at: row.created_at, updated_at: row.updated_at,
         date: body.date, scope: body.scope || [], totals: body.totals || {},
         deposit_paid: !!body.deposit_paid, client_name: body.client_name || '',
-        title: body.title || '', addr: body.addr || ''
+        title: body.title || '', addr: body.addr || '', labour_label: body.labour_label || ''
       };
     }
     if (table === 'cards') {

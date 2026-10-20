@@ -34,7 +34,18 @@
     draft: null,
     liveCard: null,
     matHits: [],
-    cloudTeam: null
+    cloudTeam: null,
+    clients: [],
+    sites: [],
+    places: [],
+    demoOn: false,
+    clientQ: '',
+    stockPlace: '',
+    stockHits: [],
+    repFrom: '',
+    repTo: '',
+    reportCache: null,
+    focusId: ''
   };
   window.APSApp = {
     onSync: function () {
@@ -55,6 +66,9 @@
   function money(n) { return R.money(n); }
   function staff() { return App.user && (App.user.role === 'owner' || App.user.role === 'office'); }
   function isOwner() { return App.user && App.user.role === 'owner'; }
+  function wide() { return window.matchMedia('(min-width: 960px)').matches; }
+  function useDesk() { return !!(App.user && staff() && wide()); }
+  function home() { return useDesk() ? '#/dashboard' : '#/jobs'; }
   function todayISO() {
     var d = new Date();
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
@@ -209,6 +223,28 @@
     location.hash = hash;
   }
 
+  function side() {
+    var r = App.route.name;
+    var items = [
+      ['dashboard', 'Dashboard', '#/dashboard'],
+      ['jobs', 'Jobs', '#/jobs'],
+      ['board', 'Pipeline', '#/board'],
+      ['calendar', 'Calendar', '#/calendar'],
+      ['clients', 'Clients', '#/clients'],
+      ['stock', 'Stock', '#/stock'],
+      ['map', 'Map', '#/map'],
+      ['invoices', 'Invoices', '#/invoices'],
+      ['reports', 'Reports', '#/reports'],
+      ['more', 'More', '#/more']
+    ];
+    return '<aside class="side"><a class="brand" href="#/dashboard"><img src="icon-192.png" alt=""><span>APS Job Manager</span></a>' +
+      items.map(function (it) {
+        var on = r === it[0] || (it[0] === 'jobs' && (r === 'job' || r === 'edit' || r === 'quote' || r === 'card' || r === 'preview')) ||
+          (it[0] === 'clients' && r === 'client') || (it[0] === 'stock' && r === 'po') || (it[0] === 'invoices' && r === 'invoice') ||
+          (it[0] === 'more' && r === 'team');
+        return '<a class="' + (on ? 'on' : '') + '" href="' + it[2] + '">' + it[1] + '</a>';
+      }).join('') + '</aside>';
+  }
   function frame(inner, opt) {
     opt = opt || {};
     if (opt.bare) return '<main>' + inner + '</main><div id="toast" class="toast" hidden></div>';
@@ -217,7 +253,11 @@
       '<img class="logo" src="icon-192.png" alt="APS">' +
       '<h1>' + esc(opt.title || 'Job Manager') + (opt.sub ? '<small>' + esc(opt.sub) + '</small>' : '') + '</h1>' +
       '<span class="syncpill" id="syncPill">On this phone</span></div></header>';
-    return head + '<main>' + inner + '</main>' + (App.user ? nav() : '') + '<div id="toast" class="toast" hidden></div>';
+    var desk = useDesk();
+    return (desk ? '<div class="shell">' + side() + '<div class="deskmain">' : '') +
+      head + '<main>' + inner + '</main>' +
+      (desk ? '</div></div>' : (App.user ? nav() : '')) +
+      '<div id="toast" class="toast" hidden></div>';
   }
   function nav() {
     var r = App.route.name;
@@ -267,7 +307,10 @@
     return { id: u.id, name: u.name, role: u.role, phone: u.phone || '', color: u.color || COLORS[0] };
   }
   function reload() {
-    return Promise.all([DB.all('users'), DB.all('jobs'), DB.all('quotes'), DB.all('invoices')]).then(function (all) {
+    return Promise.all([
+      DB.all('users'), DB.all('jobs'), DB.all('quotes'), DB.all('invoices'),
+      DB.all('clients'), DB.all('sites'), DB.all('places'), DB.get('meta', 'demo_on')
+    ]).then(function (all) {
       App.users = all[0] || [];
       App.hasUsers = App.users.some(function (u) { return u.active !== false; });
       App.jobs = (all[1] || []).slice().sort(function (a, b) { return String(b.updated_at || '').localeCompare(String(a.updated_at || '')); });
@@ -275,6 +318,10 @@
       (all[2] || []).forEach(function (q) { App.quotes[q.id] = q; });
       App.invoices = {};
       (all[3] || []).forEach(function (inv) { App.invoices[inv.id] = inv; });
+      App.clients = all[4] || [];
+      App.sites = all[5] || [];
+      App.places = all[6] || [];
+      App.demoOn = !!(all[7] && all[7].on);
     }).then(function () {
       if (!APSSync.configured()) return;
       return DB.get('meta', 'cloud_team').then(function (cached) {
@@ -306,7 +353,20 @@
       if (App.route.name === 'approve') return;
       if (!APSSync.configured() && !App.hasUsers) App.route = { name: 'setup', id: '' };
       else App.route = { name: 'login', id: '' };
+    }).then(function () {
+      var bare = !location.hash || location.hash === '#' || location.hash === '#/';
+      if (App.user && bare && useDesk()) {
+        App.route = { name: 'dashboard', id: '' };
+        location.hash = '#/dashboard';
+      }
     }).then(draw).then(function () {
+      var wasWide = wide();
+      window.addEventListener('resize', function () {
+        var now = wide();
+        if (now === wasWide) return;
+        wasWide = now;
+        draw();
+      });
       window.addEventListener('hashchange', onHash);
       document.addEventListener('click', onClick);
       document.addEventListener('change', onChange);
@@ -340,12 +400,25 @@
   function draw() {
     var seq = ++drawSeq;
     revokePhotos();
+    if (window.APSOffice) APSOffice.unmount();
     return Promise.resolve(view()).then(function (html) {
       if (seq !== drawSeq) return;
-      $('app').innerHTML = html;
+      var root = $('app');
+      root.classList.toggle('desk', useDesk() && App.route.name !== 'approve');
+      root.innerHTML = html;
       paintSync();
       var sign = $('sign');
       if (sign) bindSign(sign);
+      if (window.APSOffice) APSOffice.mount();
+      if (App.focusId) {
+        var focus = $(App.focusId);
+        App.focusId = '';
+        if (focus) {
+          focus.focus();
+          var n = focus.value.length;
+          if (focus.setSelectionRange) focus.setSelectionRange(n, n);
+        }
+      }
     }).catch(function (err) {
       $('app').innerHTML = frame('<div class="panel"><h2>Something went wrong</h2><p>' + esc(err.message || 'Please try again.') + '</p></div>', { title: 'Job Manager' });
     });
@@ -356,6 +429,7 @@
     if (r.name === 'approve') return viewApprove(r.id);
     if (r.name === 'setup') return viewSetup();
     if (!App.user || r.name === 'login') return viewLogin();
+    if (window.APSOffice && APSOffice.routes[r.name]) return APSOffice.view(r);
     if (r.name === 'job') return viewJob(r.id);
     if (r.name === 'edit') return viewEdit(r.id);
     if (r.name === 'calendar') return viewCalendar();
@@ -516,6 +590,7 @@
       (job.scope ? '<p>' + esc(job.scope) + '</p>' : '') +
       (job.address ? '<p>' + esc(job.address) + '</p>' : '') +
       '<p class="muted">' + esc(fmtWhen(job.start_at) || 'No time booked') + ' · ' + esc(userName(job.assigned_to)) + '</p>' +
+      (staff() && job.client_id ? '<p><a href="#/client/' + esc(job.client_id) + '">Client record</a></p>' : '') +
       call + '</div>' +
       '<div class="panel"><h3>Stage</h3>' + steps +
       (next && canSet(job, next) ? '<button class="btn btn-block" type="button" data-act="set-status" data-id="' + esc(job.id) + '" data-status="' + next + '">Move to ' + esc(stageName(next)) + '</button>' : '') +
@@ -543,17 +618,40 @@
   }
 
   function viewEdit(id) {
+    var pref = '';
+    if (String(id).indexOf('new/') === 0) { pref = id.slice(4); id = 'new'; }
     var job = id === 'new' ? {
       id: '', client_name: '', phone: '', email: '', address: '', suburb: '', title: '', scope: '', notes: '',
-      assigned_to: '', start_at: '', end_at: '', status: 'lead'
+      assigned_to: '', start_at: '', end_at: '', status: 'lead', client_id: '', site_id: ''
     } : jobById(id);
     if (!job) return frame('<div class="panel">Job not found.</div>', { title: 'Edit', back: '#/jobs' });
     if (id !== 'new' && !staff()) return frame('<div class="panel">The office edits job details.</div>', { title: 'Edit', back: '#/job/' + id });
+    if (id === 'new' && pref) {
+      var prefClient = App.clients.filter(function (c) { return c.id === pref; })[0];
+      if (prefClient) {
+        job.client_id = prefClient.id;
+        job.client_name = prefClient.name;
+        job.phone = prefClient.phone || '';
+        job.email = prefClient.email || '';
+      }
+    }
     var opts = '<option value="">Unassigned</option>' + team().map(function (u) {
       return '<option value="' + esc(u.id) + '"' + (u.id === job.assigned_to ? ' selected' : '') + '>' + esc(u.name) + ' · ' + esc(roleLabel(u.role)) + '</option>';
     }).join('');
+    var clientOpts = '<option value="">Type a name below</option>' + App.clients.slice().sort(function (a, b) {
+      return String(a.name).localeCompare(String(b.name));
+    }).map(function (c) {
+      return '<option value="' + esc(c.id) + '"' + (c.id === job.client_id ? ' selected' : '') + '>' + esc(c.name) + '</option>';
+    }).join('');
+    var sites = App.sites.filter(function (s) { return s.client_id === job.client_id; });
+    var siteOpts = '<option value="">No saved site</option>' + sites.map(function (s) {
+      return '<option value="' + esc(s.id) + '"' + (s.id === job.site_id ? ' selected' : '') + '>' + esc((s.label || 'Site') + (s.suburb ? ' · ' + s.suburb : '')) + '</option>';
+    }).join('');
     return frame('<form id="jobForm"><input type="hidden" name="id" value="' + esc(job.id) + '">' +
+      '<label class="field">Saved client<select name="client_id">' + clientOpts + '</select></label>' +
+      '<p class="muted">Pick a saved client, or type a name. A client record is created if the name is new.</p>' +
       field('Client name', 'client_name', job.client_name) +
+      '<label class="field">Site<select name="site_id">' + siteOpts + '</select></label>' +
       '<div class="two">' + field('Phone', 'phone', job.phone, 'tel') + field('Email', 'email', job.email, 'email', 'email') + '</div>' +
       '<div class="two">' + field('Suburb', 'suburb', job.suburb) + field('Job title', 'title', job.title) + '</div>' +
       field('Address', 'address', job.address) +
@@ -792,7 +890,9 @@
     var back = staff() ? '#/quote/' + q.job_id : '#/job/' + q.job_id;
     var tools = '<div class="noprint"><button class="btn btn-block" type="button" data-act="copy-link" data-id="' + esc(q.id) + '">Copy approval link</button>' +
       (href ? '<a class="btn btn-wa btn-block" data-act="wa-quote" href="' + esc(href) + '">WhatsApp quote</a>' : '') +
-      '<button class="btn btn-light btn-block" type="button" data-act="print">Print / save PDF</button>' +
+      '<button class="btn btn-block" type="button" data-act="pdf" data-kind="quote" data-id="' + esc(q.id) + '">Download PDF</button>' +
+      '<button class="btn btn-wa btn-block" type="button" data-act="pdf-share" data-kind="quote" data-id="' + esc(q.id) + '">Share PDF</button>' +
+      '<button class="btn btn-light btn-block" type="button" data-act="print">Print</button>' +
       (staff() && q.status !== 'approved' ? '<button class="btn btn-light btn-block" type="button" data-act="mark" data-id="' + esc(q.id) + '" data-status="approved">Mark approved</button>' : '') +
       '<p class="muted">Status: ' + esc(q.status || 'draft') + '</p></div>';
     return frame(paper(pub) + tools, { title: 'Client view', back: back });
@@ -857,8 +957,7 @@
           return '<figure><img src="' + url + '" alt="Job photo"><button class="btn btn-light btn-block" type="button" data-act="del-photo" data-id="' + esc(p.id) + '">Remove</button></figure>';
         }).join('');
         var running = !!card.running_since;
-        return frame(
-          '<div class="panel"><h2>' + esc(job.client_name || 'Job card') + '</h2><p>' + esc(job.title || job.scope || '') + '</p>' +
+        var head = '<div class="panel"><h2>' + esc(job.client_name || 'Job card') + '</h2><p>' + esc(job.title || job.scope || '') + '</p>' +
           '<div class="timer" id="timerRead">' + fmtDur(cardElapsed(card)) + '</div>' +
           (running
             ? '<button class="btn btn-block" type="button" data-act="stop-timer" data-id="' + esc(job.id) + '">Stop timer</button>'
@@ -868,12 +967,17 @@
           '<label class="btn btn-block filebtn">Add photo<input id="photoIn" type="file" accept="image/*" capture="environment"></label></div>' +
           '<div class="panel"><h3>Client signature</h3><div class="signwrap"><canvas id="sign"></canvas></div>' +
           field('Signed by', 'signed_name', card.signed_name || job.client_name || '') +
-          '<button class="btn btn-light btn-block" type="button" data-act="clear-sign">Clear signature</button></div>' +
-          '<label class="field">Notes<textarea id="cardNotes">' + esc(card.notes || '') + '</textarea></label>' +
-          '<button class="btn btn-block" type="button" data-act="save-card" data-id="' + esc(job.id) + '">Save job card</button>' +
-          (canSet(job, 'done') ? '<button class="btn btn-light btn-block" type="button" data-act="set-status" data-id="' + esc(job.id) + '" data-status="done">Mark job done</button>' : ''),
-          { title: 'Job card', back: '#/job/' + job.id }
-        );
+          '<button class="btn btn-light btn-block" type="button" data-act="clear-sign">Clear signature</button></div>';
+        var extra = window.APSOffice ? APSOffice.cardExtra(job) : Promise.resolve('');
+        return extra.then(function (more) {
+          return frame(
+            head + more +
+            '<label class="field">Notes<textarea id="cardNotes">' + esc(card.notes || '') + '</textarea></label>' +
+            '<button class="btn btn-block" type="button" data-act="save-card" data-id="' + esc(job.id) + '">Save job card</button>' +
+            (canSet(job, 'done') ? '<button class="btn btn-light btn-block" type="button" data-act="set-status" data-id="' + esc(job.id) + '" data-status="done">Mark job done</button>' : ''),
+            { title: 'Job card', back: '#/job/' + job.id }
+          );
+        });
       });
     });
   }
@@ -946,9 +1050,11 @@
       '<button class="btn btn-block" type="submit">Save link</button></form>' +
       '<div class="noprint">' +
       (waHref ? '<a class="btn btn-wa btn-block" href="' + esc(waHref) + '">WhatsApp invoice</a>' : '') +
+      '<button class="btn btn-block" type="button" data-act="pdf" data-kind="invoice" data-id="' + esc(inv.id) + '">Download PDF</button>' +
+      '<button class="btn btn-wa btn-block" type="button" data-act="pdf-share" data-kind="invoice" data-id="' + esc(inv.id) + '">Share PDF</button>' +
       '<button class="btn btn-light btn-block" type="button" data-act="mark-deposit" data-id="' + esc(inv.id) + '">' + (inv.deposit_paid ? 'Deposit received' : 'Mark deposit received') + '</button>' +
       '<button class="btn btn-block" type="button" data-act="mark-paid" data-id="' + esc(inv.id) + '">Mark paid</button>' +
-      '<button class="btn btn-light btn-block" type="button" data-act="print">Print / save PDF</button></div>',
+      '<button class="btn btn-light btn-block" type="button" data-act="print">Print</button></div>',
       { title: 'Invoice', back: '#/job/' + inv.job_id, sub: inv.no });
   }
   function invoiceText(inv, job, href) {
@@ -1001,9 +1107,19 @@
       var el = $('syncErr');
       if (el && err && err.message) el.textContent = err.message;
     });
+    var officeLinks = staff()
+      ? '<a class="btn btn-block" href="#/dashboard">Dashboard</a><a class="btn btn-block" href="#/board">Pipeline</a>' +
+        '<a class="btn btn-block" href="#/clients">Clients</a><a class="btn btn-block" href="#/stock">Stock</a>' +
+        '<a class="btn btn-block" href="#/map">Map</a><a class="btn btn-block" href="#/reports">Reports</a>'
+      : '<a class="btn btn-block" href="#/map">Map</a><a class="btn btn-block" href="#/stock">Van stock</a>';
+    var demoBtn = staff()
+      ? '<button class="btn btn-light btn-block" type="button" data-act="demo-toggle">' + (App.demoOn ? 'Hide demo company' : 'Show demo company') + '</button>' +
+        '<p class="muted">Sample West Rand jobs, clients and stock. Hide the demo before you upload this phone if you do not want those samples in Supabase.</p>'
+      : '';
     return frame(
       '<div class="panel"><h2>' + esc(App.user.name) + '</h2><p class="muted">' + esc(roleLabel(App.user.role)) + '</p>' +
       '<button class="btn btn-light btn-block" type="button" data-act="logout">Log out</button></div>' +
+      officeLinks + demoBtn +
       (isOwner() || APSSync.configured() ? '<a class="btn btn-block" href="#/team">Team</a>' : '') +
       '<div class="panel"><h3>This phone</h3>' + syncBtn +
       '<button class="btn btn-light btn-block" type="button" data-act="export">Save a backup file</button>' +
@@ -1034,6 +1150,7 @@
     var id = e.target && e.target.getAttribute && e.target.getAttribute('id');
     if (!id) return;
     e.preventDefault();
+    if (window.APSOffice && APSOffice.form(id, e.target)) return;
     var map = { setupForm: saveSetup, pinForm: savePin, cloudForm: saveCloud, jobForm: saveJob, bookForm: saveBook, userForm: saveUser, invForm: saveInvoice };
     if (!map[id]) return;
     var pending;
@@ -1045,6 +1162,32 @@
     var t = e.target;
     if (t.id === 'photoIn' && t.files && t.files[0]) { addPhoto(t.files[0]); t.value = ''; }
     if ((t.id === 'importFile' || t.id === 'setupFile') && t.files && t.files[0]) { importFile(t.files[0]); t.value = ''; }
+    if (t.id === 'placePick') { App.stockPlace = t.value; draw(); return; }
+    if (t.getAttribute && t.getAttribute('data-move')) { setStatus(t.getAttribute('data-move'), t.value); return; }
+    if (t.name === 'client_id' && t.form && t.form.getAttribute('id') === 'jobForm') {
+      var client = App.clients.filter(function (c) { return c.id === t.value; })[0];
+      if (client) {
+        t.form.client_name.value = client.name || '';
+        t.form.phone.value = client.phone || '';
+        t.form.email.value = client.email || '';
+      }
+      var site = t.form.elements.site_id;
+      if (site) {
+        var sites = App.sites.filter(function (s) { return s.client_id === t.value; });
+        site.innerHTML = '<option value="">No saved site</option>' + sites.map(function (s) {
+          return '<option value="' + esc(s.id) + '">' + esc((s.label || 'Site') + (s.suburb ? ' · ' + s.suburb : '')) + '</option>';
+        }).join('');
+      }
+      return;
+    }
+    if (t.name === 'site_id' && t.form && t.form.getAttribute('id') === 'jobForm') {
+      var picked = App.sites.filter(function (s) { return s.id === t.value; })[0];
+      if (picked) {
+        t.form.address.value = picked.address || '';
+        t.form.suburb.value = picked.suburb || '';
+      }
+      return;
+    }
     if (!App.draft) return;
     if (t.id === 'ahTick') { App.draft.ah = t.checked; persistQuote(false).then(paintTotals); }
     if (t.id === 'consTick') { App.draft.cons = t.checked; persistQuote(false).then(paintTotals); }
@@ -1064,6 +1207,7 @@
     if (t.id === 'matCost' || t.id === 'matQty' || t.id === 'matCls') paintMatSell();
     if (t.id === 'matTyped' && App.draft) { App.draft.mat_typed = Number(t.value) || 0; paintTotals(); }
     if (t.id === 'notInc' && App.draft) App.draft.not_included = t.value;
+    if (window.APSOffice) APSOffice.onInput(t);
   }
   function onHide() {
     if (document.visibilityState !== 'hidden' || !App.liveCard || !App.liveCard.running_since) return;
@@ -1073,6 +1217,7 @@
   }
 
   function handle(act, el) {
+    if (window.APSOffice && APSOffice.act(act, el)) return;
     if (act === 'go') return go(el.dataset.to);
     if (act === 'login-pick') { App.loginId = el.dataset.id; return draw(); }
     if (act === 'logout') return logout();
@@ -1130,7 +1275,7 @@
       App.user = publicUser(user);
       App.hasUsers = true;
       return DB.put('meta', { id: 'session', user_id: user.id });
-    }).then(function () { toast('PIN saved on this phone'); go('#/jobs'); });
+    }).then(function () { toast('PIN saved on this phone'); go(home()); });
   }
   function savePin(form) {
     var pin = form.pin.value.trim();
@@ -1139,7 +1284,7 @@
       return hashPin(pin, user.salt).then(function (hash) {
         if (hash !== user.pin_hash) return toast('Wrong PIN');
         App.user = publicUser(user);
-        return DB.put('meta', { id: 'session', user_id: user.id }).then(function () { go('#/jobs'); });
+        return DB.put('meta', { id: 'session', user_id: user.id }).then(function () { go(home()); });
       });
     });
   }
@@ -1157,7 +1302,7 @@
         App.user = { id: prof.data.id, name: prof.data.name, role: prof.data.role, phone: prof.data.phone || '', email: email };
         return DB.put('meta', { id: 'cloud_user', user: App.user });
       });
-    }).then(function () { return APSSync.kick(); }).then(function () { go('#/jobs'); });
+    }).then(function () { return APSSync.kick(); }).then(function () { go(home()); });
   }
   function logout() {
     App.user = null;
@@ -1184,7 +1329,8 @@
     job.start_at = fromLocal(form.start_at.value);
     job.end_at = fromLocal(form.end_at.value);
     if (job.start_at && (job.status === 'lead' || job.status === 'quoted')) job.status = 'booked';
-    return DB.save('jobs', job).then(reload).then(function () { toast('Saved'); go('#/job/' + job.id); });
+    var linked = window.APSOffice ? APSOffice.linkClient(job, form) : Promise.resolve();
+    return linked.then(function () { return DB.save('jobs', job); }).then(reload).then(function () { toast('Saved'); go('#/job/' + job.id); });
   }
   function setStatus(id, status) {
     var job = jobById(id);
@@ -1757,6 +1903,19 @@
       out.sort(function (a, b) { return b[0] - a[0]; });
       return out.map(function (x) { return x[1]; });
     }
+  };
+
+  window.APSJM = {
+    App: App, esc: esc, money: money, toast: toast, go: go, draw: draw, reload: reload,
+    staff: staff, isOwner: isOwner, wide: wide, team: team, userName: userName,
+    jobById: jobById, quoteOf: quoteOf, invoiceOf: invoiceOf, totalsOf: totalsOf,
+    canSet: canSet, setStatus: setStatus, STAGES: STAGES, stageName: stageName,
+    todayISO: todayISO, fmtWhen: fmtWhen, fmtDay: fmtDay, fmtDur: fmtDur,
+    dayKey: dayKey, parseDay: parseDay, APS: APS, R: R, DB: DB, field: field, frame: frame,
+    wa: wa, visibleJobs: visibleJobs, canSee: canSee, nextNo: nextNo, home: home,
+    buildPublic: buildPublic,
+    loadCatalogue: function () { return Mat.load(); },
+    searchCatalogue: function (q) { return Mat.search(q); }
   };
 
   boot().catch(function (err) {

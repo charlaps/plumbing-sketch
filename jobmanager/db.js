@@ -2,9 +2,12 @@
 (function (global) {
   'use strict';
   var NAME = 'aps-job-manager';
-  var VERSION = 1;
+  var VERSION = 2;
   var dbp = null;
-  var SYNC = { jobs: 1, quotes: 1, invoices: 1, cards: 1 };
+  var SYNC = {
+    jobs: 1, quotes: 1, invoices: 1, cards: 1, clients: 1, sites: 1, contacts: 1,
+    places: 1, stock_items: 1, stock_levels: 1, stock_moves: 1, purchase_orders: 1, checkins: 1
+  };
 
   function open() {
     if (dbp) return dbp;
@@ -16,14 +19,27 @@
       var req = indexedDB.open(NAME, VERSION);
       req.onupgradeneeded = function () {
         var db = req.result;
-        ['users', 'jobs', 'quotes', 'invoices', 'cards', 'photos', 'outbox', 'meta'].forEach(function (name) {
-          if (db.objectStoreNames.contains(name)) return;
-          var os = db.createObjectStore(name, { keyPath: 'id' });
-          if (name === 'jobs') os.createIndex('by_status', 'status', { unique: false });
-          if (name === 'photos' || name === 'quotes' || name === 'invoices') {
-            os.createIndex('by_job', 'job_id', { unique: false });
-          }
-        });
+        var tx = req.transaction;
+        function store(name) {
+          if (db.objectStoreNames.contains(name)) return tx.objectStore(name);
+          return db.createObjectStore(name, { keyPath: 'id' });
+        }
+        function index(os, name, key) {
+          if (!os.indexNames.contains(name)) os.createIndex(name, key, { unique: false });
+        }
+        ['users', 'jobs', 'quotes', 'invoices', 'cards', 'photos', 'outbox', 'meta',
+          'clients', 'sites', 'contacts', 'places', 'stock_items', 'stock_levels', 'stock_moves', 'purchase_orders', 'checkins'
+        ].forEach(store);
+        index(store('jobs'), 'by_status', 'status');
+        index(store('jobs'), 'by_client', 'client_id');
+        index(store('photos'), 'by_job', 'job_id');
+        index(store('quotes'), 'by_job', 'job_id');
+        index(store('invoices'), 'by_job', 'job_id');
+        index(store('sites'), 'by_client', 'client_id');
+        index(store('contacts'), 'by_client', 'client_id');
+        index(store('stock_levels'), 'by_place', 'place_id');
+        index(store('stock_moves'), 'by_job', 'job_id');
+        index(store('checkins'), 'by_user', 'user_id');
       };
       req.onsuccess = function () { resolve(req.result); };
       req.onerror = function () { dbp = null; reject(req.error || new Error('Could not open the job store')); };
@@ -72,6 +88,19 @@
     get: function (store, id) { return run(store, 'readonly', function (os) { return os.get(id); }); },
     put: function (store, row) { return run(store, 'readwrite', function (os) { return os.put(row); }).then(function () { return row; }); },
     del: function (store, id) { return run(store, 'readwrite', function (os) { return os.delete(id); }); },
+    putAll: function (store, rows) {
+      if (!rows || !rows.length) return Promise.resolve(0);
+      return open().then(function (db) {
+        return new Promise(function (resolve, reject) {
+          var tx = db.transaction(store, 'readwrite');
+          var os = tx.objectStore(store);
+          rows.forEach(function (row) { os.put(row); });
+          tx.oncomplete = function () { resolve(rows.length); };
+          tx.onerror = function () { reject(tx.error || new Error('Could not save the list')); };
+          tx.onabort = function () { reject(tx.error || new Error('Could not save the list')); };
+        });
+      });
+    },
     save: function (store, row) {
       var now = new Date().toISOString();
       row.updated_at = now;
@@ -95,7 +124,7 @@
       });
     },
     clearBusiness: function () {
-      var stores = ['jobs', 'quotes', 'invoices', 'cards', 'photos', 'outbox'];
+      var stores = ['jobs', 'quotes', 'invoices', 'cards', 'photos', 'outbox', 'clients', 'sites', 'contacts', 'places', 'stock_items', 'stock_levels', 'stock_moves', 'purchase_orders', 'checkins'];
       return stores.reduce(function (p, store) {
         return p.then(function () {
           return DB.all(store).then(function (rows) {
