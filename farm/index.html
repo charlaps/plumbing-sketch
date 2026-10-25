@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1d5224">
+<meta name="description" content="Veld Farm is a highveld farming game. Plough, plant maize, wheat, soybean and sunflower, keep livestock, and sell in rand. Game values.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Veld Farm">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Veld Farm</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root {
+  --ink: #1c2614;
+  --paper: #f6efd8;
+  --paper2: #fff9ea;
+  --leaf: #217333;
+  --leaf2: #185628;
+  --gold: #f0c14a;
+  --soil: #a85b32;
+  --sky: #8ecaf2;
+  --muted: #4d5a40;
+  --line: #1c2614;
+  --danger: #a33b32;
+  --good: #1c7a34;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #16324a; }
+body {
+  font-family: system-ui, "Segoe UI", sans-serif;
+  color: var(--ink);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+button, input { font: inherit; color: inherit; }
+#app {
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--sky);
+  position: relative;
+  overflow: hidden;
+}
+header {
+  background: var(--paper);
+  border-bottom: 3px solid var(--line);
+  padding: calc(6px + env(safe-area-inset-top)) 10px 6px;
+}
+.row { display: flex; align-items: center; gap: 8px; }
+.brand {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-size: 16px;
+  background: var(--leaf);
+  color: #fff;
+  padding: 4px 8px;
+  border: 3px solid var(--line);
+  box-shadow: 3px 3px 0 var(--line);
+}
+#cash { font-weight: 800; font-size: 20px; margin-left: auto; font-variant-numeric: tabular-nums; }
+#mute, #help {
+  width: 42px; height: 42px; padding: 0;
+  border: 3px solid var(--line);
+  background: var(--paper2);
+  box-shadow: 3px 3px 0 var(--line);
+  border-radius: 10px;
+  font-weight: 800;
+}
+.sub { margin-top: 6px; font-size: 14px; font-weight: 650; color: var(--ink); justify-content: space-between; }
+#hands { background: var(--gold); border: 2px solid var(--line); padding: 2px 8px; border-radius: 999px; font-weight: 800; }
+.speeds { margin-top: 6px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.speeds button, nav button, .actions button, .panel button.wide {
+  border: 3px solid var(--line);
+  background: var(--paper2);
+  border-radius: 10px;
+  min-height: 42px;
+  font-weight: 750;
+  box-shadow: 3px 3px 0 var(--line);
+}
+.speeds button.on, nav button.on { background: var(--leaf); color: #fff; }
+button:active { transform: translate(2px, 2px); box-shadow: none; }
+button:disabled { opacity: 0.45; transform: none; }
+#log {
+  margin-top: 6px;
+  min-height: 1.3em;
+  font-size: 14px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#stage { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+canvas {
+  flex: 1;
+  width: 100%;
+  min-height: 160px;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  touch-action: manipulation;
+  background: #7ebfe8;
+}
+#sheet {
+  display: none;
+  background: var(--paper);
+  border-top: 3px solid var(--line);
+  padding: 8px 10px 10px;
+  max-height: 42dvh;
+  overflow: auto;
+}
+#sheet.open { display: block; }
+#sheet h2 { margin: 0 0 4px; font-size: 18px; }
+#sheet .status { margin: 0 0 8px; font-size: 14px; color: var(--muted); }
+.actions { display: flex; flex-direction: column; gap: 8px; }
+.actions button { text-align: left; padding: 8px 10px; background: #fff; }
+.actions button.primary { background: var(--leaf); color: #fff; }
+.actions button.ghost { background: var(--paper2); }
+.hint { margin: -2px 0 0; font-size: 12px; color: var(--muted); }
+nav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: 3px solid var(--line);
+}
+nav button { padding: 6px 2px; font-size: 14px; }
+#panel {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  z-index: 4;
+  overflow: auto;
+  padding: 12px 12px 28px;
+}
+#panel.open { display: block; }
+#panel h2 { margin: 0 0 6px; font-size: 24px; }
+.lede { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.card {
+  background: var(--paper2);
+  border: 3px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  margin: 0 0 10px;
+  box-shadow: 3px 3px 0 var(--line);
+}
+.card h3 { margin: 0 0 6px; display: flex; justify-content: space-between; gap: 8px; font-size: 18px; }
+.card h3 span { font-weight: 650; color: var(--muted); font-size: 13px; }
+dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; font-size: 14px; }
+dt { color: var(--muted); }
+dd { margin: 0; font-weight: 750; font-variant-numeric: tabular-nums; }
+.profit { margin: 8px 0 0; font-weight: 800; }
+.profit.good { color: var(--good); }
+.profit.bad { color: var(--danger); }
+.card .rowbtns { display: flex; gap: 6px; margin-top: 8px; }
+#panel button, .card .rowbtns button {
+  border: 3px solid var(--line);
+  background: var(--leaf);
+  color: #fff;
+  border-radius: 10px;
+  min-height: 44px;
+  font-weight: 750;
+  box-shadow: 3px 3px 0 var(--line);
+  padding: 8px 10px;
+}
+.card .rowbtns button { flex: 1; }
+#panel .how button, #panel .card > button { display: block; width: 100%; margin-top: 8px; }
+.panel button.wide { width: 100%; margin-top: 8px; }
+.panel button.alt { background: var(--paper2); color: var(--ink); }
+.cashbig { font-size: 32px; font-weight: 850; margin: 0; }
+.split { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; }
+.section { margin: 14px 0 6px; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.how p { margin: 0 0 10px; line-height: 1.35; }
+#panel .how { display: flex; flex-direction: column; min-height: 100%; }
+#panel .how-go { position: sticky; bottom: 0; background: var(--paper); padding: 8px 0 2px; }
+.tag {
+  display: inline-block;
+  background: var(--gold);
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+body.season-winter #stage { background: #c5d7e4; }
+body.season-autumn header { background: #f3e2c4; }
+body.season-spring header { background: #e7f3d4; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="row">
+      <div class="brand">Veld Farm</div>
+      <div id="cash">R28 000</div>
+      <button id="mute" type="button" aria-label="Toggle sound">🔊</button>
+      <button id="help" type="button" aria-label="How to play">?</button>
+    </div>
+    <div class="row sub">
+      <div id="when">Summer day 1 · Year 1</div>
+      <div id="hands">Hands 1</div>
+    </div>
+    <div class="speeds" role="group" aria-label="Speed">
+      <button type="button" data-act="speed" data-arg="0">Pause</button>
+      <button type="button" data-act="speed" data-arg="1" class="on">Day</button>
+      <button type="button" data-act="speed" data-arg="3">Fast</button>
+    </div>
+    <div id="log" aria-live="polite">Tap the bright hectare under the house.</div>
+  </header>
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="sheet"></div>
+    <div id="panel"></div>
+  </div>
+  <nav>
+    <button type="button" data-act="tab" data-arg="farm" class="on">Farm</button>
+    <button type="button" data-act="tab" data-arg="market">Market</button>
+    <button type="button" data-act="tab" data-arg="money">Money</button>
+    <button type="button" data-act="tab" data-arg="yard">Yard</button>
+  </nav>
+</div>
+<script src="game.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js', {scope: './'}).catch(function () {});
+}
+</script>
+</body>
+</html>
