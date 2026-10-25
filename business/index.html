@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1d5224">
-<meta name="description" content="Corner & Co is a South African business game. Walk your town, serve customers, and grow. Prices are game values in rand.">
+<meta name="description" content="Corner & Co is a hands-on South African shop game. Walk the floor, scan at the till, stock shelves, and grow. Prices are game values in rand.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Corner & Co">
@@ -14,106 +14,16 @@
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
-:root {
-  --ink: #1c2614;
-  --paper: #f6efd8;
-  --paper2: #fff9ea;
-  --leaf: #217333;
-  --gold: #f0c14a;
-  --sky: #8ecaf2;
-  --muted: #4d5a40;
-  --line: #1c2614;
-  --danger: #a33b32;
-  --good: #1c7a34;
-}
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; background: #16324a; }
+html, body { margin: 0; height: 100%; background: #16324a; overflow: hidden; }
 body {
   font-family: system-ui, "Segoe UI", sans-serif;
-  color: var(--ink);
-  touch-action: manipulation;
-  -webkit-user-select: none;
+  touch-action: none;
   user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: none;
 }
-button { font: inherit; color: inherit; touch-action: manipulation; }
-#app {
-  height: 100dvh;
-  max-width: 480px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  background: var(--sky);
-  overflow: hidden;
-}
-header {
-  background: var(--paper);
-  border-bottom: 3px solid var(--line);
-  padding: calc(4px + env(safe-area-inset-top)) 8px 6px;
-}
-.row { display: flex; align-items: center; gap: 6px; }
-.brand {
-  font-weight: 800;
-  font-size: 14px;
-  background: var(--leaf);
-  color: #fff;
-  padding: 3px 7px;
-  border: 3px solid var(--line);
-  box-shadow: 3px 3px 0 var(--line);
-}
-#cash { font-weight: 800; font-size: 18px; margin-left: auto; font-variant-numeric: tabular-nums; }
-#mute, #help {
-  width: 40px; height: 40px; padding: 0;
-  border: 3px solid var(--line);
-  background: var(--paper2);
-  box-shadow: 3px 3px 0 var(--line);
-  border-radius: 10px;
-  font-weight: 800;
-}
-.sub { margin-top: 4px; font-size: 13px; font-weight: 700; justify-content: space-between; }
-#repchip, #skyname {
-  background: var(--gold);
-  border: 2px solid var(--line);
-  padding: 1px 7px;
-  border-radius: 999px;
-  font-weight: 800;
-}
-.speeds { margin-top: 4px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 6px; }
-.speeds button, nav button, #float button, #panel button, #sheet button {
-  border: 3px solid var(--line);
-  background: var(--paper2);
-  border-radius: 10px;
-  min-height: 40px;
-  font-weight: 750;
-  box-shadow: 3px 3px 0 var(--line);
-  padding: 6px 8px;
-}
-.speeds button.on, nav button.on, button.on { background: var(--leaf); color: #fff; }
-button.primary { background: var(--leaf); color: #fff; }
-button:active { transform: translate(2px, 2px); box-shadow: none; }
-button:disabled { opacity: 0.45; transform: none; }
-#log {
-  margin-top: 4px;
-  width: 100%;
-  text-align: left;
-  min-height: 36px;
-  font-size: 13px;
-  font-weight: 650;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  padding: 0;
-  color: var(--muted);
-}
-#hint {
-  background: var(--gold);
-  border-bottom: 3px solid var(--line);
-  padding: 6px 10px;
-  font-size: 14px;
-  font-weight: 750;
-  line-height: 1.3;
-}
-#hint[hidden] { display: none; }
-#stage { flex: 1; min-height: 0; position: relative; }
+#app { height: 100dvh; height: 100%; }
 canvas {
   width: 100%;
   height: 100%;
@@ -123,128 +33,10 @@ canvas {
   touch-action: none;
   background: #8ecaf2;
 }
-#float {
-  position: absolute;
-  right: 8px;
-  top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  z-index: 3;
-}
-#float button { width: 44px; height: 44px; padding: 0; background: var(--paper); }
-#sheet {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  z-index: 4;
-  background: var(--paper);
-  border-top: 3px solid var(--line);
-  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
-  max-height: 46%;
-  overflow: auto;
-  transform: translateY(110%);
-  transition: transform 0.18s ease-out;
-  pointer-events: none;
-  -webkit-overflow-scrolling: touch;
-}
-#sheet.open { transform: translateY(0); pointer-events: auto; }
-#sheet h2, #panel h2 { margin: 0 0 4px; font-size: 20px; }
-.status, .hint, .lede { margin: 0 0 8px; font-size: 14px; color: var(--muted); line-height: 1.35; }
-.choice { display: flex; flex-direction: column; gap: 8px; }
-nav {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-  background: var(--paper);
-  border-top: 3px solid var(--line);
-  z-index: 5;
-}
-nav button { padding: 6px 2px; font-size: 13px; text-align: center; }
-#panel {
-  display: none;
-  position: absolute;
-  inset: 0;
-  background: var(--paper);
-  z-index: 6;
-  overflow: auto;
-  padding: 12px 12px 24px;
-}
-#panel.open { display: block; }
-.card {
-  background: var(--paper2);
-  border: 3px solid var(--line);
-  border-radius: 12px;
-  padding: 10px;
-  margin: 0 0 10px;
-  box-shadow: 3px 3px 0 var(--line);
-}
-.card h3 { margin: 0 0 6px; font-size: 16px; display: flex; justify-content: space-between; gap: 8px; }
-.card h3 span { font-weight: 650; color: var(--muted); font-size: 13px; }
-.section { margin: 10px 0 6px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-.grid3 button, .grid2 button { font-size: 13px; min-height: 44px; text-align: center; padding: 6px; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.cashbig { font-size: 30px; font-weight: 850; margin: 0; }
-.split { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; margin: 3px 0; }
-.good { color: var(--good); }
-.bad { color: var(--danger); }
-.chart { display: flex; align-items: flex-end; gap: 3px; height: 64px; margin-top: 8px; }
-.bar { flex: 1; min-height: 4px; border: 2px solid var(--line); background: var(--leaf); }
-.bar.down { background: var(--danger); }
-.news p, .how p { margin: 0 0 8px; line-height: 1.35; }
-#panel .how-go, #sheet .choice > button, #panel .card > button, #sheet > button { display: block; width: 100%; margin-top: 8px; }
-.tag {
-  display: inline-block;
-  background: var(--gold);
-  border: 2px solid var(--line);
-  border-radius: 999px;
-  padding: 1px 8px;
-  font-size: 12px;
-  font-weight: 800;
-}
 </style>
 </head>
 <body>
-<div id="app">
-  <header>
-    <div class="row">
-      <div class="brand">Corner &amp; Co</div>
-      <div id="cash">R40 000</div>
-      <button id="mute" type="button" data-act="mute" aria-label="Toggle sound">♪</button>
-      <button id="help" type="button" data-act="help" aria-label="How to play">?</button>
-    </div>
-    <div class="row sub">
-      <div id="when">Week 1</div>
-      <div id="skyname">Clear</div>
-      <div id="repchip">Rep 50</div>
-    </div>
-    <div class="speeds" role="group" aria-label="Time">
-      <button type="button" data-act="run" class="primary">Run week</button>
-      <button type="button" data-act="speed" data-arg="0" class="on">Pause</button>
-      <button type="button" data-act="speed" data-arg="1">Auto</button>
-      <button type="button" data-act="speed" data-arg="3">Fast</button>
-    </div>
-    <button id="log" type="button" data-act="sheet" data-arg="news">Drag the town. Tap your shop.</button>
-  </header>
-  <div id="hint">Easy start. Fair prices should make a profit if you just run the weeks.</div>
-  <div id="stage">
-    <canvas id="c"></canvas>
-    <div id="float">
-      <button type="button" data-act="zoom" data-arg="1" aria-label="Zoom in">+</button>
-      <button type="button" data-act="zoom" data-arg="-1" aria-label="Zoom out">−</button>
-      <button type="button" id="mapbtn" data-act="view" data-arg="country" aria-label="South Africa map">SA</button>
-    </div>
-    <div id="sheet"></div>
-    <div id="panel"></div>
-  </div>
-  <nav>
-    <button type="button" data-act="view" data-arg="city" class="on">Town</button>
-    <button type="button" data-act="view" data-arg="country">Country</button>
-    <button type="button" data-act="sheet" data-arg="desk">Shop</button>
-    <button type="button" data-act="sheet" data-arg="money">Books</button>
-  </nav>
-</div>
+<div id="app"><canvas id="c"></canvas></div>
 <script src="game.js"></script>
 <script>
 if ('serviceWorker' in navigator) {

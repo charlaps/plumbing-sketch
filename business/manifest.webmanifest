@@ -1,7 +1,7 @@
 {
   "name": "Corner & Co",
   "short_name": "Corner & Co",
-  "description": "Start with a spaza or a bakkie and grow a South African business. Game values in rand.",
+  "description": "Run the shop yourself. Scan, stock, price, and grow a South African business. Game values in rand.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
