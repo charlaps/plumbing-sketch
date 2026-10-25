@@ -1,5 +1,5 @@
 /* Corner & Co — caches this folder only. */
-var CACHE = 'corner-co-v1';
+var CACHE = 'corner-co-v2';
 var FILES = ['./', './index.html', './game.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function (e) {
