@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1d5224">
+<meta name="description" content="Corner & Co is a South African business game. Start with a spaza or a bakkie, and grow. Prices are game values in rand.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Corner & Co">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Corner &amp; Co</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root {
+  --ink: #1c2614;
+  --paper: #f6efd8;
+  --paper2: #fff9ea;
+  --leaf: #217333;
+  --leaf2: #185628;
+  --gold: #f0c14a;
+  --sky: #8ecaf2;
+  --muted: #4d5a40;
+  --line: #1c2614;
+  --danger: #a33b32;
+  --good: #1c7a34;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #16324a; }
+body {
+  font-family: system-ui, "Segoe UI", sans-serif;
+  color: var(--ink);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+button { font: inherit; color: inherit; }
+#app {
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--sky);
+  overflow: hidden;
+}
+header {
+  background: var(--paper);
+  border-bottom: 3px solid var(--line);
+  padding: calc(6px + env(safe-area-inset-top)) 10px 6px;
+}
+.row { display: flex; align-items: center; gap: 8px; }
+.brand {
+  font-weight: 800;
+  font-size: 15px;
+  background: var(--leaf);
+  color: #fff;
+  padding: 4px 8px;
+  border: 3px solid var(--line);
+  box-shadow: 3px 3px 0 var(--line);
+}
+#cash { font-weight: 800; font-size: 20px; margin-left: auto; font-variant-numeric: tabular-nums; }
+#mute, #help {
+  width: 42px; height: 42px; padding: 0;
+  border: 3px solid var(--line);
+  background: var(--paper2);
+  box-shadow: 3px 3px 0 var(--line);
+  border-radius: 10px;
+  font-weight: 800;
+}
+.sub { margin-top: 6px; font-size: 14px; font-weight: 650; justify-content: space-between; }
+#repchip { background: var(--gold); border: 2px solid var(--line); padding: 2px 8px; border-radius: 999px; font-weight: 800; }
+.speeds { margin-top: 6px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 6px; }
+.speeds button, nav button, .actions button, #panel button {
+  border: 3px solid var(--line);
+  background: var(--paper2);
+  border-radius: 10px;
+  min-height: 42px;
+  font-weight: 750;
+  box-shadow: 3px 3px 0 var(--line);
+  padding: 8px 10px;
+}
+.speeds button.on, nav button.on, button.on { background: var(--leaf); color: #fff; }
+button.primary { background: var(--leaf); color: #fff; }
+button:active { transform: translate(2px, 2px); box-shadow: none; }
+button:disabled { opacity: 0.45; transform: none; }
+#log {
+  margin-top: 6px;
+  min-height: 1.3em;
+  font-size: 14px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#stage { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+canvas {
+  flex: 1;
+  width: 100%;
+  min-height: 140px;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  touch-action: manipulation;
+  background: #7ebfe8;
+}
+#sheet {
+  display: none;
+  background: var(--paper);
+  border-top: 3px solid var(--line);
+  padding: 8px 10px 10px;
+  max-height: 40dvh;
+  overflow: auto;
+}
+#sheet.open { display: block; }
+#sheet h2, #panel h2 { margin: 0 0 4px; font-size: 22px; }
+.status, .hint, .lede { margin: 0 0 8px; font-size: 14px; color: var(--muted); line-height: 1.35; }
+.actions { display: flex; flex-direction: column; gap: 8px; }
+.actions button, #sheet button { text-align: left; }
+.choice { display: flex; flex-direction: column; gap: 8px; }
+nav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: 3px solid var(--line);
+}
+nav button { padding: 6px 2px; font-size: 14px; text-align: center; }
+#panel {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  z-index: 4;
+  overflow: auto;
+  padding: 12px 12px 28px;
+}
+#panel.open { display: block; }
+.card {
+  background: var(--paper2);
+  border: 3px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  margin: 0 0 10px;
+  box-shadow: 3px 3px 0 var(--line);
+}
+.card h3 { margin: 0 0 6px; font-size: 16px; display: flex; justify-content: space-between; gap: 8px; }
+.card h3 span { font-weight: 650; color: var(--muted); font-size: 13px; }
+.section { margin: 12px 0 6px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.grid3 button, .grid2 button { font-size: 13px; min-height: 44px; text-align: center; padding: 6px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.cashbig { font-size: 32px; font-weight: 850; margin: 0; }
+.split { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; margin: 3px 0; }
+.good { color: var(--good); }
+.bad { color: var(--danger); }
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 72px;
+  margin-top: 8px;
+}
+.bar { flex: 1; min-height: 4px; border: 2px solid var(--line); background: var(--leaf); }
+.bar.down { background: var(--danger); }
+.news p { margin: 0 0 8px; line-height: 1.35; }
+.how p { margin: 0 0 10px; line-height: 1.35; }
+#panel .how { display: flex; flex-direction: column; min-height: 100%; }
+#panel .how-go { position: sticky; bottom: 0; background: var(--paper); padding-top: 8px; }
+#panel .how-go button, #panel .card > button, #panel > button, #sheet .actions > button { display: block; width: 100%; margin-top: 8px; }
+.tag {
+  display: inline-block;
+  background: var(--gold);
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="row">
+      <div class="brand">Corner &amp; Co</div>
+      <div id="cash">R20 000</div>
+      <button id="mute" type="button" aria-label="Toggle sound">♪</button>
+      <button id="help" type="button" aria-label="How to play">?</button>
+    </div>
+    <div class="row sub">
+      <div id="when">Week 1</div>
+      <div id="repchip">Rep 50</div>
+    </div>
+    <div class="speeds" role="group" aria-label="Time">
+      <button type="button" data-act="run" class="primary">Run week</button>
+      <button type="button" data-act="speed" data-arg="0" class="on">Pause</button>
+      <button type="button" data-act="speed" data-arg="1">Auto</button>
+      <button type="button" data-act="speed" data-arg="3">Fast</button>
+    </div>
+    <div id="log" aria-live="polite">A small beginning.</div>
+  </header>
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="sheet"></div>
+    <div id="panel"></div>
+  </div>
+  <nav>
+    <button type="button" data-act="tab" data-arg="map" class="on">Map</button>
+    <button type="button" data-act="tab" data-arg="desk">Desk</button>
+    <button type="button" data-act="tab" data-arg="money">Money</button>
+    <button type="button" data-act="tab" data-arg="news">News</button>
+  </nav>
+</div>
+<script src="game.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js', {scope: './'}).catch(function () {});
+}
+</script>
+</body>
+</html>
