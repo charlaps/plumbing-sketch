@@ -2,7 +2,7 @@
   "name": "Veld Farm",
   "short_name": "Veld Farm",
   "description": "A highveld farming game. Plough, plant, and grow your plaas. Prices are game values.",
-  "start_url": "./",
+  "start_url": "./?v=2",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

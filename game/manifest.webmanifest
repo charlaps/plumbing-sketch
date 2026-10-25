@@ -2,7 +2,7 @@
   "name": "Sky Skip",
   "short_name": "Sky Skip",
   "description": "Tap to jump over the bumps. A one-thumb endless hopper.",
-  "start_url": "./",
+  "start_url": "./?v=2",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

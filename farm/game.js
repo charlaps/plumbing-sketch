@@ -1397,7 +1397,7 @@
     var start = state.helpSeen
       ? button('close-help', 'Back to the farm')
       : button('close-help', 'Start farming');
-    return '<div class="how"><div class="how-body"><h2>How to farm</h2>' +
+    return '<div class="how"><div class="how-body"><h2>How to farm</h2><p class="tag">v1.1</p>' +
       '<p>You have one hectare on the highveld, a tin-roof house, and ' + R(START_CASH) + '.</p>' +
       '<p>Tap your land. Plough it, then plant. <b>Maize, soybean and sunflower</b> go in during summer. <b>Wheat</b> goes in during winter.</p>' +
       '<p>Fertilise and spray if you can. Rain helps the yield. A dry spell hurts, unless you irrigate from a borehole or a dam.</p>' +

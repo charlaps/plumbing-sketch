@@ -2,7 +2,7 @@
   "name": "Corner & Co",
   "short_name": "Corner & Co",
   "description": "Run the shop yourself. Scan, stock, price, and grow a South African business. Game values in rand.",
-  "start_url": "./",
+  "start_url": "./?v=4",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

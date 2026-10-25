@@ -3,6 +3,7 @@
   'use strict';
 
   var SAVE_KEY = 'corner-co-save';
+  var APP_VERSION = 'v3.1';
   var COLS = 46;
   var ROWS = 36;
   var TILE = 16;
@@ -2138,6 +2139,7 @@
     ctx.fillStyle = '#f6efd8';
     ctx.fillRect(0, 0, view.cssW, view.cssH);
     hudText('Corner & Co', 16, 42, '#217333', 26);
+    hudText(APP_VERSION, view.cssW - 16, 42, '#4d5a40', 14, 'right');
     hudText('You work the floor yourself.', 16, 70, '#1c2614', 16);
     ctx.font = '600 15px system-ui, sans-serif';
     ctx.fillStyle = '#1c2614';

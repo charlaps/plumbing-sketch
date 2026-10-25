@@ -10,38 +10,28 @@
 <meta name="apple-mobile-web-app-title" content="Corner & Co">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Corner &amp; Co</title>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.webmanifest?v=4">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<style>
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; background: #16324a; overflow: hidden; }
-body {
-  font-family: system-ui, "Segoe UI", sans-serif;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  overscroll-behavior: none;
-}
-#app { height: 100dvh; height: 100%; }
-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  touch-action: none;
-  background: #8ecaf2;
-}
-</style>
+<link rel="stylesheet" href="app.css?v=4">
 </head>
 <body>
+<div id="ver">v3.1</div>
 <div id="app"><canvas id="c"></canvas></div>
-<script src="game.js"></script>
+<script src="game.js?v=4"></script>
 <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js', {scope: './'}).catch(function () {});
-}
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+  var once = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (once) return;
+    once = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' }).then(function (reg) {
+    if (reg && reg.update) reg.update();
+  }).catch(function () {});
+})();
 </script>
 </body>
 </html>
