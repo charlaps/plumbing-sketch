@@ -1,0 +1,16 @@
+{
+  "name": "Sky Skip",
+  "short_name": "Sky Skip",
+  "description": "Tap to jump over the bumps. A one-thumb endless hopper.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#7EC8FF",
+  "theme_color": "#3A8DFF",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
