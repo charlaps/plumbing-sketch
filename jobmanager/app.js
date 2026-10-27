@@ -259,6 +259,7 @@
     var head = '<header class="top"><div class="top-in">' + back +
       '<img class="logo" src="icon-192.png" alt="APS">' +
       '<h1>' + esc(opt.title || 'Job Manager') + (opt.sub ? '<small>' + esc(opt.sub) + '</small>' : '') + '</h1>' +
+      '<span class="verpill">v5</span>' +
       '<span class="syncpill" id="syncPill">On this phone</span></div></header>';
     var desk = useDesk();
     return (desk ? '<div class="shell">' + side() + '<div class="deskmain">' : '') +
@@ -392,7 +393,15 @@
         var el = $('timerRead');
         if (el && App.liveCard) el.textContent = fmtDur(cardElapsed(App.liveCard));
       }, 500);
-      if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(function () {});
+      if ('serviceWorker' in navigator) {
+        var reloaded = false;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (reloaded) return;
+          reloaded = true;
+          location.reload();
+        });
+        navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(function () {});
+      }
     });
   }
 
@@ -775,9 +784,12 @@
         '<button type="button" class="btn btn-light" data-act="del-line" data-id="' + esc(line.id) + '">✕</button></div>';
     }).join('') || '<p class="muted">Nothing added yet.</p>';
     var pct = R.RATES.markup[q.tier === 'low' ? 'low' : 'high'];
-    var html = '<p class="warn">Rates: R585/h · call-out R585 (first 30 min) · after-hours R880/h · minimum R1,080 · crew day R4,320 · point R1,800 · CoC R765. No VAT.</p>' +
+    var timeNote = (+q.days > 0)
+      ? '<p class="warn">Time check from Quote Finale: ' + esc(String(q.days)) + ' days with ' + esc(String(q.men || 3)) + ' men at R1,600 per man-day.</p>'
+      : '';
+    var html = timeNote + '<p class="warn">Rates: R650/h · call-out R650 (first 30 min) · after-hours ×1.5 (R975/h) · minimum R1,200 · crew day R4,800 (3 men) · point R2,000 · CoC R850. No VAT.</p>' +
       '<div class="panel"><h3>Quick add</h3>' + quick +
-      '<p class="muted">A point is strip-out R270 + first fix R900 + second fix R630. The client sees generic names and totals only.</p>' +
+      '<p class="muted">A point is strip-out R300 + first fix R1,000 + second fix R700. The client sees generic names and totals only.</p>' +
       '<input class="search" id="labSearch" placeholder="Search labour, e.g. geyser, tap">' +
       '<div id="labHits"></div></div>' +
       '<div class="panel"><h3>On this quote</h3>' + lines + '</div>' +
@@ -792,7 +804,7 @@
       '<label class="field">Extra materials total, sell price, if you are not listing them<input id="matTyped" inputmode="decimal" value="' + esc(q.mat_typed || '') + '"></label>' +
       '<label class="field">Markup tier<select id="tier"><option value="high"' + (q.tier !== 'low' ? ' selected' : '') + '>High 25 / 35 / 45</option><option value="low"' + (q.tier === 'low' ? ' selected' : '') + '>Low 20 / 30 / 40</option></select></label>' +
       '<label class="check"><input id="consTick" type="checkbox"' + (q.cons !== false ? ' checked' : '') + '> 5% consumables on materials only</label>' +
-      '<label class="check"><input id="ahTick" type="checkbox"' + (q.ah ? ' checked' : '') + '> After-hours tick (+50% on these labour lines). Leave this off if you used the After-hours R880 button.</label>' +
+      '<label class="check"><input id="ahTick" type="checkbox"' + (q.ah ? ' checked' : '') + '> After-hours tick (+50% on these labour lines). Leave this off if you used the After-hours R975 button.</label>' +
       '</div>' +
       '<div class="panel" id="totals">' + totalsHtml(t) + '</div>' +
       '<label class="field">Not included<textarea id="notInc">' + esc(q.not_included || NOT_INCL) + '</textarea></label>' +
@@ -1158,7 +1170,7 @@
       '<label class="btn btn-light btn-block filebtn">Load a backup or job file<input id="importFile" type="file" accept="application/json,.json"></label>' +
       '<p class="muted">To install: in Chrome tap the menu, then Add to Home screen. It then opens like an app and still works with no signal.</p></div>' +
       '<div class="panel"><h3>APS</h3><p>' + esc(APS.name) + '<br>' + esc(APS.phone) + '<br>WhatsApp ' + esc(APS.wa) + '<br>' + esc(APS.email) + '</p>' +
-      '<p class="muted">Pipeline: Lead, Quoted, Booked, In progress, Done, Invoiced, Paid. Quotes use the Quote Finale rate book (10% off). No VAT. No bank details. Deposit 80%. Consumables are 5% of materials only.</p></div>',
+      '<p class="muted">Pipeline: Lead, Quoted, Booked, In progress, Done, Invoiced, Paid. Quotes use the Quote Finale rate book (full rates, 27 Oct 2026). No VAT. No bank details. Deposit 80%. Consumables are 5% of materials only.</p></div>',
       { title: 'More' }
     );
   }

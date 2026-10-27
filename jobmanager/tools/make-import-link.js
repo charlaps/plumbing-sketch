@@ -28,7 +28,7 @@ var EXAMPLE = {
       name: 'Replace kitchen mixer (standard deck)',
       generic: 'Replace kitchen mixer',
       qty: 1,
-      each: 585,
+      each: 650,
       co: 'Yes'
     }
   ]

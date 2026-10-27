@@ -48,6 +48,10 @@ img { max-width: 100%; }
   background: transparent; border: 0; color: #fff; font-weight: 800;
   min-width: 44px; min-height: 44px; border-radius: 12px;
 }
+.verpill {
+  font-size: .75rem; font-weight: 800; background: #fff; color: var(--blue);
+  border-radius: 999px; padding: 4px 8px;
+}
 .syncpill {
   font-size: .72rem; font-weight: 700; background: rgba(255,255,255,.18);
   border-radius: 999px; padding: 6px 8px; max-width: 108px; text-align: center; line-height: 1.2;

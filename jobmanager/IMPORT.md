@@ -30,7 +30,7 @@ node jobmanager/tools/make-import-link.js --auto quote.json
 node jobmanager/tools/make-import-link.js - < quote.json
 ```
 
-`--example` is a kitchen mixer for Derick: labour R585, call-out R585, total **R 1,170.00**, deposit **R 936.00**, no materials, no VAT.
+`--example` is a kitchen mixer for Derick: labour R650, call-out R650, total **R 1,300.00**, deposit **R 1,040.00**, no materials, no VAT.
 
 `--auto` leaves the JSON plain, and gzips it when the plain URL is longer than 1500 characters. `--gzip` and `--deflate` always compress. The hash is base64url (no `+`, `/`, or `=`).
 
@@ -110,7 +110,7 @@ Ignored if present: `totals`, `vat`, and any other extra field. The phone recalc
     },
     "callout_lock": {
       "type": ["number", "null"],
-      "description": "Omit this. Call-out comes from the line co flags: R585 once for Yes, R1,080 once for Yes (after-hours). Set a number only to force the call-out."
+      "description": "Omit this. Call-out comes from the line co flags: R650 once for Yes, R1,200 once for Yes (after-hours). Set a number only to force the call-out."
     },
     "not_included": {
       "type": "string",
@@ -133,11 +133,11 @@ Ignored if present: `totals`, `vat`, and any other extra field. The phone recalc
           "qty": { "type": "number", "default": 1, "description": "Alias: q." },
           "each": {
             "type": "number",
-            "description": "Rand each. Labour: the book price l, already 10% off. Do not discount it again. Materials: the sell price. Alias: l. If a material omits each and gives cost, the phone applies the markup tier."
+            "description": "Rand each. Labour: the full book price l from Quote Finale (27 Oct 2026). Use that price as printed. Materials: the sell price. Alias: l. If a material omits each and gives cost, the phone applies the markup tier."
           },
           "co": {
             "type": "string",
-            "description": "Yes, No, Yes (after-hours), N/A, or No (free). Yes adds the R585 call-out once on the quote. Yes (after-hours) adds R1,080 once. Empty or No adds no call-out."
+            "description": "Yes, No, Yes (after-hours), N/A, or No (free). Yes adds the R650 call-out once on the quote. Yes (after-hours) adds R1,200 once. Empty or No adds no call-out."
           },
           "cost": { "type": "number", "description": "Material cost price. Used only when each is omitted." },
           "cls": { "enum": ["e", "p", "f"], "description": "Markup class for cost. e expensive, p pipe, f fitting. Default f." }
@@ -168,7 +168,7 @@ Example file, which `--example` encodes:
       "name": "Replace kitchen mixer (standard deck)",
       "generic": "Replace kitchen mixer",
       "qty": 1,
-      "each": 585,
+      "each": 650,
       "co": "Yes"
     }
   ]
@@ -196,7 +196,7 @@ Use a new `id` for a new quote. Reuse the id to change the price, the lines, or 
 
 ## Labour price book
 
-Price labour from Quote Finale. That file is the source. The prices are already 10% off. Do not take another 10% off. Do not add VAT.
+Price labour from Quote Finale. That file is the source. These are the full rates confirmed 27 Oct 2026. Use the printed price. Do not add VAT.
 
 **Path:** `quote-app/index.html`
 
@@ -205,22 +205,22 @@ In that file:
 | Name | What to use |
 | --- | --- |
 | `JOBS` | Array of `{ c, j, l, m, co }`. `j` is the line name. `l` is the rand price. `co` is `Yes`, `No`, `Yes (after-hours)`, `N/A`, or `No (free)`. `c` is the category. `m` is a note, not a price. |
-| `HOURLY` | `{ j: "Repair / fault-finding labour (per hour)", l: 585, co: "Yes" }` |
-| `CALLOUT` | `585`. Added once when any labour line has `co` starting with Yes, other than the after-hours flag. Includes the first 30 minutes. |
-| `AH_CALLOUT` | `1080`. Added once when any labour line has `co` of `Yes (after-hours)`. Leave `ah` false. |
+| `HOURLY` | `{ j: "Repair / fault-finding labour (per hour)", l: 650, co: "Yes" }` |
+| `CALLOUT` | `650`. Added once when any labour line has `co` starting with Yes, other than the after-hours flag. Includes the first 30 minutes. |
+| `AH_CALLOUT` | `1200`. Added once when any labour line has `co` of `Yes (after-hours)`. Leave `ah` false. |
 | `QUICK` | Shortcuts into `JOBS`. Not extra prices. |
-| `RATE_BOOK` | `2026-10-12` |
+| `RATE_BOOK` | `2026-10-27` |
 
-Four lines are on the same rate card but are not inside `JOBS`. They live in `jobmanager/rates.js` as `EXTRAS` (same prices, already 10% off):
+Four lines are on the same rate card but are not inside `JOBS`. They live in `jobmanager/rates.js` as `EXTRAS`:
 
 | Line | `l` | `co` |
 | --- | --- | --- |
-| Repair / fault-finding labour (per hour) | 585 | Yes |
-| Crew day (plumber and assistant) | 4320 | No |
-| Crew part-day (per hour) | 540 | No |
-| Bathroom point (strip-out, first fix and second fix) | 1800 | No |
+| Repair / fault-finding labour (per hour) | 650 | Yes |
+| Crew day (3-man crew) | 4800 | No |
+| Crew part-day (per hour) | 600 | No |
+| Bathroom point (strip-out, first fix and second fix) | 2000 | No |
 
-A bathroom point is strip-out R270 + first fix R900 + second fix R630. Geyser CoC is R765 (`Geyser plumbing CoC (add-on, if not included in geyser swap)` in `JOBS`). After-hours labour on the card is R880 an hour. The after-hours minimum call-out is R1,080.
+A bathroom point is strip-out R300 + first fix R1,000 + second fix R700. Geyser CoC is R850 (`Geyser plumbing CoC (add-on, if not included in geyser swap)` in `JOBS`). After-hours labour on the card is R975 an hour (×1.5). The after-hours minimum call-out is R1,200. A man-day inside the crew day is R1,600.
 
 `jobmanager/rates.js` `CATALOGUE` is a copy of `JOBS` plus those four extras. If the two files ever disagree, use `quote-app/index.html` for `JOBS` and the table above for the four extras.
 

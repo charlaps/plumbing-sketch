@@ -4,38 +4,58 @@ const require = createRequire(import.meta.url);
 const R = require('./rates.js');
 
 const hourly = R.BYNAME['Repair / fault-finding labour (per hour)'];
-assert.equal(hourly.l, 585);
+assert.equal(R.RATES.book, '2026-10-27');
+assert.equal(R.RATES.hourly, 650);
+assert.equal(R.RATES.callout, 650);
+assert.equal(R.RATES.ahHourly, 975);
+assert.equal(R.RATES.ahMin, 1200);
+assert.equal(R.RATES.crewDay, 4800);
+assert.equal(R.RATES.crewHour, 600);
+assert.equal(hourly.l, 650);
 assert.equal(hourly.co, 'Yes');
-assert.equal(R.BYNAME['Crew day (plumber and assistant)'].l, 4320);
-assert.equal(R.BYNAME['Crew part-day (per hour)'].l, 540);
-assert.equal(R.BYNAME['Bathroom point (strip-out, first fix and second fix)'].l, 1800);
-assert.equal(R.RATES.pointParts.strip + R.RATES.pointParts.first + R.RATES.pointParts.second, 1800);
-assert.equal(R.BYNAME['Geyser plumbing CoC (add-on, if not included in geyser swap)'].l, 765);
-assert.equal(R.BYNAME['After-hours emergency attendance (first hour, weekdays)'].l, 880);
+assert.equal(R.BYNAME['Crew day (3-man crew)'].l, 4800);
+assert.equal(R.BYNAME['Crew part-day (per hour)'].l, 600);
+assert.equal(R.BYNAME['Bathroom point (strip-out, first fix and second fix)'].l, 2000);
+assert.equal(R.RATES.pointParts.strip + R.RATES.pointParts.first + R.RATES.pointParts.second, 2000);
+assert.equal(R.BYNAME['Geyser plumbing CoC (add-on, if not included in geyser swap)'].l, 850);
+assert.equal(R.BYNAME['After-hours emergency attendance (first hour, weekdays)'].l, 975);
+assert.equal(R.BYNAME['Full geyser replacement 50–100L (labour only)'].l, 2850);
+assert.equal(R.BYNAME['Full geyser replacement 100–150L (labour only)'].l, 3250);
+assert.equal(R.BYNAME['Tank + pump backup water system install'].l, 11000);
+assert.equal(R.BYNAME['Tank + pump backup — basic install (tank, pump, single tie-in)'].l, 9000);
+assert.equal(R.BYNAME['Fit wall-hung toilet with concealed cistern frame'].l, 3200);
+assert.equal(R.BYNAME['Replace close-coupled toilet suite (pan + cistern)'].l, 1500);
+assert.equal(R.BYNAME['Replace toilet suite + basin (existing points, new angle valves & flexis)'].l, 2850);
+assert.equal(R.BYNAME['Install drop-in / vanity basin with mixer, waste & trap (new)'].l, 1950);
+assert.equal(R.BYNAME['Install kitchen sink (new) with mixer & waste'].l, 1950);
+assert.equal(R.BYNAME['Replace basin mixer'].l, 750);
+assert.equal(R.BYNAME['Re-pipe house in PEX (per point / run)'].l, 1000);
+assert.equal(R.BYNAME['Bathroom plumbing first fix (per point)'].l, 1000);
+assert.equal(R.BYNAME['Each extra after-hours hour'].l, 975);
 R.QUICK.forEach(function (pair) { assert.ok(R.BYNAME[pair[1]], pair[1]); });
 
-const call = R.totals({ items: [{ kind: 'labour', qty: 1, each: 585, co: 'Yes' }], cons: true });
-assert.deepEqual([call.labour, call.co, call.ah, call.total, call.dep, call.bal], [585, 585, 0, 1170, 936, 234]);
+const call = R.totals({ items: [{ kind: 'labour', qty: 1, each: 650, co: 'Yes' }], cons: true });
+assert.deepEqual([call.labour, call.co, call.ah, call.total, call.dep, call.bal], [650, 650, 0, 1300, 1040, 260]);
 
-const ahTick = R.totals({ items: [{ kind: 'labour', qty: 1, each: 585, co: 'Yes' }], ah: true, cons: true });
-assert.equal(ahTick.ah, 292.5);
-assert.equal(ahTick.co, 585);
-assert.equal(ahTick.total, 1462.5);
+const ahTick = R.totals({ items: [{ kind: 'labour', qty: 1, each: 650, co: 'Yes' }], ah: true, cons: true });
+assert.equal(ahTick.ah, 325);
+assert.equal(ahTick.co, 650);
+assert.equal(ahTick.total, 1625);
 
-const ahLine = R.totals({ items: [{ kind: 'labour', qty: 1, each: 880, co: 'Yes (after-hours)' }], cons: true });
-assert.equal(ahLine.co, 1080);
-assert.equal(ahLine.total, 1960);
+const ahLine = R.totals({ items: [{ kind: 'labour', qty: 1, each: 975, co: 'Yes (after-hours)' }], cons: true });
+assert.equal(ahLine.co, 1200);
+assert.equal(ahLine.total, 2175);
 
 const mat = R.totals({
   items: [
-    { kind: 'labour', qty: 1, each: 585, co: 'Yes' },
+    { kind: 'labour', qty: 1, each: 650, co: 'Yes' },
     { kind: 'material', qty: 1, each: 1000, co: 'No' }
   ],
   cons: true
 });
 assert.equal(mat.cons, 50);
 assert.equal(mat.mat, 1000);
-assert.equal(mat.total, 585 + 585 + 1000 + 50);
+assert.equal(mat.total, 650 + 650 + 1000 + 50);
 
 const pricey = R.sell(1000, 'e', 'high');
 assert.equal(pricey, 1250);
@@ -49,17 +69,17 @@ const off = R.totals({ items: [{ kind: 'material', qty: 2, each: 100 }], cons: f
 assert.equal(off.cons, 0);
 assert.equal(off.total, 200);
 
-const point = R.totals({ items: [{ kind: 'labour', qty: 2, each: 1800, co: 'No' }] });
+const point = R.totals({ items: [{ kind: 'labour', qty: 2, each: 2000, co: 'No' }] });
 assert.equal(point.co, 0);
-assert.equal(point.total, 3600);
-assert.equal(point.dep, 2880);
+assert.equal(point.total, 4000);
+assert.equal(point.dep, 3200);
 
 assert.equal(Object.prototype.hasOwnProperty.call(call, 'vat'), false);
 assert.equal(R.labourGeneric('Replace washer / O-ring / cartridge (accessible)'), 'Replace washer / O-ring / cartridge');
 const lines = R.scopeLines({ items: [{ kind: 'labour', qty: 1, name: 'Replace washer / O-ring / cartridge (accessible)' }, { kind: 'material', qty: 2, generic: '150 L geyser' }] });
 assert.deepEqual(lines, ['1 × Replace washer / O-ring / cartridge', '2 × 150 L geyser']);
 assert.equal(call.disc, 0);
-assert.equal(call.labourAll, 1170);
+assert.equal(call.labourAll, 1300);
 const legacy = R.totals({ items: [{ kind: 'labour', qty: 1, each: 585, co: 'Yes' }], callout_lock: 550, cons: true });
 assert.equal(legacy.co, 550);
 assert.equal(legacy.total, 1135);

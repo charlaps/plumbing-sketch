@@ -2,7 +2,7 @@
   "name": "APS Job Manager",
   "short_name": "Job Manager",
   "description": "APS jobs, quotes, calendar and job cards. Works offline on your phone.",
-  "start_url": "./",
+  "start_url": "./?v=5",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

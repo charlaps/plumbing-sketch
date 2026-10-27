@@ -35,16 +35,16 @@ assert.equal(env.items[0].co, 'Yes');
 assert.equal(env.not_included, Imp.NOT_INCL);
 assert.ok(!Object.prototype.hasOwnProperty.call(env, 'vat'));
 const t = R.totals(env);
-assert.deepEqual([t.labour, t.co, t.cons, t.total, t.dep], [585, 585, 0, 1170, 936]);
-assert.equal(R.money(t.total), 'R 1,170.00');
-assert.equal(R.money(t.dep), 'R 936.00');
+assert.deepEqual([t.labour, t.co, t.cons, t.total, t.dep], [650, 650, 0, 1300, 1040]);
+assert.equal(R.money(t.total), 'R 1,300.00');
+assert.equal(R.money(t.dep), 'R 1,040.00');
 
 for (const flag of ['--gzip', '--deflate', '--raw']) {
   const res = run([flag, '--example']);
   assert.equal(res.status, 0, res.stderr);
   const again = await Imp.decode(res.stdout.trim().split('#import=')[1]);
   assert.equal(again.client, 'Derick');
-  assert.equal(R.totals(again).total, 1170);
+  assert.equal(R.totals(again).total, 1300);
 }
 
 const big = {
@@ -78,7 +78,9 @@ assert.equal(aliased.client, 'Derick');
 assert.equal(aliased.address, '9 Test Road');
 assert.equal(aliased.items[0].kind, 'labour');
 assert.equal(aliased.items[0].generic, 'Replace kitchen mixer');
-assert.equal(R.totals(aliased).total, 1170);
+assert.equal(aliased.items[0].each, 585);
+assert.equal(R.totals(aliased).co, 650);
+assert.equal(R.totals(aliased).total, 1235);
 
 const mat = Imp.normalize({
   id: '33333333-3333-4333-8333-333333333333',

@@ -1,7 +1,7 @@
 {
   "name": "APS Quote Finale",
   "short_name": "Quote Finale",
-  "start_url": "./",
+  "start_url": "./?v=10",
   "scope": "./",
   "display": "standalone",
   "theme_color": "#004AAD",

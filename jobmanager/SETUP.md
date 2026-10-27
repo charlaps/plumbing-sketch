@@ -19,7 +19,7 @@ It works today with no account and no monthly fee. Each phone keeps its own copy
 
 WhatsApp updates are free links. The plumber taps **WhatsApp: on our way** or **WhatsApp: job done**, then taps Send in WhatsApp. Nothing is sent until they tap Send.
 
-Quotes use the same rates as Quote Finale (already 10% off): R585 an hour, R585 call-out including the first 30 minutes, after-hours R880 an hour, R1,080 after-hours minimum, crew day R4,320, R1,800 a bathroom point, CoC R765. APS is not VAT-registered, so the app never adds VAT and it never prints bank details. The client sees generic names and totals. Materials get a 5% consumables line. The deposit is 80%.
+Quotes use the same rates as Quote Finale (full rates, confirmed 27 Oct 2026): R650 an hour, R650 call-out including the first 30 minutes, after-hours ×1.5 (R975 an hour) with an R1,200 minimum, crew day R4,800 (3-man crew, R1,600 per man-day), R2,000 a bathroom point, CoC R850. APS is not VAT-registered, so the app never adds VAT and it never prints bank details. The client sees generic names and totals. Materials get a 5% consumables line. The deposit is 80%.
 
 Saving a quote in Quote Finale (on this same phone) also sends it to Job Manager. Open Job Manager and the quote is there: the client and the site are matched or created, and the job sits at Quoted with that quote number, the lines, the total and the deposit. Saving the same quote again updates it. It does not make a second job. On each saved quote, **Send to Job Manager** writes it again and **Open in Job Manager** jumps to the job. When Supabase is connected later, that job syncs like any other job.
 

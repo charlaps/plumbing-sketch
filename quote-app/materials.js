@@ -5,7 +5,7 @@
 (function () {
   "use strict";
   var ITEMS_URL = "../field/items.json";
-  var DATA_URL = "aps-data.json";
+  var DATA_URL = "aps-data.json?v=10";
   var TIERS = { low: { e: 20, p: 30, f: 40 }, high: { e: 25, p: 35, f: 45 } };
   var CLS_NAME = { e: "Expensive", p: "Pipe", f: "Fitting" };
   var GROUP_ORDER = ["tank", "pump", "filter", "bypass", "float", "overflow", "supply", "cover"];

@@ -114,6 +114,8 @@
     quote.valid_days = 14;
     quote.disc = Number(env.disc) || 0;
     quote.callout_lock = (env.callout_lock == null || env.callout_lock === '') ? null : Number(env.callout_lock);
+    quote.days = Number(env.days) || 0;
+    quote.men = (env.men == null || env.men === '') ? (quote.men || 3) : (Number(env.men) || 3);
     quote.finale_id = env.finale_id;
     quote.finale_at = env.updated_at || '';
     quote.demo = false;
@@ -192,6 +194,8 @@
     quote.valid_days = env.valid_days || 14;
     quote.disc = Number(env.disc) || 0;
     quote.callout_lock = (env.callout_lock == null || env.callout_lock === '') ? null : Number(env.callout_lock);
+    quote.days = Number(env.days) || 0;
+    quote.men = (env.men == null || env.men === '') ? (quote.men || 3) : (Number(env.men) || 3);
     quote.description = env.description || '';
     if (env.import_id) quote.import_id = env.import_id;
     quote.demo = false;

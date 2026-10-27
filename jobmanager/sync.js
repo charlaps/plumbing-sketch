@@ -117,6 +117,8 @@
           date: row.date || null, valid_days: row.valid_days || 14, public: row.public || null,
           finale_id: row.finale_id || null, disc: Number(row.disc) || 0,
           callout_lock: (row.callout_lock == null || row.callout_lock === '') ? null : Number(row.callout_lock),
+          days: Number(row.days) || 0,
+          men: (row.men == null || row.men === '') ? 3 : (Number(row.men) || 3),
           description: row.description || '', import_id: row.import_id || null
         }
       };
@@ -154,6 +156,8 @@
         date: b.date, valid_days: b.valid_days || 14, public: b.public || null,
         finale_id: b.finale_id || '', disc: Number(b.disc) || 0,
         callout_lock: (b.callout_lock == null || b.callout_lock === '') ? null : Number(b.callout_lock),
+        days: Number(b.days) || 0,
+        men: (b.men == null || b.men === '') ? 3 : (Number(b.men) || 3),
         description: b.description || '', import_id: b.import_id || ''
       };
     }

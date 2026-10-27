@@ -150,7 +150,9 @@
       disc: num(data.disc, 0),
       callout_lock: (lock == null || lock === '') ? null : num(lock, 0),
       not_included: notInc,
-      valid_days: num(data.valid_days, 14) || 14
+      valid_days: num(data.valid_days, 14) || 14,
+      days: num(data.days, 0),
+      men: (data.men == null || data.men === '') ? 3 : (num(data.men, 3) || 3)
     };
     if (!hasWork(env)) throw new Error('This quote has no labour or materials');
     return env;
