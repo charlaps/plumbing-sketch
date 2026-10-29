@@ -1,7 +1,7 @@
 /* Plumbing Sketch — network first for the page, cache fallback when offline. */
-var CACHE = 'plumbing-sketch-v3.24';
+var CACHE = 'plumbing-sketch-v3.25';
 var PREFIX = 'plumbing-sketch-';
-var V = '3.24';
+var V = '3.25';
 var FILES = [
   './',
   './?v=' + V,
