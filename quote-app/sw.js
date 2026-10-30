@@ -1,15 +1,17 @@
 /* APS Quote Finale — network first for the page and the rate book, cache fallback offline. */
-var CACHE = 'aps-quote-finale-v10';
+var CACHE = 'aps-quote-finale-v11';
 var PREFIX = 'aps-quote-finale-';
-var V = '10';
+var V = '11';
 var FILES = [
   './',
   './?v=' + V,
   './index.html',
   './index.html?v=' + V,
   './materials.js?v=' + V,
+  './tender.js?v=' + V,
   './tank-booster.js?v=' + V,
   './aps-data.json?v=' + V,
+  './data/rate-library.json',
   './manifest.webmanifest?v=' + V,
   './icon-192.png',
   './icon-512.png',
