@@ -3,7 +3,7 @@
   "short_name": "Slips",
   "description": "File job slips and receipts on this phone.",
   "id": "./",
-  "start_url": "./?v=1",
+  "start_url": "./?v=2",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

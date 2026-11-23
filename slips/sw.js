@@ -1,7 +1,7 @@
 /* APS Slips — network first for the page, cache fallback when offline. */
-var CACHE = 'aps-slips-v1';
+var CACHE = 'aps-slips-v2';
 var PREFIX = 'aps-slips-';
-var V = '1';
+var V = '2';
 var FILES = [
   './',
   './?v=' + V,

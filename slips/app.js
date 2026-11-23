@@ -211,7 +211,12 @@
       }
       onFiles(document.getElementById("cam"));
       onFiles(document.getElementById("gal"));
-      document.getElementById("more").onclick = function () { folderMenu(folder); };
+      var shareFiles = [];
+      slips.forEach(function (s) {
+        if (!s.blob) return;
+        shareFiles.push(jpegFile(s, shareFiles.length + 1));
+      });
+      document.getElementById("more").onclick = function () { folderMenu(folder, slips, shareFiles); };
       document.querySelectorAll("[data-slip]").forEach(function (b) {
         b.onclick = function () { go("#/s/" + encodeURIComponent(b.dataset.slip)); };
       });
@@ -224,7 +229,7 @@
       return get("folders", slip.folderId).then(function (folder) {
         document.getElementById("title").textContent = folder ? folder.name : "Slip";
         document.getElementById("back").classList.remove("hidden");
-        document.getElementById("app").innerHTML = '<div class="viewer"><div class="bar"><button class="back" type="button" id="closeSlip" aria-label="Back">‹</button><span class="ver">v1</span></div>'
+        document.getElementById("app").innerHTML = '<div class="viewer"><div class="bar"><button class="back" type="button" id="closeSlip" aria-label="Back">‹</button><span class="ver">v2</span></div>'
           + '<img src="' + blobUrl(slip) + '" alt="">'
           + '<div class="panel">'
           + '<div class="row"><label class="f">Amount (R)<input id="amt" inputmode="decimal" value="' + esc(slip.amount) + '"></label>'
@@ -242,8 +247,20 @@
           document.getElementById(k).addEventListener("change", function () { saveFields(); });
         });
         document.getElementById("closeSlip").onclick = function () { go("#/f/" + encodeURIComponent(slip.folderId)); };
+        var shareFile = slip.blob ? jpegFile(slip, 1) : null;
         document.getElementById("share").onclick = function () {
-          saveFields().then(function () { shareSlip(slip); });
+          slip.amount = document.getElementById("amt").value.trim();
+          slip.supplier = document.getElementById("sup").value.trim();
+          slip.note = document.getElementById("note").value.trim();
+          shareFile = slip.blob ? jpegFile(slip, 1) : null;
+          var text = [slip.supplier, slip.amount !== "" && slip.amount != null ? money(slip.amount) : "", slip.note].filter(Boolean).join(" · ");
+          if (shareFile && canShareFiles([shareFile])) {
+            navigator.share({ files: [shareFile], title: folder ? folder.name : "Slip", text: text }).catch(function () {});
+          } else if (shareFile) {
+            downloadBlob(shareFile, shareFile.name);
+            toast("Saved the photo. Share it from your downloads.");
+          }
+          put("slips", slip);
         };
         document.getElementById("move").onclick = function () { moveSlip(slip); };
         document.getElementById("del").onclick = function () {
@@ -255,15 +272,31 @@
     });
   }
 
-  function shareSlip(slip) {
-    var file = new File([slip.blob], fileName(slip), { type: "image/jpeg" });
-    var text = [slip.supplier, slip.amount !== "" && slip.amount != null ? money(slip.amount) : "", slip.note].filter(Boolean).join(" · ");
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title: "Slip", text: text }).catch(function () {});
-      return;
+  function jpegFile(slip, n) {
+    var name = (n == null ? "" : String(n).padStart(2, "0") + "-") + fileName(slip);
+    return new File([slip.blob], name, { type: "image/jpeg" });
+  }
+  function canShareFiles(files) {
+    try {
+      return !!(files.length && navigator.share && navigator.canShare && navigator.canShare({ files: files }));
+    } catch (e) {
+      return false;
     }
-    downloadBlob(file, file.name);
-    toast("Saved the photo. Share it from your downloads.");
+  }
+  function folderLine(folder, slips) {
+    var total = 0, any = false;
+    slips.forEach(function (s) {
+      if (s.amount !== "" && s.amount != null && !isNaN(Number(s.amount))) { any = true; total += Number(s.amount); }
+    });
+    var n = slips.length;
+    return folder.name + " · " + n + (n === 1 ? " slip" : " slips") + (any ? " · " + money(total) : "");
+  }
+  function downloadFiles(files) {
+    files.forEach(function (f, i) {
+      if (i === 0) downloadBlob(f, f.name);
+      else setTimeout(function () { downloadBlob(f, f.name); }, i * 300);
+    });
+    toast(files.length === 1 ? "Saved the photo. Share it from your downloads." : "Saved the photos. Share them from your downloads.");
   }
 
   function fileName(slip) {
@@ -292,11 +325,12 @@
     });
   }
 
-  function folderMenu(folder) {
+  function folderMenu(folder, slips, shareFiles) {
+    var line = folderLine(folder, slips);
     var wrap = document.createElement("div");
     wrap.innerHTML = '<div class="sheet"><div class="card"><h2>' + esc(folder.name) + '</h2><div class="menu">'
       + '<button type="button" id="ren">Rename</button>'
-      + '<button type="button" id="zip">Share all</button>'
+      + '<button type="button" id="shareAll">Share all</button>'
       + '<button type="button" class="bad" id="delFolder">Delete folder</button>'
       + '<button type="button" id="cancel">Cancel</button></div></div></div>';
     document.body.appendChild(wrap);
@@ -308,9 +342,19 @@
         put("folders", folder).then(function () { renderFolder(folder.id); });
       });
     };
-    wrap.querySelector("#zip").onclick = function () {
+    wrap.querySelector("#shareAll").onclick = function () {
+      if (!shareFiles.length) { toast("No slips to share"); return; }
+      var batch = shareFiles.length > 10 ? shareFiles.slice(0, 10) : shareFiles;
+      if (canShareFiles(batch)) {
+        var pending = navigator.share({ files: batch, title: folder.name, text: line });
+        wrap.remove();
+        pending.then(function () {
+          if (shareFiles.length > 10) offerNext(shareFiles, 10, folder.name, line);
+        }).catch(function () {});
+        return;
+      }
       wrap.remove();
-      shareFolder(folder);
+      downloadFiles(shareFiles);
     };
     wrap.querySelector("#delFolder").onclick = function () {
       wrap.remove();
@@ -322,21 +366,31 @@
     };
   }
 
-  function shareFolder(folder) {
-    slipsIn(folder.id).then(function (rows) {
-      if (!rows.length) { toast("No slips to share"); return; }
-      var files = rows.map(function (s, i) {
-        return { name: String(i + 1).padStart(2, "0") + "-" + fileName(s), data: s.blob };
-      });
-      return zipBlobs(files).then(function (bytes) {
-        var file = new File([bytes], folder.name.replace(/[^\w]+/g, "-") + "-slips.zip", { type: "application/zip" });
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          return navigator.share({ files: [file], title: folder.name }).catch(function () {});
-        }
-        downloadBlob(file, file.name);
-        toast("Zip saved. Share it from your downloads.");
-      });
-    }).catch(function () { toast("Could not pack the slips"); });
+  function offerNext(files, offset, title, text) {
+    var left = files.length - offset;
+    if (left <= 0) return;
+    var n = Math.min(10, left);
+    var old = document.getElementById("shareNext");
+    if (old) old.remove();
+    var wrap = document.createElement("div");
+    wrap.id = "shareNext";
+    wrap.innerHTML = '<div class="sheet"><div class="card"><h2>Share the rest</h2><p>'
+      + n + " more photo" + (n === 1 ? "" : "s") + " to send.</p>"
+      + '<button class="big" type="button" id="nextShare">' + (n === 10 ? "Share next 10" : "Share next " + n) + "</button>"
+      + '<button class="big light" type="button" id="nextNo">Done</button></div></div>';
+    document.body.appendChild(wrap);
+    wrap.querySelector("#nextNo").onclick = function () { wrap.remove(); };
+    wrap.querySelector("#nextShare").onclick = function () {
+      var batch = files.slice(offset, offset + n);
+      if (canShareFiles(batch)) {
+        var pending = navigator.share({ files: batch, title: title, text: text });
+        wrap.remove();
+        pending.then(function () { offerNext(files, offset + n, title, text); }).catch(function () {});
+        return;
+      }
+      wrap.remove();
+      downloadFiles(batch);
+    };
   }
 
   function askName(title, value, done) {
@@ -371,8 +425,10 @@
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = name;
+    document.body.appendChild(a);
     a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
   }
 
   function blobToData(blob) {
@@ -421,64 +477,6 @@
       chain.then(function () { toast("Backup restored"); draw(); }).catch(function () { toast("Could not restore that file"); });
     };
     reader.readAsText(file);
-  }
-
-  function zipBlobs(files) {
-    return Promise.all(files.map(function (f) {
-      return f.data.arrayBuffer().then(function (buf) { return { name: f.name, data: new Uint8Array(buf) }; });
-    })).then(function (items) { return zipStore(items); });
-  }
-  function crc32(bytes) {
-    if (!crc32.t) {
-      var t = new Uint32Array(256), n, k, c;
-      for (n = 0; n < 256; n++) {
-        c = n;
-        for (k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-        t[n] = c >>> 0;
-      }
-      crc32.t = t;
-    }
-    var crc = 0xFFFFFFFF, i;
-    for (i = 0; i < bytes.length; i++) crc = crc32.t[(crc ^ bytes[i]) & 255] ^ (crc >>> 8);
-    return (crc ^ 0xFFFFFFFF) >>> 0;
-  }
-  function u16(n) { return [n & 255, (n >> 8) & 255]; }
-  function u32(n) { return [n & 255, (n >> 8) & 255, (n >> 16) & 255, (n >> 24) & 255]; }
-  function concat(parts) {
-    var len = 0, o = 0;
-    parts.forEach(function (p) { len += p.length; });
-    var out = new Uint8Array(len);
-    parts.forEach(function (p) { out.set(p, o); o += p.length; });
-    return out;
-  }
-  function zipStore(files) {
-    var locals = [], central = [], offset = 0;
-    files.forEach(function (f) {
-      var name = new TextEncoder().encode(f.name), data = f.data, crc = crc32(data);
-      var local = concat([
-        new Uint8Array([80, 75, 3, 4]), new Uint8Array(u16(20)), new Uint8Array(u16(0)), new Uint8Array(u16(0)),
-        new Uint8Array(u16(0)), new Uint8Array(u16(0)), new Uint8Array(u32(crc)),
-        new Uint8Array(u32(data.length)), new Uint8Array(u32(data.length)),
-        new Uint8Array(u16(name.length)), new Uint8Array(u16(0)), name, data
-      ]);
-      var cen = concat([
-        new Uint8Array([80, 75, 1, 2]), new Uint8Array(u16(20)), new Uint8Array(u16(20)),
-        new Uint8Array(u16(0)), new Uint8Array(u16(0)), new Uint8Array(u16(0)), new Uint8Array(u16(0)),
-        new Uint8Array(u32(crc)), new Uint8Array(u32(data.length)), new Uint8Array(u32(data.length)),
-        new Uint8Array(u16(name.length)), new Uint8Array(u16(0)), new Uint8Array(u16(0)),
-        new Uint8Array(u16(0)), new Uint8Array(u16(0)), new Uint8Array(u32(0)), new Uint8Array(u32(offset)), name
-      ]);
-      locals.push(local);
-      central.push(cen);
-      offset += local.length;
-    });
-    var cenBlob = concat(central);
-    var end = concat([
-      new Uint8Array([80, 75, 5, 6]), new Uint8Array(u16(0)), new Uint8Array(u16(0)),
-      new Uint8Array(u16(files.length)), new Uint8Array(u16(files.length)),
-      new Uint8Array(u32(cenBlob.length)), new Uint8Array(u32(offset)), new Uint8Array(u16(0))
-    ]);
-    return concat(locals.concat([cenBlob, end]));
   }
 
   function draw() {
