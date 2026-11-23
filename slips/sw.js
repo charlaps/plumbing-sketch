@@ -1,7 +1,8 @@
 /* APS Slips — network first for the page, cache fallback when offline. */
-var CACHE = 'aps-slips-v2';
+var CACHE = 'aps-slips-v3';
 var PREFIX = 'aps-slips-';
-var V = '2';
+var V = '3';
+var PDF_JS = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
 var FILES = [
   './',
   './?v=' + V,
@@ -18,7 +19,11 @@ self.addEventListener('install', function (event) {
   event.waitUntil(caches.open(CACHE).then(function (cache) {
     return Promise.all(FILES.map(function (file) {
       return cache.add(new Request(file, { cache: 'reload' })).catch(function () {});
-    }));
+    })).then(function () {
+      return fetch(new Request(PDF_JS, { mode: 'cors', credentials: 'omit', cache: 'reload' })).then(function (res) {
+        if (res && res.ok) return cache.put(PDF_JS, res);
+      }).catch(function () {});
+    });
   }).then(function () { return self.skipWaiting(); }));
 });
 
@@ -49,6 +54,15 @@ self.addEventListener('fetch', function (event) {
   var request = event.request;
   if (request.method !== 'GET') return;
   var url = new URL(request.url);
+  if (url.href === PDF_JS) {
+    event.respondWith(caches.open(CACHE).then(function (cache) {
+      return fetch(request).then(function (res) {
+        if (res && res.ok) cache.put(PDF_JS, res.clone());
+        return res;
+      }).catch(function () { return cache.match(PDF_JS); });
+    }));
+    return;
+  }
   if (url.origin !== location.origin) return;
   if (url.pathname.slice(-6) === '/sw.js') return;
   if (isCode(url)) {

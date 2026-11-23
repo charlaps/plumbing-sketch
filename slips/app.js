@@ -211,12 +211,7 @@
       }
       onFiles(document.getElementById("cam"));
       onFiles(document.getElementById("gal"));
-      var shareFiles = [];
-      slips.forEach(function (s) {
-        if (!s.blob) return;
-        shareFiles.push(jpegFile(s, shareFiles.length + 1));
-      });
-      document.getElementById("more").onclick = function () { folderMenu(folder, slips, shareFiles); };
+      document.getElementById("more").onclick = function () { folderMenu(folder, slips); };
       document.querySelectorAll("[data-slip]").forEach(function (b) {
         b.onclick = function () { go("#/s/" + encodeURIComponent(b.dataset.slip)); };
       });
@@ -229,7 +224,7 @@
       return get("folders", slip.folderId).then(function (folder) {
         document.getElementById("title").textContent = folder ? folder.name : "Slip";
         document.getElementById("back").classList.remove("hidden");
-        document.getElementById("app").innerHTML = '<div class="viewer"><div class="bar"><button class="back" type="button" id="closeSlip" aria-label="Back">‹</button><span class="ver">v2</span></div>'
+        document.getElementById("app").innerHTML = '<div class="viewer"><div class="bar"><button class="back" type="button" id="closeSlip" aria-label="Back">‹</button><span class="ver">v3</span></div>'
           + '<img src="' + blobUrl(slip) + '" alt="">'
           + '<div class="panel">'
           + '<div class="row"><label class="f">Amount (R)<input id="amt" inputmode="decimal" value="' + esc(slip.amount) + '"></label>'
@@ -291,14 +286,6 @@
     var n = slips.length;
     return folder.name + " · " + n + (n === 1 ? " slip" : " slips") + (any ? " · " + money(total) : "");
   }
-  function downloadFiles(files) {
-    files.forEach(function (f, i) {
-      if (i === 0) downloadBlob(f, f.name);
-      else setTimeout(function () { downloadBlob(f, f.name); }, i * 300);
-    });
-    toast(files.length === 1 ? "Saved the photo. Share it from your downloads." : "Saved the photos. Share them from your downloads.");
-  }
-
   function fileName(slip) {
     var day = String(slip.created || "").slice(0, 10) || "slip";
     var who = (slip.supplier || "slip").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -325,8 +312,7 @@
     });
   }
 
-  function folderMenu(folder, slips, shareFiles) {
-    var line = folderLine(folder, slips);
+  function folderMenu(folder, slips) {
     var wrap = document.createElement("div");
     wrap.innerHTML = '<div class="sheet"><div class="card"><h2>' + esc(folder.name) + '</h2><div class="menu">'
       + '<button type="button" id="ren">Rename</button>'
@@ -343,18 +329,9 @@
       });
     };
     wrap.querySelector("#shareAll").onclick = function () {
-      if (!shareFiles.length) { toast("No slips to share"); return; }
-      var batch = shareFiles.length > 10 ? shareFiles.slice(0, 10) : shareFiles;
-      if (canShareFiles(batch)) {
-        var pending = navigator.share({ files: batch, title: folder.name, text: line });
-        wrap.remove();
-        pending.then(function () {
-          if (shareFiles.length > 10) offerNext(shareFiles, 10, folder.name, line);
-        }).catch(function () {});
-        return;
-      }
+      if (!slips.length) { toast("No slips to share"); return; }
       wrap.remove();
-      downloadFiles(shareFiles);
+      startPdf(folder, slips);
     };
     wrap.querySelector("#delFolder").onclick = function () {
       wrap.remove();
@@ -366,31 +343,215 @@
     };
   }
 
-  function offerNext(files, offset, title, text) {
-    var left = files.length - offset;
-    if (left <= 0) return;
-    var n = Math.min(10, left);
-    var old = document.getElementById("shareNext");
+  var PDF_JS = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+  function loadPdfLib() {
+    if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+    return new Promise(function (resolve, reject) {
+      var script = document.createElement("script");
+      script.src = PDF_JS;
+      script.crossOrigin = "anonymous";
+      script.onload = function () {
+        if (window.jspdf && window.jspdf.jsPDF) resolve(window.jspdf.jsPDF);
+        else reject(new Error("Could not start the PDF tool"));
+      };
+      script.onerror = function () { reject(new Error("Could not load the PDF tool. Connect once, then try again.")); };
+      document.head.appendChild(script);
+    });
+  }
+  function pdfText(value) {
+    return String(value == null ? "" : value).replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF]/g, "");
+  }
+  function pdfName(folder) {
+    var d = new Date();
+    var stamp = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    var slug = String(folder.name || "Folder").trim().replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "") || "Folder";
+    return "APS-Slips-" + slug + "-" + stamp + ".pdf";
+  }
+  function dateRange(slips) {
+    var times = slips.map(function (s) { return new Date(s.created).getTime(); }).filter(function (t) { return !isNaN(t); });
+    if (!times.length) return "";
+    var a = when(new Date(Math.min.apply(null, times)).toISOString());
+    var b = when(new Date(Math.max.apply(null, times)).toISOString());
+    return a === b ? a : a + " to " + b;
+  }
+  function amountOf(slip) {
+    if (slip.amount === "" || slip.amount == null || isNaN(Number(slip.amount))) return "";
+    return money(slip.amount);
+  }
+  function logoData() {
+    return fetch("icon-192.png").then(function (r) { return r.blob(); }).then(function (blob) {
+      return new Promise(function (resolve) {
+        var img = new Image();
+        var url = URL.createObjectURL(blob);
+        img.onload = function () {
+          var canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          canvas.getContext("2d").drawImage(img, 0, 0);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL("image/png"));
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); resolve(""); };
+        img.src = url;
+      });
+    }).catch(function () { return ""; });
+  }
+  function jpegForPdf(slip) {
+    return new Promise(function (resolve) {
+      if (!slip || !slip.blob) { resolve(null); return; }
+      var img = new Image();
+      var url = URL.createObjectURL(slip.blob);
+      img.onload = function () {
+        var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+        var scale = Math.min(1, 1200 / Math.max(w, h));
+        w = Math.max(1, Math.round(w * scale));
+        h = Math.max(1, Math.round(h * scale));
+        var canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        resolve({ data: canvas.toDataURL("image/jpeg", 0.7), w: w, h: h });
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(null); };
+      img.src = url;
+    });
+  }
+  function oneByOne(list, fn) {
+    var out = new Array(list.length);
+    var chain = Promise.resolve();
+    list.forEach(function (item, i) {
+      chain = chain.then(function () { return fn(item, i).then(function (v) { out[i] = v; }); });
+    });
+    return chain.then(function () { return out; });
+  }
+  function drawCover(doc, folder, slips, logo) {
+    doc.setFillColor(8, 36, 100);
+    doc.rect(0, 0, 210, 32, "F");
+    if (logo) {
+      try { doc.addImage(logo, "PNG", 10, 6, 20, 20); } catch (e) {}
+    }
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text(pdfText(folder.name), logo ? 36 : 12, 19, { maxWidth: logo ? 162 : 186 });
+    doc.setTextColor(18, 38, 58);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    var y = 44;
+    doc.text(pdfText(dateRange(slips)), 12, y);
+    y += 7;
+    var total = 0, any = false;
+    slips.forEach(function (s) {
+      if (s.amount !== "" && s.amount != null && !isNaN(Number(s.amount))) { any = true; total += Number(s.amount); }
+    });
+    var count = slips.length === 1 ? "1 slip" : slips.length + " slips";
+    doc.text(count + (any ? "    Total " + money(total) : "    No amounts entered"), 12, y);
+    y += 12;
+    return drawTable(doc, slips, y);
+  }
+  function drawTable(doc, slips, y) {
+    function header() {
+      doc.setFillColor(232, 240, 252);
+      doc.rect(12, y - 5, 186, 8, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(8, 36, 100);
+      doc.text("Date", 14, y);
+      doc.text("Supplier", 50, y);
+      doc.text("Amount", 96, y);
+      doc.text("Note", 128, y);
+      y += 8;
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(18, 38, 58);
+    }
+    header();
+    slips.forEach(function (s) {
+      var noteLines = doc.splitTextToSize(pdfText(s.note || ""), 68);
+      if (!noteLines.length) noteLines = [""];
+      var rowH = Math.max(8, noteLines.length * 4.6 + 2);
+      if (y + rowH > 285) {
+        doc.addPage();
+        y = 16;
+        header();
+      }
+      doc.setFontSize(10);
+      doc.text(pdfText(when(s.created)), 14, y);
+      doc.text(doc.splitTextToSize(pdfText(s.supplier || ""), 42)[0] || "", 50, y);
+      doc.text(amountOf(s), 96, y);
+      doc.text(noteLines, 128, y);
+      y += rowH;
+    });
+    return y;
+  }
+  function drawSlipPage(doc, slip, pic) {
+    var caption = [when(slip.created), slip.supplier, amountOf(slip)].filter(Boolean).join("  ·  ");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(8, 36, 100);
+    var lines = doc.splitTextToSize(pdfText(caption), 186);
+    doc.text(lines, 12, 16);
+    var top = 18 + lines.length * 6;
+    if (!pic) {
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(18, 38, 58);
+      doc.text("Photo could not be added.", 12, top + 8);
+      return;
+    }
+    var maxW = 186, maxH = 297 - top - 12;
+    var ratio = pic.w / pic.h;
+    var dw, dh;
+    if (ratio > maxW / maxH) { dw = maxW; dh = maxW / ratio; }
+    else { dh = maxH; dw = maxH * ratio; }
+    var x = (210 - dw) / 2;
+    var y = top + (maxH - dh) / 2;
+    doc.addImage(pic.data, "JPEG", x, y, dw, dh, undefined, "FAST");
+  }
+  function buildFolderPdf(folder, slips, onStep) {
+    return loadPdfLib().then(function (JsPDF) {
+      return Promise.all([logoData(), oneByOne(slips, function (s, i) {
+        if (onStep) onStep(i, slips.length);
+        return jpegForPdf(s);
+      })]).then(function (pair) {
+        var doc = new JsPDF({ unit: "mm", format: "a4", compress: true });
+        drawCover(doc, folder, slips, pair[0]);
+        slips.forEach(function (s, i) {
+          doc.addPage();
+          drawSlipPage(doc, s, pair[1][i]);
+        });
+        return new File([doc.output("blob")], pdfName(folder), { type: "application/pdf" });
+      });
+    });
+  }
+  function startPdf(folder, slips) {
+    var old = document.getElementById("pdfSheet");
     if (old) old.remove();
     var wrap = document.createElement("div");
-    wrap.id = "shareNext";
-    wrap.innerHTML = '<div class="sheet"><div class="card"><h2>Share the rest</h2><p>'
-      + n + " more photo" + (n === 1 ? "" : "s") + " to send.</p>"
-      + '<button class="big" type="button" id="nextShare">' + (n === 10 ? "Share next 10" : "Share next " + n) + "</button>"
-      + '<button class="big light" type="button" id="nextNo">Done</button></div></div>';
+    wrap.id = "pdfSheet";
+    wrap.innerHTML = '<div class="sheet"><div class="card"><h2>Making PDF...</h2><p class="note" id="pdfStep">Putting the slips into one file.</p></div></div>';
     document.body.appendChild(wrap);
-    wrap.querySelector("#nextNo").onclick = function () { wrap.remove(); };
-    wrap.querySelector("#nextShare").onclick = function () {
-      var batch = files.slice(offset, offset + n);
-      if (canShareFiles(batch)) {
-        var pending = navigator.share({ files: batch, title: title, text: text });
-        wrap.remove();
-        pending.then(function () { offerNext(files, offset + n, title, text); }).catch(function () {});
-        return;
-      }
-      wrap.remove();
-      downloadFiles(batch);
-    };
+    buildFolderPdf(folder, slips, function (i, n) {
+      var step = document.getElementById("pdfStep");
+      if (step) step.textContent = (i + 1) + " of " + n;
+    }).then(function (file) {
+      var line = folderLine(folder, slips);
+      wrap.innerHTML = '<div class="sheet"><div class="card"><h2>PDF ready</h2><p>' + esc(file.name) + '</p><p class="note">' + esc(line) + '</p>'
+        + '<button class="big" type="button" id="sendPdf">Send PDF</button>'
+        + '<button class="big light" type="button" id="pdfDone">Done</button></div></div>';
+      wrap.querySelector("#pdfDone").onclick = function () { wrap.remove(); };
+      wrap.querySelector("#sendPdf").onclick = function () {
+        if (canShareFiles([file])) {
+          navigator.share({ files: [file], title: folder.name, text: line }).catch(function () {});
+          return;
+        }
+        downloadBlob(file, file.name);
+        toast("Saved the PDF. Share it from your downloads.");
+      };
+    }).catch(function (err) {
+      wrap.innerHTML = '<div class="sheet"><div class="card"><h2>Could not make the PDF</h2><p>' + esc(err && err.message ? err.message : "Try again") + '</p>'
+        + '<button class="big light" type="button" id="pdfDone">Close</button></div></div>';
+      wrap.querySelector("#pdfDone").onclick = function () { wrap.remove(); };
+    });
   }
 
   function askName(title, value, done) {
