@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#004AAD">
+<meta name="application-name" content="APS Slips">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="APS Slips">
+<link rel="manifest" href="manifest.webmanifest?v=1">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Slips</title>
+<style>
+:root{--navy:#082464;--blue:#004AAD;--pale:#E8F0FC;--line:#c9d6ee;--grey:#5c6b7a;--bad:#b42318}
+*{box-sizing:border-box}
+html,body{margin:0;background:#f4f7fc;color:#12263a;font-family:Montserrat,"Segoe UI",Roboto,Arial,sans-serif;font-size:17px}
+button,input{font:inherit;color:inherit}
+header.top{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px}
+header.top img{height:32px;background:#fff;border-radius:6px;padding:3px 6px}
+header.top h1{margin:0;font-size:18px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.back{width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#fff;font-size:28px;font-weight:800}
+.ver{margin-left:auto;background:#fff;color:var(--navy);font-size:12px;font-weight:800;border-radius:999px;padding:4px 8px}
+main{padding:12px 12px calc(20px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto}
+.search{width:100%;height:52px;border:2px solid var(--line);border-radius:14px;padding:0 14px;background:#fff;margin:0 0 12px}
+.big{display:flex;align-items:center;justify-content:center;width:100%;min-height:64px;border:0;border-radius:16px;background:var(--blue);color:#fff;font-weight:800;font-size:20px;margin:0 0 12px}
+.big.light{background:#fff;color:var(--blue);border:2px solid var(--blue);min-height:52px;font-size:17px}
+.note{color:var(--grey);font-size:14px;line-height:1.4;margin:8px 2px 0}
+.folder{display:flex;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 8px;gap:10px;align-items:center}
+.folder b{display:block;font-size:18px}
+.folder span{color:var(--grey);font-size:14px}
+.folder .grow{flex:1;min-width:0}
+.empty{background:#fff;border:1px dashed var(--line);border-radius:16px;padding:18px;color:var(--grey)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slip{background:#fff;border:0;border-radius:14px;padding:0;overflow:hidden;text-align:left;border:1px solid var(--line)}
+.slip img{display:block;width:100%;height:140px;object-fit:cover;background:#e8eef8}
+.slip span{display:block;padding:8px 10px 10px;font-size:13px;font-weight:700}
+.viewer{position:fixed;inset:0;z-index:40;background:#0b1730;color:#fff;display:flex;flex-direction:column}
+.viewer img{flex:1;min-height:0;width:100%;object-fit:contain;background:#000}
+.viewer .bar{display:flex;gap:8px;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 10px 8px}
+.viewer .panel{background:#fff;color:#12263a;padding:12px;max-height:46vh;overflow:auto}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+label.f{display:block;font-size:13px;font-weight:700;color:var(--grey);margin:0 0 8px}
+label.f input{display:block;width:100%;height:48px;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:0 10px}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.actions button{flex:1;min-width:120px;min-height:48px;border-radius:12px;border:2px solid var(--blue);background:#fff;color:var(--blue);font-weight:800}
+.actions button.bad{border-color:var(--bad);color:var(--bad)}
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(8,20,50,.45);display:flex;align-items:flex-end}
+.card{background:#fff;width:100%;border-radius:20px 20px 0 0;padding:16px 14px calc(16px + env(safe-area-inset-bottom))}
+.card h2{margin:0 0 10px;font-size:22px}
+.menu button{display:block;width:100%;text-align:left;min-height:52px;border:0;background:#f4f7fc;border-radius:12px;margin:0 0 8px;font-weight:800;padding:0 14px}
+.menu button.bad{color:var(--bad)}
+.hidden{display:none}
+@media (min-width:800px){
+  .grid{grid-template-columns:repeat(4,1fr)}
+  .sheet{align-items:center;justify-content:center}
+  .card{max-width:440px;border-radius:20px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="back hidden" id="back" type="button" aria-label="Back">‹</button>
+  <img src="icon-192.png" alt="">
+  <h1 id="title"></h1>
+  <span class="ver">v1</span>
+</header>
+<main id="app">Loading…</main>
+<script src="app.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  var once = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (once) return;
+    once = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' });
+}
+</script>
+</body>
+</html>

@@ -128,7 +128,7 @@ A.routes.home=function(a,q,v){
   return h('a',{class:'hbig',href:t[0],'data-home':t[2]},[h('span',{class:'hi',html:svg(t[1])}),h('span',null,[h('b',{text:t[2]}),h('small',{text:t[3]})])])}));
  v.appendChild(tilesEl);
  if(A.gs)A.gs.homeBox(v,tilesEl);
- v.appendChild(h('div',{class:'foot'},[h('a',{href:'../index.html'},'Sketch'),h('a',{href:'../manual/'},'Manual'),h('a',{href:'../jobs/'},'Jobs'),h('span',{text:'APS Field App v'+VERSION}),h('a',{href:'#/settings','data-home':'settings'},[ic('gear'),'Settings'])]))};
+ v.appendChild(h('div',{class:'foot'},[h('a',{href:'../index.html'},'Sketch'),h('a',{href:'../manual/'},'Manual'),h('a',{href:'../jobs/'},'Jobs'),h('a',{href:'../slips/'},'Slips'),h('span',{text:'APS Field App v'+VERSION}),h('a',{href:'#/settings','data-home':'settings'},[ic('gear'),'Settings'])]))};
 
 /* ---------------- Plumblink data & search ---------------- */
 var D={rows:null,loading:null,snap:SNAP_FALLBACK,cats:[],slugs:[],base:'',urls:{},packs:0,byCode:{},c1:[],c2:{}};
