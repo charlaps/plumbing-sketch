@@ -30,7 +30,7 @@ node jobmanager/tools/make-import-link.js --auto quote.json
 node jobmanager/tools/make-import-link.js - < quote.json
 ```
 
-`--example` is a kitchen mixer for Derick: labour R650, call-out R650, total **R 1,300.00**, deposit **R 1,040.00**, no materials, no VAT.
+`--example` is a kitchen mixer for Derick: labour R650, call-out R650, total **R 1,300.00**, deposit **R 910.00**, no materials, no VAT.
 
 `--auto` leaves the JSON plain, and gzips it when the plain URL is longer than 1500 characters. `--gzip` and `--deflate` always compress. The hash is base64url (no `+`, `/`, or `=`).
 
@@ -188,7 +188,7 @@ A material line:
 }
 ```
 
-`each` here is the sell price. Consumables are 5% of the materials sell total. The deposit is 80% of the quote total. There is no VAT line.
+`each` here is the sell price. Consumables are 5% of the materials sell total. The deposit is 70% of the quote total. The balance is the remainder, so the two add up to the total. There is no VAT line.
 
 Quote Finale names still work on a labour line: `j` for the name, `l` for the price, `q` for the quantity, `co` for the call-out flag.
 

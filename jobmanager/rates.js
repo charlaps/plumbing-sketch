@@ -19,7 +19,7 @@
     point: 2000,
     pointParts: {strip: 300, first: 1000, second: 700},
     coc: 850,
-    deposit: 0.8,
+    deposit: 0.7,
     consumables: 0.05,
     markup: {high: {e: 25, p: 35, f: 45}, low: {e: 20, p: 30, f: 40}}
   };
@@ -44,6 +44,12 @@
   ];
 
   function r2(n) { return Math.round(((Number(n) || 0) + Number.EPSILON) * 100) / 100; }
+  /* 70% deposit from 16 Nov 2026. Balance is the remainder, so the cents add up to the total. */
+  function splitDeposit(total) {
+    var t = r2(total);
+    var dep = r2(t * RATES.deposit);
+    return { total: t, dep: dep, bal: r2(t - dep) };
+  }
   function money(n) {
     var v = r2(n);
     var sign = v < 0 ? '-' : '';
@@ -88,11 +94,10 @@
     var disc = discPct ? -r2((labour + ah) * discPct / 100) : 0;
     var mat = r2(matLines + (+q.mat_typed || 0));
     var cons = q.cons === false ? 0 : r2(mat * RATES.consumables);
-    var total = r2(labour + co + ah + disc + mat + cons);
-    var dep = r2(total * RATES.deposit);
+    var parts = splitDeposit(labour + co + ah + disc + mat + cons);
     return {
       labour: r2(labour), co: co, ah: ah, disc: disc, mat: mat, cons: cons,
-      total: total, dep: dep, bal: r2(total - dep), labourAll: r2(labour + co + ah + disc)
+      total: parts.total, dep: parts.dep, bal: parts.bal, labourAll: r2(labour + co + ah + disc)
     };
   }
   function markupPct(cls, tier) {
@@ -333,7 +338,7 @@ function genericName(name) {
 
   return {
     RATES: RATES, JOBS: JOBS, EXTRAS: EXTRAS, CATALOGUE: CATALOGUE, BYNAME: BYNAME, QUICK: QUICK,
-    r2: r2, money: money, coKind: coKind, labourGeneric: labourGeneric, callout: callout,
+    r2: r2, splitDeposit: splitDeposit, money: money, coKind: coKind, labourGeneric: labourGeneric, callout: callout,
     totals: totals, markupPct: markupPct, sell: sell, scopeLines: scopeLines, labourLabel: labourLabel,
     genericName: genericName, classifier: classifier, fittingAttrs: fittingAttrs, sizeWords: sizeWords
   };

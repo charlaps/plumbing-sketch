@@ -16,7 +16,7 @@ Offline-first, phone-first web app for APS Plumbing quotes. Client view hides pe
 
 ## How Charl uses it
 
-1. Open `index.html` on the phone (or host the folder). Tap a **package** (geyser / basin / toilet / filter) or a **tank + booster kit**, fill client details, check costs on **Internal**, set labour, then switch to **Client** — materials show description + qty only; pricing is materials, consumables (5% of materials), labour, and an 80% deposit. APS is not VAT-registered.
+1. Open `index.html` on the phone (or host the folder). Tap a **package** (geyser / basin / toilet / filter) or a **tank + booster kit**, fill client details, check costs on **Internal**, set labour, then switch to **Client** — materials show description + qty only; pricing is materials, consumables (5% of materials), labour, and a 70% deposit. APS is not VAT-registered.
 2. **Copy client text** or **Open WhatsApp** to send the short-scope quote; **Print / Save PDF** for a branded one-pager.
 3. **Save quote** keeps the last 10 on that device (localStorage); reopen from the list to edit.
 
@@ -25,7 +25,7 @@ Offline-first, phone-first web app for APS Plumbing quotes. Client view hides pe
 - Generic material names on the client side (e.g. “22mm ball valve”)
 - No per-item prices on client quote — materials total, consumables (5%), labour and grand total only. No VAT.
 - Short scope — no fitting detail for competitors
-- 80% deposit to book
+- 70% deposit to book
 
 ## Tank + booster backup kits
 
@@ -33,7 +33,7 @@ Offline-first, phone-first web app for APS Plumbing quotes. Client view hides pe
 
 - Markup follows Charl's tiered rule (10 Oct 2026, see below): tanks and pumps 20/25%, pipe 30/35%, fittings 40/45%, set with the **Markup: Low / High** switch. Internal view shows both materials totals and each line's class and %.
 - Labour prefills at R9,000. The note “labour not yet confirmed by Charl” is internal only.
-- Client WhatsApp text and print/PDF use plain names only (no brand, code or material type) and group the fittings. Prices shown are materials total, consumables (5%), labour, total and the 80% deposit. No VAT line.
+- Client WhatsApp text and print/PDF use plain names only (no brand, code or material type) and group the fittings. Prices shown are materials total, consumables (5%), labour, total and the 70% deposit. No VAT line.
 
 ## Note
 
@@ -51,7 +51,7 @@ Added files (nothing removed):
 
 - Plumblink catalogue is **reused** from `../field/items.json` (Field App, snapshot 4 Oct 2026, 5,232 items) and only fetched when you first search (≈129 KB gzipped).
 - Sell = Plumblink cost incl VAT × markup for the item's class (tiered rule, 10 Oct 2026, below).
-- Client text / print show generic names + qty, materials total, labour, total and 80% deposit only. Codes, brands, Plumblink names, per-item prices and "unconfirmed" badges are Internal-only. No VAT anywhere.
+- Client text / print show generic names + qty, materials total, labour, total and 70% deposit only. Codes, brands, Plumblink names, per-item prices and "unconfirmed" badges are Internal-only. No VAT anywhere.
 - A hand-typed unit price wins over Plumblink for that line. Typing labour by hand clears the job-book link.
 - To refresh data: regenerate `aps-data.json` (box script `/workspace/aps-quote-v2/build/build_data.py`) and/or the Field App's `items.json`.
 
@@ -64,7 +64,7 @@ Changed files: `index.html`, `app.js`, `autoprice.js`, `autoprice.css`, `aps-dat
 - **Prices**: `aps-data.json` checks now cover 126 codes live-checked up to 8 Oct 2026 (no price or stock changes). Six Kwikot valve pages were renamed on Plumblink (001346, 001343, 040402, 001347, 007706, 001518). `aps-data.json` `urls` / `names` override them. Codes 040402 and 001347 now link to a Plumblink search for the item name, because those product pages are not found. The other four still link to their product pages.
 - The 30/25/20% compare boxes now also reflect Plumblink-priced geysers (they were flat before).
 - Asset URLs carry `?v=20261008` so phones pick up the update without a hard refresh.
-- Client output is unchanged: generic names, no per-item prices, totals + 80% deposit, "APS is not VAT-registered."
+- Client output is unchanged: generic names, no per-item prices, totals + 70% deposit, "APS is not VAT-registered."
 
 ## 10 Oct 2026 update (tiered markup)
 
@@ -83,6 +83,6 @@ Charl's rule (10 Oct 2026) replaces the flat 30% and the 30/25/20% big-ticket se
 - How items are classed (`aps-data.json` `cls`, all 5,232 items in `field/items.json`): 1) Sourcing's classification for the 115 kit codes in `tiered-markup-20261010.json`; 2) **pipe**: Plumblink pipe categories, or a pipe/tube/hose name with a length, any price; 3) **expensive**: geyser / water heater / heat pump / solar geyser / tank / pump main units (not spares), or any other item at R750+ (Sourcing's threshold); 4) **fitting**: everything else. The rule agrees with Sourcing on all 115 of its codes.
 - Counts: **1,335 expensive**, **357 pipe**, **3,540 fitting** (expensive: 1,230 by the R750 threshold, 88 geyser/tank/pump units, rest from Sourcing).
 - Tank kits: markup per class on shelf cost, total rounded once (Sourcing's rounding), so all nine kits match Sourcing to the cent at Low and High. Geyser repairs and the geyser/basin packages match within a few cents.
-- **Consumables (5%)** is 5% of the materials total after markup, not of labour. It is its own line in the Internal view and in the client output (listed next to the materials total). It is included in the grand total and the 80% deposit. Saved quotes pick it up when they are reopened and recalculated. Kit material totals are unchanged.
+- **Consumables (5%)** is 5% of the materials total after markup, not of labour. It is its own line in the Internal view and in the client output (listed next to the materials total). It is included in the grand total and the 70% deposit. Saved quotes pick it up when they are reopened and recalculated. Kit material totals are unchanged.
 - Client output otherwise stays: generic names, no per-item prices, no class or markup %, "APS is not VAT-registered."
 - Asset URLs carry `?v=20261010b`.

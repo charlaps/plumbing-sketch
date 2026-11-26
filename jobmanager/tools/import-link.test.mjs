@@ -35,9 +35,11 @@ assert.equal(env.items[0].co, 'Yes');
 assert.equal(env.not_included, Imp.NOT_INCL);
 assert.ok(!Object.prototype.hasOwnProperty.call(env, 'vat'));
 const t = R.totals(env);
-assert.deepEqual([t.labour, t.co, t.cons, t.total, t.dep], [650, 650, 0, 1300, 1040]);
+assert.deepEqual([t.labour, t.co, t.cons, t.total, t.dep], [650, 650, 0, 1300, 910]);
 assert.equal(R.money(t.total), 'R 1,300.00');
-assert.equal(R.money(t.dep), 'R 1,040.00');
+assert.equal(R.money(t.dep), 'R 910.00');
+assert.equal(R.money(t.bal), 'R 390.00');
+assert.equal(R.r2(t.dep + t.bal), t.total);
 
 for (const flag of ['--gzip', '--deflate', '--raw']) {
   const res = run([flag, '--example']);

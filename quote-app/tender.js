@@ -352,13 +352,15 @@
     var cont = beforeCont * contPct / 100;
     var cons = sell * 0.05;
     var total = beforeCont + cont + cons;
+    var shown = money(total);
+    var dep = money(shown * 0.7);
     return {
       sections: sections,
       cost: cost, sell: sell, bookLab: bookLab, cons: cons, cont: cont, contPct: contPct, fixed: fixed,
       crews: crews, days: days, extra: extra, men: men,
       crewPay: crewPay, menPay: menPay, timePay: timePay, gap: gap > 0 ? gap : 0,
       labourUsed: labourUsed, use: use,
-      total: total, dep: total * 0.8, tbc: tbc
+      total: total, dep: dep, bal: money(shown - dep), tbc: tbc
     };
   }
 
@@ -546,7 +548,7 @@ function useHigher() {
     rows.push(["Prelims", money(t.fixed)]);
     rows.push(["Contingency", money(t.cont)]);
     rows.push(["TOTAL", money(t.total)]);
-    rows.push(["80% deposit", money(t.dep)]);
+    rows.push(["70% deposit", money(t.dep)]);
     return rows.map(function (r) { return r.map(csvEscape).join(","); }).join("\n");
   }
 
@@ -727,8 +729,8 @@ function useHigher() {
         L.push((st.name || "Stage") + "  " + (Number(st.pct) || 0) + "%    " + R(t.total * (Number(st.pct) || 0) / 100));
       });
     } else {
-      L.push("80% deposit to book and buy materials    " + R(t.dep));
-      L.push("Balance on completion                    " + R(t.total - t.dep));
+      L.push("70% deposit to book and buy materials    " + R(t.dep));
+      L.push("Balance on completion                    " + R(t.bal));
     }
     L.push("");
     L.push("Not included: " + (p.excluded || "Scaffolding, tiling, and building work."));
@@ -846,7 +848,7 @@ function useHigher() {
       ? (P.schedule || []).map(function (st) {
         return "<tr><td>" + esc(st.name || "Stage") + " " + (Number(st.pct) || 0) + "%</td><td>" + R(t.total * (Number(st.pct) || 0) / 100) + "</td></tr>";
       }).join("")
-      : "<tr><td>80% deposit</td><td>" + R(t.dep) + "</td></tr><tr><td>Balance on completion</td><td>" + R(money(t.total - t.dep)) + "</td></tr>";
+      : "<tr><td>70% deposit</td><td>" + R(t.dep) + "</td></tr><tr><td>Balance on completion</td><td>" + R(t.bal) + "</td></tr>";
     var flags = t.tbc.length ? "<p><b>Still to confirm:</b> " + esc(t.tbc.join("; ")) + ".</p>" : "";
     return '<article id="tenderPaper"><h2>APS tender summary</h2><p class="who">APS – Architectural Plumbing Services<br>Not VAT-registered. No VAT is charged.</p>'
       + "<h3>" + esc(P.name || "Tender") + "</h3>"
@@ -860,7 +862,7 @@ function useHigher() {
   }
 
   function viewSum(t) {
-    return '<div class="no-print tbtns"><button type="button" data-pay="deposit" class="tbtn' + (P.pay !== "schedule" ? " on" : "") + '">80% deposit</button>'
+    return '<div class="no-print tbtns"><button type="button" data-pay="deposit" class="tbtn' + (P.pay !== "schedule" ? " on" : "") + '">70% deposit</button>'
       + '<button type="button" data-pay="schedule" class="tbtn' + (P.pay === "schedule" ? " on" : "") + '">Payment schedule</button></div>'
       + (P.pay === "schedule" ? '<div class="tcard no-print">' + (P.schedule || []).map(function (st, i) {
         return field(st.name || "Stage", st.pct, 'data-sched="' + i + '" type="number"');

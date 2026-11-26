@@ -207,7 +207,15 @@
     var q = quoteOf(job);
     if (q) return R.totals(q);
     var inv = invoiceOf(job);
-    if (inv && inv.totals) return inv.totals;
+    if (inv && inv.totals) {
+      var parts = R.splitDeposit(inv.totals.total);
+      var copy = {};
+      Object.keys(inv.totals).forEach(function (k) { copy[k] = inv.totals[k]; });
+      copy.total = parts.total;
+      copy.dep = parts.dep;
+      copy.bal = parts.bal;
+      return copy;
+    }
     return null;
   }
 
@@ -314,6 +322,28 @@
   function publicUser(u) {
     return { id: u.id, name: u.name, role: u.role, phone: u.phone || '', color: u.color || COLORS[0] };
   }
+  /* Invoices saved before 16 Nov 2026 store an 80% deposit. Move those to 70%, once.
+     A deposit that is not the old 80% figure is left as it was. */
+  function migrateInvoiceDeposits() {
+    var KEY = 'aps-jm-deposit-70';
+    try { if (localStorage.getItem(KEY) === '1') return Promise.resolve(); }
+    catch (e) { return Promise.resolve(); }
+    var saves = [];
+    Object.keys(App.invoices).forEach(function (id) {
+      var inv = App.invoices[id];
+      var t = inv && inv.totals;
+      if (!t || !isFinite(+t.total)) return;
+      var oldDep = R.r2((+t.total) * 0.8);
+      if (!isFinite(+t.dep) || Math.abs(R.r2(+t.dep) - oldDep) > 0.001) return;
+      var parts = R.splitDeposit(t.total);
+      t.dep = parts.dep;
+      t.bal = parts.bal;
+      saves.push(DB.save('invoices', inv));
+    });
+    return Promise.all(saves).then(function () {
+      try { localStorage.setItem(KEY, '1'); } catch (e) {}
+    }, function () {});
+  }
   function reload() {
     return Promise.all([
       DB.all('users'), DB.all('jobs'), DB.all('quotes'), DB.all('invoices'),
@@ -330,6 +360,7 @@
       App.sites = all[5] || [];
       App.places = all[6] || [];
       App.demoOn = !!(all[7] && all[7].on);
+      return migrateInvoiceDeposits();
     }).then(function () {
       if (!App.user) return;
       var bridge = window.APSBridge ? APSBridge.importAll() : Promise.resolve();
@@ -828,7 +859,7 @@
       '<tr><td>Materials</td><td>' + money(t.mat) + '</td></tr>' +
       '<tr><td>Consumables 5%</td><td>' + money(t.cons) + '</td></tr>' +
       '<tr class="tot"><td>Total</td><td>' + money(t.total) + '</td></tr>' +
-      '<tr><td>80% deposit</td><td>' + money(t.dep) + '</td></tr>' +
+      '<tr><td>70% deposit</td><td>' + money(t.dep) + '</td></tr>' +
       '<tr><td>Balance</td><td>' + money(t.bal) + '</td></tr></table>' +
       '<p class="muted">APS is not VAT-registered. No VAT is added.</p>';
   }
@@ -878,7 +909,7 @@
       pub.title || 'Plumbing work',
       pub.scope && pub.scope.length ? pub.scope.map(function (l) { return '• ' + l; }).join('\n') : '',
       'Total: ' + money(pub.total),
-      '80% deposit to book: ' + money(pub.dep),
+      '70% deposit to book: ' + money(pub.dep),
       'Balance on completion: ' + money(pub.bal),
       'Valid 14 days. Not VAT-registered.',
       'Approve here: ' + link,
@@ -894,6 +925,10 @@
   }
 
   function paper(pub, extra) {
+    if (pub && pub.total != null) {
+      var parts = R.splitDeposit(pub.total);
+      pub = Object.assign({}, pub, { total: parts.total, dep: parts.dep, bal: parts.bal });
+    }
     var isInv = pub.kind === 'invoice';
     var when = '';
     if (!isInv && pub.date) {
@@ -904,7 +939,7 @@
     var scope = (pub.scope || []).map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') || '<li>Plumbing work as discussed</li>';
     var foot = isInv
       ? 'Balance is due on completion. APS is not VAT-registered. No bank details are on this invoice. '
-      : 'Quote valid 14 days. 80% deposit books the job and buys materials. Balance on completion. A cancellation within 24 hours may be charged. ';
+      : 'Quote valid 14 days. 70% deposit books the job and buys materials. Balance on completion. A cancellation within 24 hours may be charged. ';
     var notInc = isInv ? '' : '<div class="kicker">NOT INCLUDED</div><p>' + esc(pub.not_included || NOT_INCL) + '</p>';
     return '<article class="paper"><header><img src="icon-192.png" alt="APS"><div><div class="kicker">APS</div><strong>' + esc(APS.name) + '</strong>' +
       '<div class="muted">' + esc(APS.phone) + '<br>' + esc(APS.email) + '<br>Not VAT-registered</div></div></header>' +
@@ -918,7 +953,7 @@
       (pub.cons ? '<tr><td>Consumables (5%)</td><td>' + money(pub.cons) + '</td></tr>' : '') +
       '<tr><td>' + esc(pub.labour_label || 'Labour') + '</td><td>' + money(pub.labour || 0) + '</td></tr>' +
       '<tr class="tot"><td>TOTAL</td><td>' + money(pub.total || 0) + '</td></tr></table>' +
-      '<div class="depbox"><strong>80% deposit to book: ' + money(pub.dep || 0) + '</strong><br>Balance on completion: ' + money(pub.bal || 0) + '</div>' +
+      '<div class="depbox"><strong>70% deposit to book: ' + money(pub.dep || 0) + '</strong><br>Balance on completion: ' + money(pub.bal || 0) + '</div>' +
       '<p class="muted">APS is not VAT-registered. No VAT is charged.</p>' +
       notInc +
       '<p class="muted">' + esc(foot) + esc(APS.name) + ' · ' + esc(APS.phone) + '</p>' + (extra || '') + '</article>';
@@ -1078,11 +1113,12 @@
     var inv = App.invoices[id];
     if (!inv || !staff()) return frame('<div class="panel">Invoice not on this phone.</div>', { title: 'Invoice', back: '#/invoices' });
     var job = jobById(inv.job_id) || {};
+    var parts = R.splitDeposit(inv.totals.total);
     var pub = {
       kind: 'invoice', no: inv.no, date: inv.date, client: inv.client_name || job.client_name, addr: inv.addr || '',
       title: inv.title || job.title, scope: inv.scope || [], mat: inv.totals.mat, cons: inv.totals.cons,
-      labour: inv.totals.labourAll != null ? inv.totals.labourAll : inv.totals.labour, total: inv.totals.total,
-      dep: inv.totals.dep, bal: inv.totals.bal, labour_label: inv.labour_label || 'Labour', not_included: ''
+      labour: inv.totals.labourAll != null ? inv.totals.labourAll : inv.totals.labour, total: parts.total,
+      dep: parts.dep, bal: parts.bal, labour_label: inv.labour_label || 'Labour', not_included: ''
     };
     var href = payHref(inv.pay_link);
     var extra = href ? '<a class="btn btn-block" href="' + esc(href) + '">Pay now</a>' : '<p class="muted">No payment link yet.</p>';
@@ -1102,10 +1138,11 @@
       { title: 'Invoice', back: '#/job/' + inv.job_id, sub: inv.no });
   }
   function invoiceText(inv, job, href) {
+    var parts = R.splitDeposit(inv.totals.total);
     var lines = [
       APS.name, 'Invoice ' + inv.no, 'For: ' + (inv.client_name || job.client_name || ''),
-      inv.title || '', 'Total: ' + money(inv.totals.total),
-      '80% deposit: ' + money(inv.totals.dep), 'Balance: ' + money(inv.totals.bal),
+      inv.title || '', 'Total: ' + money(parts.total),
+      '70% deposit: ' + money(parts.dep), 'Balance: ' + money(parts.bal),
       inv.deposit_paid ? 'Deposit received.' : '',
       href ? 'Pay: ' + href : '',
       'APS is not VAT-registered.', 'Charl · ' + APS.phone
@@ -1170,7 +1207,7 @@
       '<label class="btn btn-light btn-block filebtn">Load a backup or job file<input id="importFile" type="file" accept="application/json,.json"></label>' +
       '<p class="muted">To install: in Chrome tap the menu, then Add to Home screen. It then opens like an app and still works with no signal.</p></div>' +
       '<div class="panel"><h3>APS</h3><p>' + esc(APS.name) + '<br>' + esc(APS.phone) + '<br>WhatsApp ' + esc(APS.wa) + '<br>' + esc(APS.email) + '</p>' +
-      '<p class="muted">Pipeline: Lead, Quoted, Booked, In progress, Done, Invoiced, Paid. Quotes use the Quote Finale rate book (full rates, 27 Oct 2026). No VAT. No bank details. Deposit 80%. Consumables are 5% of materials only.</p></div>',
+      '<p class="muted">Pipeline: Lead, Quoted, Booked, In progress, Done, Invoiced, Paid. Quotes use the Quote Finale rate book (full rates, 27 Oct 2026). No VAT. No bank details. Deposit 70%. Consumables are 5% of materials only.</p></div>',
       { title: 'More' }
     );
   }

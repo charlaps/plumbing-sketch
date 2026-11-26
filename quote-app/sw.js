@@ -1,7 +1,7 @@
 /* APS Quote Finale — network first for the page and the rate book, cache fallback offline. */
-var CACHE = 'aps-quote-finale-v11';
+var CACHE = 'aps-quote-finale-v12';
 var PREFIX = 'aps-quote-finale-';
-var V = '11';
+var V = '12';
 var FILES = [
   './',
   './?v=' + V,

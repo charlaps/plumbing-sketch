@@ -1,7 +1,7 @@
 /* APS Job Manager — network first for the page and scripts, cache fallback offline. */
-var CACHE = 'aps-jm-v5';
+var CACHE = 'aps-jm-v6';
 var PREFIX = 'aps-jm-';
-var V = '5';
+var V = '6';
 var FILES = [
   './',
   './?v=' + V,

@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const DEPOSIT_RATE = 0.8;
+  const DEPOSIT_PCT = 70;
   /* 5% of the materials total after markup. Not applied to labour. */
   const CONSUMABLES_RATE = 5;
   const STORAGE_KEY = "aps-quote-saved-v1";
@@ -353,8 +353,9 @@
     const consumablesCents = roundRatio(materialsSumCents * CONSUMABLES_RATE, 100);
     const labourCents = randsToCents($("labour").value);
     const totalCents = materialsSumCents + consumablesCents + labourCents;
-    const depositCents = roundRatio(totalCents * 80, 100);
-    return { materialsSumCents, consumablesCents, labourCents, totalCents, depositCents };
+    const depositCents = roundRatio(totalCents * DEPOSIT_PCT, 100);
+    const balanceCents = totalCents - depositCents;
+    return { materialsSumCents, consumablesCents, labourCents, totalCents, depositCents, balanceCents };
   }
 
   function updateTotals() {
@@ -696,9 +697,10 @@
     lines.push(`Consumables (5%): ${moneyFromCents(t.consumablesCents)}`);
     lines.push(`Labour: ${moneyFromCents(t.labourCents)}`);
     lines.push(`TOTAL: ${moneyFromCents(t.totalCents)}`);
-    lines.push(`Deposit to book (80%): ${moneyFromCents(t.depositCents)}`);
+    lines.push(`Deposit to book (${DEPOSIT_PCT}%): ${moneyFromCents(t.depositCents)}`);
+    lines.push(`Balance on completion: ${moneyFromCents(t.balanceCents)}`);
     lines.push("");
-    lines.push("80% deposit required to book. Balance on completion.");
+    lines.push("70% deposit required to book. Balance on completion.");
     lines.push("APS is not VAT-registered.");
     lines.push("Thank you — APS Plumbing");
     return lines.join("\n");

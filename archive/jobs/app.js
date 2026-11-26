@@ -4,6 +4,8 @@
 
   var KEY = 'apsJobs.v1';
   var VAT_RATE = 0.15;
+  var DEPOSIT_PCT = 70;
+  var DEPOSIT_MIGRATE = 'apsJobs.depositDefault70';
   var APS_PHONE = '072 230 9222';
   var STATUSES = [
     { key: 'lead', label: 'Lead' },
@@ -20,6 +22,7 @@
 
   var $ = function (s, el) { return (el || document).querySelector(s); };
   var jobs = load();
+  migrateDepositDefault();
   var filter = { q: '', status: '', suburb: '' };
   var editingId = null;
 
@@ -27,6 +30,18 @@
   function load() {
     try { var d = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(d) ? d : []; }
     catch (e) { return []; }
+  }
+  function migrateDepositDefault() {
+    var done = false;
+    try { done = localStorage.getItem(DEPOSIT_MIGRATE) === '1'; }
+    catch (e) { return; }
+    if (done) return;
+    var changed = false;
+    jobs.forEach(function (j) {
+      if (j && num(j.depositPct) === 80) { j.depositPct = DEPOSIT_PCT; changed = true; }
+    });
+    if (changed) save();
+    try { localStorage.setItem(DEPOSIT_MIGRATE, '1'); } catch (e) {}
   }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(jobs)); }
@@ -45,12 +60,16 @@
     return (neg ? '-R' : 'R') + parts.join('.');
   }
   function vatOn(j) { return !!(j && j.vat === true); }
+  function centsOf(n) { return Math.round((Number(n) || 0) * 100); }
   function calc(j) {
     var sub = r2(num(j.materials) + num(j.labour));
     var vat = vatOn(j) ? r2(sub * VAT_RATE) : 0;
     var total = r2(sub + vat);
-    var pct = j.depositPct === '' || j.depositPct == null ? 80 : Math.min(100, Math.max(0, num(j.depositPct)));
-    return { sub: sub, vat: vat, total: total, pct: pct, deposit: r2(total * pct / 100), balance: r2(total - total * pct / 100) };
+    var pct = j.depositPct === '' || j.depositPct == null ? DEPOSIT_PCT : Math.min(100, Math.max(0, num(j.depositPct)));
+    var totalCents = centsOf(total);
+    var depositCents = Math.round(totalCents * pct / 100);
+    var balanceCents = totalCents - depositCents;
+    return { sub: sub, vat: vat, total: total, pct: pct, deposit: depositCents / 100, balance: balanceCents / 100 };
   }
 
   /* ---------- helpers ---------- */
@@ -233,12 +252,12 @@
 
   function openForm(id) {
     editingId = id || null;
-    var j = id ? byId(id) : { type: 'geyser', status: 'lead', depositPct: 80, vat: false };
+    var j = id ? byId(id) : { type: 'geyser', status: 'lead', depositPct: DEPOSIT_PCT, vat: false };
     form.reset();
     ['client', 'phone', 'suburb', 'address', 'type', 'scope', 'materials', 'labour', 'depositPct', 'status', 'notes'].forEach(function (k) {
       var v = j[k]; form.elements[k].value = (v == null ? '' : v);
     });
-    if (!id) form.elements.depositPct.value = 80;
+    if (!id) form.elements.depositPct.value = DEPOSIT_PCT;
     form.elements.vat.checked = vatOn(j);
     form.elements.client.classList.remove('invalid');
     $('#dlgTitle').textContent = id ? 'Edit job' : 'New job';
@@ -255,7 +274,7 @@
       address: e.address.value.trim(), type: e.type.value, scope: e.scope.value.trim(),
       materials: e.materials.value === '' ? '' : r2(num(e.materials.value)),
       labour: e.labour.value === '' ? '' : r2(num(e.labour.value)),
-      depositPct: e.depositPct.value === '' ? 80 : Math.min(100, Math.max(0, Math.round(num(e.depositPct.value)))),
+      depositPct: e.depositPct.value === '' ? DEPOSIT_PCT : Math.min(100, Math.max(0, Math.round(num(e.depositPct.value)))),
       vat: e.vat.checked, status: e.status.value, notes: e.notes.value.trim()
     };
   }
@@ -349,7 +368,7 @@
       id: uid(), created: now, updated: now, client: 'Example – Mrs Botha', phone: '', suburb: 'Krugersdorp',
       address: '12 Example Street, Monument', type: 'geyser', status: 'quoted',
       scope: 'Remove burst 150L geyser, supply and install new 150L geyser with full safety valve set, drip tray and vacuum breakers. Test, commission and issue CoC.',
-      materials: 9800, labour: 3200, depositPct: 80, vat: false, notes: 'Example job – delete me once you have real jobs.'
+      materials: 9800, labour: 3200, depositPct: DEPOSIT_PCT, vat: false, notes: 'Example job – delete me once you have real jobs.'
     });
     save(); filter = { q: '', status: '', suburb: '' }; $('#q').value = ''; render();
     toast('Example job added. Tap Edit → Delete to remove it.');
@@ -420,7 +439,7 @@
         status: keyFrom(stMap, col(r, 'status'), 'lead'), scope: col(r, 'scope').trim(),
         materials: col(r, 'materials') === '' ? '' : r2(num(col(r, 'materials'))),
         labour: col(r, 'labour') === '' ? '' : r2(num(col(r, 'labour'))),
-        depositPct: col(r, 'depositPct') === '' ? 80 : num(col(r, 'depositPct')),
+        depositPct: col(r, 'depositPct') === '' ? DEPOSIT_PCT : num(col(r, 'depositPct')),
         vat: /^(yes|true|1)$/i.test(col(r, 'vat').trim()), notes: col(r, 'notes').trim()
       };
       if (!j.client) return;
