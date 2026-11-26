@@ -35,7 +35,7 @@ assert.equal(R.BYNAME['Each extra after-hours hour'].l, 975);
 R.QUICK.forEach(function (pair) { assert.ok(R.BYNAME[pair[1]], pair[1]); });
 
 const call = R.totals({ items: [{ kind: 'labour', qty: 1, each: 650, co: 'Yes' }], cons: true });
-assert.deepEqual([call.labour, call.co, call.ah, call.total, call.dep, call.bal], [650, 650, 0, 1300, 1040, 260]);
+assert.deepEqual([call.labour, call.co, call.ah, call.total, call.dep, call.bal], [650, 650, 0, 1300, 910, 390]);
 
 const ahTick = R.totals({ items: [{ kind: 'labour', qty: 1, each: 650, co: 'Yes' }], ah: true, cons: true });
 assert.equal(ahTick.ah, 325);
@@ -63,7 +63,7 @@ const onlyMat = R.totals({ items: [{ kind: 'material', qty: 1, each: pricey }], 
 assert.equal(onlyMat.cons, 62.5);
 assert.equal(onlyMat.co, 0);
 assert.equal(onlyMat.total, 1312.5);
-assert.equal(onlyMat.dep, 1050);
+assert.equal(onlyMat.dep, 918.75);
 
 const off = R.totals({ items: [{ kind: 'material', qty: 2, each: 100 }], cons: false });
 assert.equal(off.cons, 0);
@@ -72,7 +72,8 @@ assert.equal(off.total, 200);
 const point = R.totals({ items: [{ kind: 'labour', qty: 2, each: 2000, co: 'No' }] });
 assert.equal(point.co, 0);
 assert.equal(point.total, 4000);
-assert.equal(point.dep, 3200);
+assert.equal(point.dep, 2800);
+assert.equal(point.bal, 1200);
 
 assert.equal(Object.prototype.hasOwnProperty.call(call, 'vat'), false);
 assert.equal(R.labourGeneric('Replace washer / O-ring / cartridge (accessible)'), 'Replace washer / O-ring / cartridge');
@@ -83,12 +84,25 @@ assert.equal(call.labourAll, 1300);
 const legacy = R.totals({ items: [{ kind: 'labour', qty: 1, each: 585, co: 'Yes' }], callout_lock: 550, cons: true });
 assert.equal(legacy.co, 550);
 assert.equal(legacy.total, 1135);
-assert.equal(legacy.dep, 908);
+assert.equal(legacy.dep, 794.5);
+assert.equal(legacy.bal, 340.5);
 const discounted = R.totals({ items: [{ kind: 'labour', qty: 1, each: 1000, co: 'No' }], disc: 10, cons: true });
 assert.equal(discounted.disc, -100);
 assert.equal(discounted.labourAll, 900);
 assert.equal(discounted.total, 900);
-assert.equal(discounted.dep, 720);
+assert.equal(discounted.dep, 630);
+assert.equal(discounted.bal, 270);
+
+const odd = R.totals({ items: [{ kind: 'material', qty: 1, each: 10000.01 }], cons: false });
+assert.equal(odd.total, 10000.01);
+assert.equal(odd.dep, 7000.01);
+assert.equal(odd.bal, 3000);
+assert.equal(R.r2(odd.dep + odd.bal), odd.total);
+const cents = R.totals({ items: [{ kind: 'material', qty: 1, each: 10.05 }], cons: false });
+assert.equal(cents.total, 10.05);
+assert.equal(cents.dep, 7.04);
+assert.equal(cents.bal, 3.01);
+assert.equal(R.r2(cents.dep + cents.bal), cents.total);
 
 assert.deepEqual(R.fittingAttrs('COPPERMAN COPCAL ELBOW 22x90 CXC', 'COPPER PIPE & FITTINGS > COPPER CAPILLARY FITTINGS > COPPERMAN 22MM'), { type: 'elbow', material: 'copper', joint: 'capillary/solder', size: '22mm' });
 assert.deepEqual(R.fittingAttrs('BRASSMAN COMPRESSION ELBOW 22mm CXC', 'COPPER COMPRESSION FITTINGS > BRASSMAN COMPRESSION 22MM'), { type: 'elbow', material: 'brass', joint: 'compression', size: '22mm' });

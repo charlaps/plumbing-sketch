@@ -48,7 +48,7 @@ function usage() {
   console.error([
     'Usage: node jobmanager/tools/make-import-link.js [--gzip|--deflate|--raw|--auto] [--example] [quote.json|-]',
     'Prints one URL: ' + DEFAULT_ORIGIN + '#import=<payload>',
-    '--example   Derick kitchen mixer, total R 1,170.00, deposit R 936.00',
+    '--example   Derick kitchen mixer, total R 1,300.00, deposit R 910.00',
     '--gzip      gzip the JSON before encoding',
     '--deflate   zlib deflate before encoding',
     '--raw       raw deflate before encoding',

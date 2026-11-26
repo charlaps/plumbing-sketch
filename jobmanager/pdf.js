@@ -191,6 +191,10 @@
   }
 
   function paper(doc, pub, heading) {
+    if (pub && pub.total != null && global.APSRates) {
+      var parts = APSRates.splitDeposit(pub.total);
+      pub = Object.assign({}, pub, { total: parts.total, dep: parts.dep, bal: parts.bal });
+    }
     doc.title = heading;
     doc.page();
     doc.text(pub.no || '', 10, '0.29 0.36 0.48');
@@ -212,7 +216,7 @@
     doc.rule();
     doc.pair('TOTAL', money(pub.total || 0), true);
     doc.gap(6);
-    doc.box('80% deposit to book: ' + money(pub.dep || 0), 'Balance on completion: ' + money(pub.bal || 0));
+    doc.box('70% deposit to book: ' + money(pub.dep || 0), 'Balance on completion: ' + money(pub.bal || 0));
     doc.gap(8);
     doc.text('APS is not VAT-registered. No VAT is charged. Bank details are not on this document.', 9, '0.29 0.36 0.48');
     if (heading === 'QUOTATION') {
@@ -220,7 +224,7 @@
       doc.text('NOT INCLUDED', 9, '0 0.290 0.678');
       doc.text(pub.not_included || 'Tiling, building, plaster, paint, electrical work, and any client-supplied items.', 10);
       doc.gap(4);
-      doc.text('Quote valid 14 days. 80% deposit books the job and buys materials. Balance on completion.', 9, '0.29 0.36 0.48');
+      doc.text('Quote valid 14 days. 70% deposit books the job and buys materials. Balance on completion.', 9, '0.29 0.36 0.48');
     } else if (heading === 'INVOICE') {
       doc.gap(4);
       doc.text('Balance is due on completion. Pay with the link if one was sent with this invoice.', 9, '0.29 0.36 0.48');

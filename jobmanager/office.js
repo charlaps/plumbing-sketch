@@ -234,7 +234,7 @@
       var owing = 0;
       invoices.forEach(function (inv) {
         if (!inv.totals || inv.status === 'paid') return;
-        owing += inv.deposit_paid ? Number(inv.totals.bal) || 0 : Number(inv.totals.total) || 0;
+        owing += inv.deposit_paid ? APSRates.splitDeposit(inv.totals.total).bal : Number(inv.totals.total) || 0;
       });
       var lows = lowList(pair[0], pair[1]);
       var stages = A().STAGES.map(function (s) {
@@ -503,7 +503,7 @@
       invoices.forEach(function (inv) {
         var t = inv.totals ? Number(inv.totals.total) || 0 : 0;
         if (inv.status === 'paid') paid += t;
-        else due += inv.deposit_paid && inv.totals ? Number(inv.totals.bal) || 0 : t;
+        else due += inv.deposit_paid && inv.totals ? APSRates.splitDeposit(inv.totals.total).bal : t;
       });
       var stageRows = A().STAGES.map(function (s) {
         return { label: s[1], value: jobs.filter(function (j) { return j.status === s[0]; }).length, text: '' };
@@ -741,13 +741,14 @@
       var inv = A().App.invoices[id];
       if (!inv) return null;
       var job = A().jobById(inv.job_id) || {};
+      var parts = APSRates.splitDeposit(inv.totals.total);
       return {
         file: (inv.no || 'invoice') + '.pdf',
         pub: {
           no: inv.no, date: inv.date, client: inv.client_name || job.client_name, addr: inv.addr || '',
           title: inv.title || job.title, scope: inv.scope || [], mat: inv.totals.mat, cons: inv.totals.cons,
           labour: inv.totals.labourAll != null ? inv.totals.labourAll : inv.totals.labour,
-          labour_label: inv.labour_label, total: inv.totals.total, dep: inv.totals.dep, bal: inv.totals.bal,
+          labour_label: inv.labour_label, total: parts.total, dep: parts.dep, bal: parts.bal,
           pay: inv.pay_link || ''
         }
       };
